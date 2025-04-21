@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-
+@import "../styles/_keyframe-animations.scss";
+@import "../styles/_variables.scss";
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -76,6 +77,8 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.723 0.219 149.579);
+  /* titap variable */
+
 }
 
 .dark {
@@ -110,6 +113,8 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.527 0.154 150.069);
+  /* Tiptap variable */
+
 }
 
 @layer base {
