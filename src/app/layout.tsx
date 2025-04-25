@@ -3,6 +3,7 @@ import localFont from 'next/font/local';
 import './globals.css';
 import QueryProvider from '@/context/query-provider';
 import { ThemeProvider } from '@/context/theme-provider';
+import { Toaster } from 'react-hot-toast';
 const beVietnamPro = localFont({
   src: [
     {
@@ -43,6 +44,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
         {children}
+        <Toaster />
         </ThemeProvider>
         </QueryProvider>
         </body>
