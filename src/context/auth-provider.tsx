@@ -117,23 +117,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const forgotPassword = async (email: string) => {
     try {
+      setLoading(true);
       await api.post('/auth/forgot-password', { email });
       toast.success('Đường dẫn cài lại mật khẩu đã được gửi qua email của bạn.');
+      setLoading(false);
+      router.push('auth/login');
     } catch (error: any) {
       const message = error.response?.data?.message || 'Gửi email cài lại mật khẩu thất bại';
       toast.error(message);
+      setLoading(false);
       throw error;
     }
   };
 
   const resetPassword = async (token: string, password: string) => {
     try {
+      setLoading(true);
       await api.post(`/auth/reset-password/${token}`, { password });
       toast.success('Cài lại mật khảu thành công! Bây giờ bạn có thể đăng nhập với mật khảu mới.');
+      setLoading(false);
       router.push('/auth/login');
     } catch (error: any) {
       const message = error.response?.data?.message || 'Cài lại mật khẩu thất bại';
       toast.error(message);
+      setLoading(false);
       throw error;
     }
   };
@@ -152,23 +159,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const changePassword = async (currentPassword: string, newPassword: string) => {
     try {
+      setLoading(true);
       await api.put('/users/change-password', { currentPassword, newPassword });
       toast.success('Đổi mật khẩu thành công!');
+      setLoading(false);
     } catch (error: any) {
       const message = error.response?.data?.message || 'Đổi mật khẩu thất bại';
       toast.error(message);
+      setLoading(false);
       throw error;
     }
   };
 
   const verifyEmail = async (token: string) => {
     try {
+      setLoading(true);
       await api.get(`/auth/verify-email/${token}`);
       toast.success('Xác thực email thành công! Bạn có thể đăng nhập ngay bây giờ.');
+      setLoading(false);
       router.push('/auth/login');
     } catch (error: any) {
       const message = error.response?.data?.message || 'Xác thực email thất bại';
       toast.error(message);
+      setLoading(false);
       throw error;
     }
   };
