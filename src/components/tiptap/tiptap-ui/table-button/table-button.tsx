@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { type Editor } from "@tiptap/react"
-
+import {TableMenu} from "./table-menu"
 // --- Hooks ---
 import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
 
@@ -66,7 +66,8 @@ export const TableButton = React.forwardRef<HTMLButtonElement, TableButtonProps>
     }
 
     return (
-      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <div className="flex">
+           <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
           <Button
             ref={ref}
@@ -143,6 +144,8 @@ export const TableButton = React.forwardRef<HTMLButtonElement, TableButtonProps>
           </div>
         </DropdownMenuContent>
       </DropdownMenu>
+      <TableMenu editor={editor} />
+      </div>
     )
   }
 )

@@ -21,10 +21,9 @@ const beVietnamPro = localFont({
   ],
 });
 export const metadata: Metadata = {
-  title:
-    'ĐI LÀ SỬA - Sửa Chữa Máy Tính Tận Nơi Tại Nhà | Nhanh Chóng - Uy Tín Tại TP.HCM',
+  title: 'TKhang | Thời Trang Nam Lịch Lãm & Phong Cách',
   description:
-    'Dịch vụ sửa chữa máy tính tận nơi - tận nhà tại TP.HCM. Kỹ thuật viên đến tận nơi, sửa nhanh - chuyên nghiệp - giá rẻ. Phục vụ 24/7 khắp các quận.',
+    'Khám phá TKhang – thương hiệu thời trang nam hiện đại, lịch lãm và cá tính. Cung cấp áo sơ mi, áo thun, quần jean và phụ kiện dành riêng cho phái mạnh. Giao hàng toàn quốc.',
 };
 
 export default function RootLayout({
@@ -34,20 +33,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-
       <body className={`${beVietnamPro.className} antialiased`}>
-      <QueryProvider>
-      <ThemeProvider
+        <QueryProvider>
+          <ThemeProvider
             attribute="class"
             defaultTheme="light"
             enableSystem
             disableTransitionOnChange
           >
-        {children}
-        <Toaster />
-        </ThemeProvider>
+            {children}
+            <Toaster />
+          </ThemeProvider>
         </QueryProvider>
-        </body>
+      </body>
     </html>
   );
 }
