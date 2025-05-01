@@ -13,6 +13,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/tiptap/tiptap-ui-primitive/dropdown-menu"
+import AICommandsMenu from "../ai-commands-menu/AICommandsMenu"
 
 /**
  * Props for the TableButton component.
@@ -79,7 +80,7 @@ export const TableButton = React.forwardRef<HTMLButtonElement, TableButtonProps>
             role="button"
             tabIndex={-1}
             aria-label="Insert Table"
-            tooltip="Insert Table"
+            tooltip="Thêm bảng"
             onClick={onClick}
             {...buttonProps}
           >
@@ -110,25 +111,25 @@ export const TableButton = React.forwardRef<HTMLButtonElement, TableButtonProps>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <div className="p-2">
-            <div className="mb-2 text-sm font-medium">Insert Table</div>
+            <div className="mb-2 text-sm font-medium">Thêm bảng</div>
             <div className="flex gap-2 mb-2">
               <div>
-                <label className="block text-xs mb-1">Rows</label>
+                <label className="block text-xs mb-1">Hàng</label>
                 <input 
                   type="number" 
                   min="1" 
-                  max="10"
+                  max="20"
                   value={rows}
                   onChange={(e) => setRows(parseInt(e.target.value) || 1)}
                   className="w-16 px-2 py-1 border rounded text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs mb-1">Columns</label>
+                <label className="block text-xs mb-1">Cột</label>
                 <input 
                   type="number" 
                   min="1" 
-                  max="10"
+                  max="20"
                   value={cols}
                   onChange={(e) => setCols(parseInt(e.target.value) || 1)}
                   className="w-16 px-2 py-1 border rounded text-sm"
@@ -139,12 +140,13 @@ export const TableButton = React.forwardRef<HTMLButtonElement, TableButtonProps>
               onClick={handleInsertTable}
               className="w-full px-2 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600"
             >
-              Insert
+              Thêm
             </button>
           </div>
         </DropdownMenuContent>
       </DropdownMenu>
       <TableMenu editor={editor} />
+      <AICommandsMenu editor={editor} />
       </div>
     )
   }

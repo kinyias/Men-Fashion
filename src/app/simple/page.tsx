@@ -4,6 +4,6 @@ import { useState } from 'react';
 
 export default function Page() {
   const [content, setContent] = useState('');
-  console.log('content', content);
+  console.log(content);
   return <SimpleEditor onChange={setContent} />;
 }
