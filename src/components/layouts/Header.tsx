@@ -64,11 +64,6 @@ const navigationItems = [
       { name: "Thắt lưng", href: "#" },
     ],
   },
-  {
-    name: "Cửa hàng",
-    href: "#",
-    hasDropdown: false,
-  },
 ]
 
 export default function Header() {
