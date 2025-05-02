@@ -1,7 +1,7 @@
-@import "tailwindcss";
-@import "tw-animate-css";
 @import "../styles/_keyframe-animations.scss";
 @import "../styles/_variables.scss";
+@import "tailwindcss";
+@import "tw-animate-css";
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

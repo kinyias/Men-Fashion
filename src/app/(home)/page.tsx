@@ -1,19 +1,62 @@
-"use client";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import toast from "react-hot-toast";
+import { BlogSection } from '@/components/blog/BlogSection';
+import FeatureCategory from '@/components/categories/FeatureCategory';
+import { HeroCarousel } from '@/components/home/HeroCarousel';
+import NewsletterSection from '@/components/home/NewsletterSection';
+import { FeatureProduct } from '@/components/products/FeatureProduct';
+import { ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 
 export default function HomePage() {
-    const showToast = () => {
-        toast.success("This is a success message!");
-    }
-    return (
-        <div className="flex flex-col items-center justify-center min-h-screen p-24 text-center">
-        <h1 className="text-4xl font-bold">Welcome to the Home Page</h1>
-        <p className="mt-4 text-lg">This is the home page of your application.</p>
-        <Link href='/auth/login'>Login</Link>
-        <Link href='/auth/register'>Register</Link>
-        <Button onClick={showToast}>Show toast</Button>
-        </div>
-    );
+  return (
+    <>
+      <HeroCarousel />
+      <div className="container mx-auto">
+        <section className="py-10">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                  Danh mục nổi bật
+                </h2>
+                <p className="text-muted-foreground md:text-lg">
+                  Hàng được tuyển chọn trang phục nam cao cấp
+                </p>
+              </div>
+              <Link
+                href="#"
+                className="group flex items-center gap-1 text-sm font-medium"
+              >
+                Xem tất cả
+                <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            </div>
+
+            <div className="mt-10">
+              <FeatureCategory />
+            </div>
+          </div>
+        </section>
+        <section className="py-10">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Sản phẩm nổi bật</h2>
+                <p className="text-muted-foreground md:text-lg">Những sản phẩm nổi bật nhất</p>
+              </div>
+              <Link href="#" className="group flex items-center gap-1 text-sm font-medium">
+                Xem tất cả <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            </div>
+
+            <div className="mt-10">
+        <FeatureProduct />
+            </div>
+          </div>
+        </section>
+
+        <BlogSection />
+      </div>
+        <NewsletterSection />
+    </>
+  );
 }
