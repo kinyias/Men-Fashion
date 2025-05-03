@@ -7,6 +7,8 @@ import { ShoppingBag, Search, User, ChevronDown, Menu } from "lucide-react"
 import { CartSidebar } from "./CartSideBar"
 import { MobileMenu } from "./MobileMenu"
 import { useMediaQuery } from "@/hooks/use-media-query"
+import { useAuth } from "@/context/auth-provider"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu"
 
 const navigationItems = [
   {
@@ -71,7 +73,7 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const isMobile = useMediaQuery("(max-width: 768px)")
-
+  const { user, logout } = useAuth();
   // Close mobile menu when screen size changes to desktop
   useEffect(() => {
     if (!isMobile && isMobileMenuOpen) {
@@ -174,15 +176,41 @@ export default function Header() {
                 3
               </span>
             </Button>
-
-            <Button variant="ghost" size="icon" aria-label="User account" className="hidden md:flex rounded-full">
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="User account" className="hidden md:flex rounded-full">
               <User className="h-5 w-5" />
-            </Button>
+                  </Button>  
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      {/* <p className="text-sm font-medium leading-none">{user.firstName} {user.lastName}</p>
+                      <p className="text-xs leading-none text-muted-foreground">{user.email}</p> */}
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <Link href="/account">Tài khoản</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/settings">Cài đặt</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                  <button className='cursor-pointer w-full h-full text-start' onClick={logout}>Đăng xuất</button>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              ):(
             <Link href='/auth/login'>
             <Button variant="outline" size="sm" className="hidden md:flex rounded-full">
               Đăng nhập
             </Button>
             </Link>
+
+              )}
           </div>
         </div>
       </header>
