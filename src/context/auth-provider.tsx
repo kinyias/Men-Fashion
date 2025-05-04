@@ -65,7 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Load user on mount
   useEffect(() => {
     loadUser();
-  }, []);
+  }, [loadUser]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -184,7 +184,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
       throw error;
     }
-  },[]);
+  },[router]);
 
   const googleLogin = () => {
     window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/google`;

@@ -1,6 +1,6 @@
 'use client';
 
-import { CirclePercent, Star } from 'lucide-react';
+import { Award, CirclePercent, Star, Tags } from 'lucide-react';
 import {
     ChevronDown,
     Home,
@@ -46,21 +46,39 @@ export const navItems: NavItem[] = [
     icon: ShoppingCart,
   },
   {
-    title: 'Sản phẩm',
-    href: '/admin/products',
-    icon: Package,
-    submenu: [
-      { title: 'Danh sách sản phẩm', href: '/admin/products' },
-      { title: 'Thêm sản phẩm', href: '/admin/products/create' },
-    ],
-  },
-  {
     title: 'Danh mục',
     href: '/admin/categories',
     icon: Tag,
     submenu: [
       { title: 'Danh sách danh mục', href: '/admin/categories' },
       { title: 'Thêm danh mục', href: '/admin/categories/create' },
+    ],
+  },
+  {
+    title: 'Loại sản phẩm',
+    href: '/admin/sub-category',
+    icon: Tags,
+    submenu: [
+      { title: 'Danh sách loại sản phẩm', href: '/admin/sub-category' },
+      { title: 'Thêm loại sản phẩm', href: '/admin/sub-category/create' },
+    ],
+  },
+  {
+    title: 'Thương hiệu',
+    href: '/admin/brands',
+    icon: Award,
+    submenu: [
+      { title: 'Danh sách thương hiệu', href: '/admin/brands' },
+      { title: 'Thêm loại thương hiệu', href: '/admin/brands/create' },
+    ],
+  },
+  {
+    title: 'Sản phẩm',
+    href: '/admin/products',
+    icon: Package,
+    submenu: [
+      { title: 'Danh sách sản phẩm', href: '/admin/products' },
+      { title: 'Thêm sản phẩm', href: '/admin/products/create' },
     ],
   },
   {
