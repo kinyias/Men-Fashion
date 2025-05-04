@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from 'next/navigation';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 import api, { setAuthTokens, clearAuthTokens } from '@/lib/axios-client';
@@ -12,6 +12,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (userData: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
+  loadUser: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, password: string) => Promise<void>;
   updateProfile: (userData: UpdateProfileData) => Promise<void>;
@@ -22,17 +23,16 @@ interface AuthContextType {
 
 interface RegisterData {
   email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber?: string;
-  address?: string;
+  mat_khau: string;
+  ho: string;
+  ten: string;
+  so_dien_thoai?: string;
 }
 
 interface UpdateProfileData {
-  fullName?: string;
-  phoneNumber?: string;
-  address?: string;
+  ho: string;
+  ten: string;
+  so_dien_thoai?: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,28 +42,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  const loadUser = useCallback(async () => {
+    setLoading(true);
+    const accessToken = Cookies.get('accessToken');
+    
+    if (!accessToken) {
+      setLoading(false);
+      return;
+    }
+    
+    try {
+      const { data } = await api.get('/users/profile');
+      setUser(data);
+    } catch (error) {
+      console.error('Tải dữ liệu người dùng thất bại:', error);
+      // Don't clear tokens here as the interceptor will handle token refresh
+    } finally {
+      setLoading(false);
+    }
+  },[]);
+  
   // Load user on mount
   useEffect(() => {
-    const loadUser = async () => {
-      setLoading(true);
-      const accessToken = Cookies.get('accessToken');
-      
-      if (!accessToken) {
-        setLoading(false);
-        return;
-      }
-      
-      try {
-        const { data } = await api.get('/users/profile');
-        setUser(data);
-      } catch (error) {
-        console.error('Tải dữ liệu người dùng thất bại:', error);
-        // Don't clear tokens here as the interceptor will handle token refresh
-      } finally {
-        setLoading(false);
-      }
-    };
-    
     loadUser();
   }, []);
 
@@ -72,7 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       const { data } = await api.post<LoginResponse>('/auth/login', {
         email,
-        password,
+        mat_khau: password,
       });
       setAuthTokens(data.tokens);
       setUser(data.user);
@@ -121,7 +121,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await api.post('/auth/forgot-password', { email });
       toast.success('Đường dẫn cài lại mật khẩu đã được gửi qua email của bạn.');
       setLoading(false);
-      router.push('auth/login');
+      router.push('/auth/login');
     } catch (error: any) {
       const message = error.response?.data?.message || 'Gửi email cài lại mật khẩu thất bại';
       toast.error(message);
@@ -133,7 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const resetPassword = async (token: string, password: string) => {
     try {
       setLoading(true);
-      await api.post(`/auth/reset-password/${token}`, { password });
+      await api.post(`/auth/reset-password/${token}`, { mat_khau: password });
       toast.success('Cài lại mật khảu thành công! Bây giờ bạn có thể đăng nhập với mật khảu mới.');
       setLoading(false);
       router.push('/auth/login');
@@ -171,7 +171,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const verifyEmail = async (token: string) => {
+  const verifyEmail = useCallback(async (token: string) => {
     try {
       setLoading(true);
       await api.get(`/auth/verify-email/${token}`);
@@ -184,7 +184,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
       throw error;
     }
-  };
+  },[]);
 
   const googleLogin = () => {
     window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/google`;
@@ -198,6 +198,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         register,
         logout,
+        loadUser,
         forgotPassword,
         resetPassword,
         updateProfile,

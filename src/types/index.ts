@@ -1,14 +1,13 @@
 export interface User {
-  id: number;
+  ma: number;
   email: string;
-  firstName: string | null;
-  lastName: string | null;
-  phoneNumber: string | null;
-  address: string | null;
-  role: 'customer' | 'admin' | 'technician';
-  emailVerified: boolean;
-  createdAt: string;
-  updatedAt: string;
+  ho: string | null;
+  ten: string | null;
+  so_dien_thoai: string | null;
+  vai_tro: 'khanh_hang' | 'admin';
+  ma_xac_minh: boolean;
+  ngay_tao: string;
+  ngay_cap_nhat: string;
 }
 
 export interface AuthTokens {

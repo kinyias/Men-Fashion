@@ -16,7 +16,6 @@ import {
   Lock,
   User,
   Phone,
-  MapPin,
   Loader,
   MailCheckIcon,
   ArrowRight,
@@ -44,13 +43,12 @@ export default function RegisterPage() {
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
+      ho: '',
+      ten: '',
       email: '',
-      password: '',
+      mat_khau: '',
       confirmPassword: '',
-      phone: '',
-      address: '',
+      so_dien_thoai: '',
     },
   });
 
@@ -86,7 +84,7 @@ export default function RegisterPage() {
                   <div className="grid grid-cols-1 gap-4">
                   <FormField
                       control={form.control}
-                      name="firstName"
+                      name="ho"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Họ</FormLabel>
@@ -94,7 +92,7 @@ export default function RegisterPage() {
                             <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                             <FormControl>
                               <Input
-                                placeholder="An"
+                                placeholder="Nguyen"
                                 className="pl-10"
                                 disabled={loading}
                                 {...field}
@@ -107,7 +105,7 @@ export default function RegisterPage() {
                     />
                     <FormField
                       control={form.control}
-                      name="lastName"
+                      name="ten"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Tên</FormLabel>
@@ -115,7 +113,7 @@ export default function RegisterPage() {
                             <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                             <FormControl>
                               <Input
-                                placeholder="An"
+                                placeholder="Van An"
                                 className="pl-10"
                                 disabled={loading}
                                 {...field}
@@ -151,7 +149,7 @@ export default function RegisterPage() {
                   />
                   <FormField
                     control={form.control}
-                    name="password"
+                    name="mat_khau"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Mật khẩu</FormLabel>
@@ -195,7 +193,7 @@ export default function RegisterPage() {
                   />
                   <FormField
                     control={form.control}
-                    name="phone"
+                    name="so_dien_thoai"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Số điện thoại</FormLabel>
@@ -205,27 +203,6 @@ export default function RegisterPage() {
                             <Input
                               type="tel"
                               placeholder="+84 000-000-000"
-                              className="pl-10"
-                              disabled={loading}
-                              {...field}
-                            />
-                          </FormControl>
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="address"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Địa chỉ</FormLabel>
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                          <FormControl>
-                            <Input
-                              placeholder="Số nhà tên đường, phường/xã, Quận/Huyện, Tỉnh/Thành phố"
                               className="pl-10"
                               disabled={loading}
                               {...field}

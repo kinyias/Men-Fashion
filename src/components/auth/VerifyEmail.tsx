@@ -29,6 +29,7 @@ export default function VerifyEmail() {
       if (token) {
         verifyToken();
       }
+      console.log('errrrrrrr');
     }, [token, verifyEmail]);
   return (
     <> {status === 'loading' && (

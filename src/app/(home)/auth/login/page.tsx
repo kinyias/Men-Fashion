@@ -37,13 +37,13 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
-      password: '',
+      mat_khau: '',
     },
   });
 
   const onSubmit = async (values: LoginFormValues) => {
     try {
-      await login(values.email, values.password);
+      await login(values.email, values.mat_khau);
     } catch (error: any) {
       console.error('Login error:', error);
     }
@@ -86,7 +86,7 @@ export default function LoginPage() {
               />
               <FormField
                 control={form.control}
-                name="password"
+                name="mat_khau"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center justify-between">

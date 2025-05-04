@@ -29,7 +29,7 @@ export default function ResetPasswordForm() {
   const form = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
-      password: '',
+      mat_khau: '',
       confirmPassword: '',
     },
   });
@@ -40,7 +40,7 @@ export default function ResetPasswordForm() {
         return;
       }
 
-      await resetPassword(token, values.password);
+      await resetPassword(token, values.mat_khau);
       // Redirect happens in the auth context after successful reset
     } catch (error) {
       console.error('Reset password error:', error);
@@ -51,7 +51,7 @@ export default function ResetPasswordForm() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="password"
+          name="mat_khau"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Mật khẩu</FormLabel>

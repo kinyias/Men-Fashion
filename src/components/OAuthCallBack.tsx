@@ -2,11 +2,13 @@
 import React, { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { setAuthTokens } from '@/lib/axios-client';
+import toast from 'react-hot-toast';
+import { useAuth } from '@/context/auth-provider';
 
 export default function OAuthCallBack() {
   const router = useRouter();
    const searchParams = useSearchParams(); // Use useSearchParams to access query parameters
- 
+  const { loadUser } = useAuth(); 
    useEffect(() => {
      // Wait for searchParams to be ready
      if (searchParams) {
@@ -18,20 +20,21 @@ export default function OAuthCallBack() {
        if (token && refreshToken) {
          // Save tokens
          setAuthTokens({ accessToken: token, refreshToken });
- 
+         loadUser();
+         toast.success('Đăng nhập thành công');
          // Redirect to dashboard
-         setTimeout(() => {
-           router.push('/dashboard');
-         }, 1000);
+          router.push('/');
        } else if (error) {
          // If there was an error, redirect to login with error
+         toast.error('Đăng nhập thất bại');
          router.push(`/auth/login?error=${error}`);
        } else {
          // If no tokens or error, redirect to login
+         toast.error('Đăng nhập thất bại');
          router.push('/auth/login');
        }
      }
-   }, [searchParams, router]);
+   }, [searchParams, router, loadUser]);
    return (
     <div className="max-w-md w-full space-y-8 p-10 bg-white rounded-xl shadow-md">
     <div className="flex flex-col items-center justify-center text-center">
