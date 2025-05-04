@@ -6,32 +6,32 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 const categories = [
   {
     name: "Quần âu",
-    image: "/placeholder.svg?height=400&width=400",
+    image: "/assets/products/1.png",
     itemCount: 42,
   },
   {
     name: "Áo sơ mi",
-    image: "/placeholder.svg?height=400&width=400",
+    image: "/assets/products/1.png",
     itemCount: 36,
   },
   {
     name: "Áo Polo",
-    image: "/placeholder.svg?height=400&width=400",
+    image: "/assets/products/1.png",
     itemCount: 28,
   },
   {
     name: "Túi",
-    image: "/placeholder.svg?height=400&width=400",
+    image: "/assets/products/1.png",
     itemCount: 24,
   },
   {
     name: "Giày tây",
-    image: "/placeholder.svg?height=400&width=400",
+    image: "/assets/products/1.png",
     itemCount: 18,
   },
   {
     name: "Quần jeans",
-    image: "/placeholder.svg?height=400&width=400",
+    image: "/assets/products/1.png",
     itemCount: 32,
   },
 ]

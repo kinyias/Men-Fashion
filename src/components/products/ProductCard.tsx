@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Check, Heart, ShoppingBag, Star } from 'lucide-react';
+import { ShoppingBag, Star } from 'lucide-react';
 import { formatCurrency } from '@/utils/currency';
 import toast from 'react-hot-toast';
 
@@ -54,9 +54,9 @@ export default function ProductCard({ product }: { product: Product }) {
     setShowQuickAdd(false)
   }
   return (
-    <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg">
+    <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg pt-0">
       <div className="aspect-square relative overflow-hidden bg-muted/30">
-        <div className="absolute top-3 right-3 z-10 flex gap-1.5">
+        {/* <div className="absolute top-3 right-3 z-10 flex gap-1.5">
           <Button
             variant="ghost"
             size="icon"
@@ -65,10 +65,9 @@ export default function ProductCard({ product }: { product: Product }) {
           >
             <Heart className="h-4 w-4" />
           </Button>
-        </div>
+        </div> */}
         <Image
-          src={`${product.image.split('.')[0]}_${selectedColor.id}.${
-            product.image.split('.')[1]
+          src={`${product.image
           }`}
           alt={`${product.name} in ${selectedColor.name}`}
           width={400}
@@ -112,7 +111,7 @@ export default function ProductCard({ product }: { product: Product }) {
               </div>
 
               {/* Color Selection */}
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <p className="text-xs font-medium text-gray-900">Chọn màu sắc</p>
                 <div className="flex gap-1.5">
                   {product.colors.map((color) => (
@@ -130,7 +129,7 @@ export default function ProductCard({ product }: { product: Product }) {
                     </button>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               {/* Add to Cart Button */}
               <Button className="w-full" size="sm" onClick={handleAddToCart}>

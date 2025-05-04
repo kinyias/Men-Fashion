@@ -18,7 +18,7 @@ const blogPosts: BlogPost[] = [
   {
     title: "Tiêu đề 1",
     excerpt: "Mô tả 1.",
-    image: "/placeholder.svg?height=600&width=800",
+    image: "/assets/products/1.png",
     date: "May 15, 2025",
     author: "Admin",
     category: "Style Guide",
@@ -27,7 +27,7 @@ const blogPosts: BlogPost[] = [
   {
     title: "Tiêu đề 2",
     excerpt: "Mô tả 2.",
-    image: "/placeholder.svg?height=600&width=800",
+    image: "/assets/products/1.png",
     date: "April 28, 2025",
     author: "Admin",
     category: "Style Guide",
@@ -36,7 +36,7 @@ const blogPosts: BlogPost[] = [
   {
     title: "Tiêu đề 3",
     excerpt: "Mô tả 3.",
-    image: "/placeholder.svg?height=600&width=800",
+    image: "/assets/products/1.png",
     date: "April 10, 2025",
     author: "Admin",
     category: "Style Guide",
@@ -60,7 +60,7 @@ export function BlogSection() {
 
         <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {blogPosts.map((post) => (
-            <Card key={post.slug} className="overflow-hidden transition-all duration-200 hover:shadow-md">
+            <Card key={post.slug} className="overflow-hidden transition-all duration-200 hover:shadow-md pt-0">
               <div className="aspect-[16/9] relative overflow-hidden">
                 <Image
                   src={post.image || "/placeholder.svg"}

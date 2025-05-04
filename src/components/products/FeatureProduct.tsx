@@ -7,7 +7,7 @@ const products = [
       name: "Sản phẩm 1",
       category: "Danh mục",
       price: 500000,
-      image: "/placeholder.svg?height=400&width=400",
+      image: "/assets/products/1.png",
       rating: 4.8,
       isNew: true,
       colors: [
@@ -21,7 +21,7 @@ const products = [
       name: "Sản phẩm 2",
       category: "Danh mục",
       price: 700000,
-      image: "/placeholder.svg?height=400&width=400",
+      image: "/assets/products/1.png",
       rating: 4.6,
       isNew: false,
       colors: [
@@ -35,7 +35,7 @@ const products = [
       name: "Sản phẩm 3",
       category: "Danh mục",
       price: 800000,
-      image: "/placeholder.svg?height=400&width=400",
+      image: "/assets/products/1.png",
       rating: 4.9,
       isNew: true,
       colors: [
@@ -48,7 +48,7 @@ const products = [
       name: "Sản phẩm 4",
       category: "Danh mục",
       price: 900000,
-      image: "/placeholder.svg?height=400&width=400",
+      image: "/assets/products/1.png",
       rating: 4.7,
       isNew: false,
       colors: [
@@ -61,7 +61,7 @@ const products = [
       name: "Sản phẩm 5",
       category: "Danh mục",
       price: 500000,
-      image: "/placeholder.svg?height=400&width=400",
+      image: "/assets/products/1.png",
       rating: 4.5,
       isNew: true,
       colors: [
@@ -74,7 +74,7 @@ const products = [
       name: "Sản phẩm 6",
       category: "Danh mục",
       price: 1500000,
-      image: "/placeholder.svg?height=400&width=400",
+      image: "/assets/products/1.png",
       rating: 4.9,
       isNew: false,
       colors: [
