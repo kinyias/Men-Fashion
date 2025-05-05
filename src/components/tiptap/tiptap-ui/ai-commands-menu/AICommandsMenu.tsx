@@ -73,43 +73,43 @@
           editor.chain().focus().deleteRange({ from, to }).run();
       
           // Initialize position tracking
-          let insertPosition = from;
+          // let insertPosition = from;
           let fullResponse = '';
       
           for await (const chunk of stream) {
             if (abortControllerRef.current?.signal.aborted) break;
       
             // Calculate only the new text in this chunk
-            const newText = chunk.slice(fullResponse.length);
+            // const newText = chunk.slice(fullResponse.length);
             fullResponse = chunk;
       
-            if (newText && command !== AICommand.MakeSEO) {
-              // Ensure position is within bounds
-              const docSize = editor.state.doc.content.size;
-              console.log(newText);
-              insertPosition = Math.min(insertPosition, docSize);
+    //         if (newText && command !== AICommand.MakeSEO) {
+    //           // Ensure position is within bounds
+    //           const docSize = editor.state.doc.content.size;
+    //           insertPosition = Math.min(insertPosition, docSize);
     //             const cleanNewText = newText.replace(/\n\s*\n/g, '\n')      // Clean remaining double newlines
     //             .replace(/(\S)\n(\S)/g, '$1 $2') // Fix broken words across lines
     //             .replace(/\n\s*/g, ' ')      // Replace all newlines and following whitespace with a single space
     // .replace(/>\s+</g, '><')     // Remove whitespace between HTML tags
     // .trim();
     // console.log(cleanNewText);
-              // Insert the new content
-              editor
-                .chain()
-                .focus()
-                .insertContentAt(insertPosition, newText)
-                .run();
+    //           // Insert the new content
+    //           console.log('insertPosition', insertPosition, 'newText', newText);
+    //           editor
+    //             .chain()
+    //             .focus()
+    //             .insertContentAt(insertPosition, newText)
+    //             .run();
       
-              // Update position for next chunk
-              insertPosition += newText.length;
+    //           // Update position for next chunk
+    //           insertPosition += newText.length;
       
-              // Small delay to allow editor state to update
-              await new Promise(resolve => setTimeout(resolve, 10));
-            }
+    //           // Small delay to allow editor state to update
+    //           await new Promise(resolve => setTimeout(resolve, 10));
+    //         }
           }
           
-          if (fullResponse && command === AICommand.MakeSEO) {
+          // if (fullResponse && command === AICommand.MakeSEO) {
             console.log(fullResponse.length);
             const finalCleanResponse = fullResponse
               .replace(/\n\s*\n/g, '\n')      // Clean remaining double newlines
@@ -124,7 +124,7 @@
             .insertContentAt(from, finalCleanResponse)
             .run();
              
-          }
+          // }
         } catch (error) {
           console.error('Error processing text with Gemini:', 
             error instanceof Error ? error.message : error);
