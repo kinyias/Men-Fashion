@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const subCategoryFormSchema = z.object({
+export const loaiSanPhamFormSchema = z.object({
   ten: z
     .string()
     .min(2, {
@@ -13,6 +13,6 @@ export const subCategoryFormSchema = z.object({
   hinhanh: z.string().optional(),
   noibat: z.boolean(),
   madanhmuc: z.number({
-  required_error: 'Vui lòng chọn danh mục.',
-}),
+    required_error: 'Vui lòng chọn danh mục.',
+  }),
 })

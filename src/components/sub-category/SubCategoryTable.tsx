@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -13,9 +13,10 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal, Eye, EyeOff, Search, PlusCircle } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, Eye, EyeOff, Search, PlusCircle, Loader2, ChevronLeft, ChevronRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -32,104 +33,120 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "../ui/input"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog"
 import toast from "react-hot-toast"
-
-// Define the ProductType type
-export type ProductType = {
-  ma: number
-  ten: string
-  mota: string
-  hinhanh: string
-  noibat: boolean
-  madanhmuc: number
-  tendanhmuc: string
-}
-
-// Sample product type data
-const productTypes: ProductType[] = [
-  {
-    ma: 1,
-    ten: "Áo sơ mi",
-    mota: "Áo sơ mi nam dài tay",
-    hinhanh: "/placeholder.svg?height=40&width=40",
-    noibat: true,
-    madanhmuc: 1,
-    tendanhmuc: "Áo"
-  },
-  {
-    ma: 2,
-    ten: "Áo thun",
-    mota: "Áo thun nam ngắn tay",
-    hinhanh: "/placeholder.svg?height=40&width=40",
-    noibat: false,
-    madanhmuc: 1,
-    tendanhmuc: "Áo"
-  },
-  {
-    ma: 3,
-    ten: "Quần jean",
-    mota: "Quần jean nam dáng slim fit",
-    hinhanh: "/placeholder.svg?height=40&width=40",
-    noibat: true,
-    madanhmuc: 2,
-    tendanhmuc: "Quần"
-  },
-  {
-    ma: 4,
-    ten: "Quần kaki",
-    mota: "Quần kaki nam dáng regular",
-    hinhanh: "/placeholder.svg?height=40&width=40",
-    noibat: false,
-    madanhmuc: 2,
-    tendanhmuc: "Quần"
-  },
-  {
-    ma: 5,
-    ten: "Giày tây",
-    mota: "Giày tây nam da bò",
-    hinhanh: "/placeholder.svg?height=40&width=40",
-    noibat: true,
-    madanhmuc: 3,
-    tendanhmuc: "Giày"
-  },
-  {
-    ma: 6,
-    ten: "Giày thể thao",
-    mota: "Giày thể thao nam",
-    hinhanh: "/placeholder.svg?height=40&width=40",
-    noibat: false,
-    madanhmuc: 3,
-    tendanhmuc: "Giày"
-  },
-  {
-    ma: 7,
-    ten: "Thắt lưng",
-    mota: "Thắt lưng nam da bò",
-    hinhanh: "/placeholder.svg?height=40&width=40",
-    noibat: true,
-    madanhmuc: 4,
-    tendanhmuc: "Phụ kiện"
-  },
-  {
-    ma: 8,
-    ten: "Ví da",
-    mota: "Ví da nam",
-    hinhanh: "/placeholder.svg?height=40&width=40",
-    noibat: false,
-    madanhmuc: 4,
-    tendanhmuc: "Phụ kiện"
-  }
-]
+import { LoaiSanPham, LoaiSanPhamQueryParams } from "@/types/sub-category"
+import { deleteSubCategory, deleteManySubCategories, getSubCategories } from "@/lib/api/api-sub-categories"
+import EllipsisPagination from "../ui/EllipsisPagination"
+import { ApiError } from "@/types"
+import axios from "axios"
 
 export function SubCategoryTable() {
+  const queryClient = useQueryClient()
+  const [searchQuery, setSearchQuery] = useState("")
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
-  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [typeToDelete, setTypeToDelete] = useState<ProductType | null>(null);
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [subCategoryToDelete, setSubCategoryToDelete] = useState<LoaiSanPham | null>(null)
+  const [queryParams, setQueryParams] = useState<LoaiSanPhamQueryParams>({
+    page: 1,
+    limit: 5,
+    sortBy: 'ma',
+    sortOrder: 'asc',
+    search: "",
+  })
+  
+  // Fetch sub-categories
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['sub-categories', queryParams],
+    queryFn: () => getSubCategories(queryParams),
+    placeholderData: (previousData) => previousData,
+    staleTime: 5 * 60 * 1000,
+  });
+  
+  const subCategories = data?.data || []
+  const pagination = data?.pagination || {
+    page: 1,
+    limit: 5,
+    totalItems: 0,
+    totalPages: 1,
+  }
+  
+  // Update search with debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setQueryParams(prev => ({ ...prev, search: searchQuery, page: 1 }))
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+  
+  // Delete sub-category mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      // Get the sub-category to delete
+      const subCategoryToDelete = subCategories.find(sc => sc.ma === id);
+      
+      // Delete the image if it exists
+      if (subCategoryToDelete?.hinhanh) {
+        await handleDeleteSubCategory(subCategoryToDelete);
+      }
+      
+      // Delete the sub-category
+      return deleteSubCategory(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sub-categories'] })
+      toast.success(`Đã xóa loại sản phẩm thành công`)
+      setOpen(false)
+    },
+    onError: (error) => {
+      console.error("Error deleting sub-category:", error)
+      toast.error('Xóa loại sản phẩm thất bại')
+    }
+  })
+  
+  // Bulk delete mutation
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (ids: number[]) => {
+      // Delete images for all selected sub-categories
+      for (const id of ids) {
+        const subCategoryToDelete = subCategories.find(sc => sc.ma === id);
+        if (subCategoryToDelete?.hinhanh) {
+          await handleDeleteSubCategory(subCategoryToDelete);
+        }
+      }
+      // Delete the sub-categories
+      return deleteManySubCategories(ids);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sub-categories'] })
+      toast.success(`Đã xóa ${Object.keys(rowSelection).length} loại sản phẩm thành công`)
+      setBulkDeleteOpen(false)
+      setRowSelection({})
+    },
+    onError: (error: ApiError) => {
+      console.error("Error bulk deleting sub-categories:", error)
+      toast.error(`${error.response.data.message}` )
+    }
+  })
+  
+  const getImageKey = (src: string) =>
+    src.substring(src.lastIndexOf('/') + 1);
+    
+  const handleDeleteSubCategory = async (subCategory: LoaiSanPham) => {
+    if (!subCategory.hinhanh) return;
+    
+    const imageKey = getImageKey(subCategory.hinhanh);
+    try {
+      await axios.post('/api/uploadthing/delete', { imageKey });
+      console.log(`Deleted image: ${imageKey}`);
+    } catch (error) {
+      console.error(`Failed to delete image: ${imageKey}`, error);
+    }
+  }
 
-  const columns: ColumnDef<ProductType>[] = [
+  const columns: ColumnDef<LoaiSanPham>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -153,7 +170,7 @@ export function SubCategoryTable() {
       accessorKey: "hinhanh",
       header: "Hình ảnh",
       cell: ({ row }) => (
-        <div className="w-10 h-10 relative rounded-md overflow-hidden">
+        <div className="w-20 h-20 relative rounded-md overflow-hidden">
           <Image
             src={row.getValue("hinhanh") || "/placeholder.svg"}
             alt={row.getValue("ten")}
@@ -177,9 +194,9 @@ export function SubCategoryTable() {
       cell: ({ row }) => <div className="font-medium">{row.getValue("ten")}</div>,
     },
     {
-      accessorKey: "tendanhmuc",
+      accessorKey: "danhMuc.ten",
       header: "Danh mục",
-      cell: ({ row }) => <div>{row.getValue("tendanhmuc")}</div>,
+      cell: ({ row }) => <div>{row.original.danhMuc?.ten || ""}</div>,
     },
     {
       accessorKey: "mota",
@@ -201,12 +218,20 @@ export function SubCategoryTable() {
       },
     },
     {
+      accessorKey: "_count.sanPhams",
+      header: "Số sản phẩm",
+      cell: ({ row }) => {
+        const count = row.original._count?.sanPhams || 0
+        return <div className="text-center">{count}</div>
+      },
+    },
+    {
       id: 'actions',
       cell: ({ row }) => {
-        const productType = row.original;
+        const subCategory = row.original;
   
         return (
-          <Dialog open={open && typeToDelete?.ma === productType.ma} onOpenChange={setOpen}>
+          <Dialog open={open && subCategoryToDelete?.ma === subCategory.ma} onOpenChange={setOpen}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">
@@ -215,20 +240,20 @@ export function SubCategoryTable() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuLabel>Hành động</DropdownMenuLabel>
               <DropdownMenuItem asChild>
-                <Link href={`/dashboard/sub-category/${productType.ma}`}>Xem</Link>
+                <Link className="cursor-pointer" href={`/admin/sub-category/${subCategory.ma}`}>Xem</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href={`/dashboard/sub-category/${productType.ma}`}>Sửa</Link>
+                <Link className="cursor-pointer" href={`/admin/sub-category/${subCategory.ma}`}>Sửa</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
-                  setTypeToDelete(productType);
+                  setSubCategoryToDelete(subCategory);
                   setOpen(true);
                 }}
-                className="text-destructive focus:text-destructive className='cursor-pointer'"
+                className="text-destructive focus:text-destructive cursor-pointer"
               >
                 Xoá
               </DropdownMenuItem>
@@ -238,15 +263,16 @@ export function SubCategoryTable() {
             <DialogHeader>
               <DialogTitle>Xác nhận xóa</DialogTitle>
               <DialogDescription>
-                Bạn có chắc chắn muốn xóa loại sản phẩm &quot;{productType.ten}&quot;? Hành động này không thể hoàn tác.
+                Bạn có chắc chắn muốn xóa loại sản phẩm &quot;{subCategory.ten}&quot;? Hành động này không thể hoàn tác.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
               <Button className='cursor-pointer' variant="outline" onClick={() => setOpen(false)}>
                 Hủy
               </Button>
-              <Button className='cursor-pointer' variant="destructive" onClick={() => handleDeleteType(productType)}>
-                Xóa
+              <Button className='cursor-pointer' variant="destructive" onClick={() => deleteMutation.mutate(subCategory.ma)}>
+                {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {deleteMutation.isPending ? 'Đang xoá...' : 'Xóa'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -257,7 +283,7 @@ export function SubCategoryTable() {
   ]
   
   const table = useReactTable({
-    data: productTypes,
+    data: subCategories || [],
     columns: columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -273,126 +299,165 @@ export function SubCategoryTable() {
       columnVisibility,
       rowSelection,
     },
+    manualPagination: true,
   })
   
-  const bulkDeleteMutation = (selectedIds: number[]) => {
-    toast.success(`Đã xóa ${selectedIds.length} loại sản phẩm`)
-  }
-  
   const handleBulkDelete = () => {
-    const selectedIds = Object.keys(rowSelection).map(Number);
-    
-    bulkDeleteMutation(selectedIds);
-    setBulkDeleteOpen(false);
-  };
-  
-  const handleDeleteType = (productType: ProductType) => {
-    toast.success(`Đã xóa loại sản phẩm ${productType.ten}`)
-    setOpen(false);
+    const selectedIds = Object.keys(rowSelection).map(index => {
+      return subCategories[Number(index)].ma;
+    });
+    bulkDeleteMutation.mutate(selectedIds);
   };
   
   return (
     <div className="space-y-4">
-       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
-      <div className="flex gap-5">
-      <h1 className="text-2xl font-bold tracking-tight">Loại sản phẩm</h1>
-      {Object.keys(rowSelection).length > 0 && (
-          <Dialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
-            <DialogTrigger asChild>
-              <Button variant="destructive" size="sm">
-                Xoá loại sản phẩm đã chọn
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+        <div className="flex gap-5">
+          <h1 className="text-2xl font-bold tracking-tight">Loại sản phẩm</h1>
+          {Object.keys(rowSelection).length > 0 && (
+            <Dialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+              <DialogTrigger asChild>
+                <Button variant="destructive" size="sm">
+                  Xoá loại sản phẩm đã chọn
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Xác nhận xóa hàng loạt</DialogTitle>
+                  <DialogDescription>
+                    Bạn có chắc chắn muốn xóa {Object.keys(rowSelection).length} loại sản phẩm đã chọn? Hành động này không thể
+                    hoàn tác.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setBulkDeleteOpen(false)}>
+                    Hủy
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    onClick={handleBulkDelete}
+                    disabled={bulkDeleteMutation.isPending}
+                  >
+                    {bulkDeleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {bulkDeleteMutation.isPending ? 'Đang xoá...' : 'Xóa'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
+        <div className="flex flex-col md:flex-row w-full md:w-auto gap-4 md:gap-2">
+          <div className="relative w-full md:w-[300px]">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Tìm kiếm loại sản phẩm..."
+              className="pl-8 w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Button asChild>
+            <Link href="/admin/sub-category/create">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Thêm loại sản phẩm
+            </Link>
+          </Button>
+        </div>
+      </div>
+      
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : isError ? (
+        <div className="flex justify-center items-center h-64">
+          <p className="text-destructive">Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.</p>
+        </div>
+      ) : (
+        <>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => {
+                      return (
+                        <TableHead key={header.id}>
+                          {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                        </TableHead>
+                      )
+                    })}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                      Không có dữ liệu nào để hiển thị.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium">Số hàng mỗi trang</p>
+              <select
+                value={queryParams.limit}
+                onChange={(e) => {
+                  const newLimit = Number(e.target.value);
+                  setQueryParams(prev => ({ ...prev, limit: newLimit, page: 1 }));
+                }}
+                className="h-8 w-[70px] rounded-md border border-input bg-background px-2 py-1 text-sm"
+              >
+                {[5, 10, 20, 30, 50].map((pageSize) => (
+                  <option key={pageSize} value={pageSize}>
+                    {pageSize}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setQueryParams(prev => ({ ...prev, page: prev.page! - 1 }));
+                }}
+                disabled={pagination.page <= 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Xác nhận xóa hàng loạt</DialogTitle>
-                <DialogDescription>
-                  Bạn có chắc chắn muốn xóa {Object.keys(rowSelection).length} loại sản phẩm đã chọn? Hành động này không thể
-                  hoàn tác.
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setBulkDeleteOpen(false)}>
-                  Hủy
-                </Button>
-                <Button variant="destructive" onClick={handleBulkDelete}>
-                  Xóa
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )}
-      </div>
-      <div className="flex flex-col md:flex-row w-full md:w-auto gap-4 md:gap-2">
-        <div className="relative w-full md:w-[300px]">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Tìm kiếm loại sản phẩm..."
-            className="pl-8 w-full"
-          />
-        </div>
-        <Button asChild>
-          <Link href="/admin/sub-category/create">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Thêm loại sản phẩm
-          </Link>
-        </Button>
-      </div>
-    </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Không có dữ liệu nào để hiển thị.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="flex items-center justify-between">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} hàng
-          được chọn.
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Trước
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-            Sau
-          </Button>
-        </div>
-      </div>
+              <EllipsisPagination 
+                currentPage={queryParams.page}
+                totalPages={pagination.totalPages}
+                onPageChange={(page) => setQueryParams(prev => ({...prev, page }))}
+              />
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  setQueryParams(prev => ({ ...prev, page: prev.page! + 1 }));
+                }}
+                disabled={pagination.page >= pagination.totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
