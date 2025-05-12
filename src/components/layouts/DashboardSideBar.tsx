@@ -77,6 +77,8 @@ export const navItems: NavItem[] = [
     href: '/admin/products',
     icon: Package,
     submenu: [
+      { title: 'Màu sắc', href: '/admin/colors' },
+      { title: 'Kích cỡ', href: '/admin/sizes' },
       { title: 'Danh sách sản phẩm', href: '/admin/products' },
       { title: 'Thêm sản phẩm', href: '/admin/products/create' },
     ],
