@@ -10,7 +10,7 @@ import { MoonStarIcon } from '@/components/tiptap/tiptap-icons/moon-star-icon';
 import { SunIcon } from '@/components/tiptap/tiptap-icons/sun-icon';
 
 export function ThemeToggle() {
-  const [isDarkMode, setIsDarkMode] = React.useState<boolean>(true);
+  const [isDarkMode, setIsDarkMode] = React.useState<boolean>(false);
 
   React.useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
