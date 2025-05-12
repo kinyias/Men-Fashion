@@ -33,7 +33,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "../ui/input"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog"
 import toast from "react-hot-toast"
-import { LoaiSanPham, LoaiSanPhamQueryParams } from "@/types/sub-category"
+import { LoaiSanPham, LoaiSanPhamQueryParams } from "@/types"
 import { deleteSubCategory, deleteManySubCategories, getSubCategories } from "@/lib/api/api-sub-categories"
 import EllipsisPagination from "../ui/EllipsisPagination"
 import { ApiError } from "@/types"
@@ -80,7 +80,17 @@ export function SubCategoryTable() {
     }, 500)
     return () => clearTimeout(timer)
   }, [searchQuery])
-  
+  useEffect(() => {
+    if (sorting.length > 0) {
+      setQueryParams(prev => ({
+        ...prev,
+        sortBy: sorting[0].id,
+        sortOrder: sorting[0].desc ? 'desc' : 'asc',
+        page: 1,
+      }));
+    }
+  }, [sorting]);
+
   // Delete sub-category mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {

@@ -76,7 +76,17 @@ export function CategoriesTable() {
     }, 500)
     return () => clearTimeout(timer)
   }, [searchQuery])
-  // Add a function to handle column sorting
+  useEffect(() => {
+    if (sorting.length > 0) {
+      setQueryParams(prev => ({
+        ...prev,
+        sortBy: sorting[0].id,
+        sortOrder: sorting[0].desc ? 'desc' : 'asc',
+        page: 1,
+      }));
+    }
+  }, [sorting]);
+
   // Delete category mutation
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteCategory(id),
