@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -13,8 +13,9 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal, Search, PlusCircle } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, Search, PlusCircle, Loader2, ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -30,44 +31,82 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "../ui/input"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog"
 import toast from "react-hot-toast"
-
-// Define the Product type
-export type Category = {
-  ma: number
-  ten: string
-  mota: string
-}
-
-// Sample product data
-const categories: Category[] = [
-    { ma: 1, ten: "Áo", mota: "Áo thời trang lịch lãm" },
-    { ma: 2, ten: "Quần", mota: "Các loại quần âu, quần jean,..." },
-    { ma: 3, ten: "Giày", mota: "Giày tây, giày sneaker,..." },
-    { ma: 4, ten: "Phụ kiện", mota: "Phụ kiện mang đến sự thoải mãi và lịch lám" },
-]
-
+import { DanhMuc, DanhMucQueryParams } from "@/types"
+import { deleteCategory, deleteManyCategories, getCategories } from "@/lib/api/api-categories"
+import EllipsisPagination from "../ui/EllipsisPagination"
 
 export function CategoriesTable() {
+  const queryClient = useQueryClient()
+  const [searchQuery, setSearchQuery] = useState("")
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
-  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
-  // React.useEffect(() => {
-  //   if (searchQuery) {
-  //     setColumnFilters([
-  //       {
-  //         id: "name",
-  //         value: searchQuery,
-  //       },
-  //     ])
-  //   } else {
-  //     setColumnFilters([])
-  //   }
-  // }, [searchQuery])
-  const columns: ColumnDef<Category>[] = [
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [categoryToDelete, setCategoryToDelete] = useState<DanhMuc | null>(null)
+  const [queryParams, setQueryParams] = useState<DanhMucQueryParams>({
+    page: 1,
+    limit: 5,
+    sortBy: 'ma',
+    sortOrder: 'asc',
+    search: "",
+  })
+
+  
+  
+  // Fetch categories
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['categories', queryParams],
+    queryFn: () => getCategories(queryParams),
+    placeholderData: (previousData) => previousData,
+    staleTime: 5 * 60 * 1000,
+  });
+  const categories = data?.data || []
+  const pagination = data?.pagination || {
+    page: 1,
+    pageSize: 5,
+    totalItems: 0,
+    totalPages: 1,
+  }
+  // Update search with debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setQueryParams(prev => ({ ...prev, search: searchQuery, page: 1 }))
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+  // Add a function to handle column sorting
+  // Delete category mutation
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteCategory(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] })
+      toast.success(`Đã xóa danh mục thành công`)
+      setOpen(false)
+    },
+    onError: (error) => {
+      console.error("Error deleting category:", error)
+      toast.error('Xóa danh mục thất bại')
+    }
+  })
+  
+  // Bulk delete mutation
+  const bulkDeleteMutation = useMutation({
+    mutationFn: (ids: number[]) => deleteManyCategories(ids),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] })
+      toast.success(`Đã xóa ${Object.keys(rowSelection).length} danh mục thành công`)
+      setBulkDeleteOpen(false)
+      setRowSelection({})
+    },
+    onError: (error) => {
+      console.error("Error bulk deleting categories:", error)
+      toast.error('Xóa danh mục hàng loạt thất bại')
+    }
+  })
+
+  const columns: ColumnDef<DanhMuc>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -105,6 +144,22 @@ export function CategoriesTable() {
       cell: ({ row }) => <div>{row.getValue("mota")}</div>,
     },
     {
+      accessorKey: "_count.sanPhams",
+      header: "Số sản phẩm",
+      cell: ({ row }) => {
+        const count = row.original._count?.sanPhams || 0
+        return <div className="text-center">{count}</div>
+      },
+    },
+    {
+      accessorKey: "_count.loaiSanPhams",
+      header: "Số loại sản phẩm",
+      cell: ({ row }) => {
+        const count = row.original._count?.loaiSanPhams || 0
+        return <div className="text-center">{count}</div>
+      },
+    },
+    {
       id: 'actions',
       cell: ({ row }) => {
         const category = row.original;
@@ -119,12 +174,12 @@ export function CategoriesTable() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuLabel>Hành động</DropdownMenuLabel>
               <DropdownMenuItem asChild>
-                <Link href={`/dashboard/categories/${category.ma}`}>Xem</Link>
+                <Link className="cursor-pointer" href={`/admin/categories/${category.ma}`}>Xem</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href={`/dashboard/categories/${category.ma}`}>Sửa</Link>
+                <Link className="cursor-pointer" href={`/admin/categories/${category.ma}`}>Sửa</Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -132,7 +187,7 @@ export function CategoriesTable() {
                   setCategoryToDelete(category);
                   setOpen(true);
                 }}
-                className="text-destructive focus:text-destructive className='cursor-pointer'"
+                className="text-destructive focus:text-destructive cursor-pointer"
               >
                 Xoá
               </DropdownMenuItem>
@@ -142,17 +197,16 @@ export function CategoriesTable() {
             <DialogHeader>
               <DialogTitle>Xác nhận xóa</DialogTitle>
               <DialogDescription>
-                Bạn có chắc chắn muốn xóa sản phẩm &quot;{category.ten}&quot;? Hành động này không thể hoàn tác.
+                Bạn có chắc chắn muốn xóa danh mục &quot;{category.ten}&quot;? Hành động này không thể hoàn tác.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
               <Button className='cursor-pointer' variant="outline" onClick={() => setOpen(false)}>
                 Hủy
               </Button>
-              <Button className='cursor-pointer' variant="destructive" onClick={() => handleDeleteCategory(category)}>
-              {/* {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {deleteMutation.isPending ? 'Đang xoá...' : 'Xoá'} */}
-              Xóa
+              <Button className='cursor-pointer' variant="destructive" onClick={() => deleteMutation.mutate(category.ma)}>
+                {deleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {deleteMutation.isPending ? 'Đang xoá...' : 'Xóa'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -163,7 +217,7 @@ export function CategoriesTable() {
   ]
   
   const table = useReactTable({
-    data: categories,
+    data: categories || [],
     columns: columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -179,124 +233,188 @@ export function CategoriesTable() {
       columnVisibility,
       rowSelection,
     },
+    manualPagination: true,
   })
-  const bulkDeleteMutation = (selectedIds: number[]) => {
-    toast.success(`Đã xóa ${selectedIds.length} danh mục`)
-  }
+  
   const handleBulkDelete = () => {
-    const selectedIds = Object.keys(rowSelection).map(Number);
-    
-    bulkDeleteMutation(selectedIds);
-    setBulkDeleteOpen(false);
+    const selectedIds = Object.keys(rowSelection).map(index => {
+      return categories[Number(index)].ma;
+    });
+    bulkDeleteMutation.mutate(selectedIds);
   };
-  const handleDeleteCategory= (category: Category) => {
-    toast.success(`Đã xóa danh mục ${category.ten}`)
-    setOpen(false);
-  };
+  
   return (
     <div className="space-y-4">
-       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
-      <div className="flex gap-5">
-      <h1 className="text-2xl font-bold tracking-tight">Danh mục</h1>
-      {Object.keys(rowSelection).length > 0 && (
-          <Dialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
-            <DialogTrigger asChild>
-              <Button variant="destructive" size="sm">
-                Xoá danh mục đã chọn
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Xác nhận xóa hàng loạt</DialogTitle>
-                <DialogDescription>
-                  Bạn có chắc chắn muốn xóa {Object.keys(rowSelection).length} danh mục đã chọn? Hành động này không thể
-                  hoàn tác.
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setBulkDeleteOpen(false)}>
-                  Hủy
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+        <div className="flex gap-5">
+          <h1 className="text-2xl font-bold tracking-tight">Danh mục</h1>
+          {Object.keys(rowSelection).length > 0 && (
+            <Dialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
+              <DialogTrigger asChild>
+                <Button variant="destructive" size="sm">
+                  Xoá danh mục đã chọn
                 </Button>
-                <Button variant="destructive" onClick={handleBulkDelete}>
-                  Xóa
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )}
-      </div>
-      <div className="flex flex-col md:flex-row w-full md:w-auto gap-4 md:gap-2">
-        <div className="relative w-full md:w-[300px]">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Tìm kiếm danh mục..."
-            className="pl-8 w-full"
-            // value={searchQuery}
-            // onChange={(e) => setSearchQuery(e.target.value)}
-          />
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Xác nhận xóa hàng loạt</DialogTitle>
+                  <DialogDescription>
+                    Bạn có chắc chắn muốn xóa {Object.keys(rowSelection).length} danh mục đã chọn? Hành động này không thể
+                    hoàn tác.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setBulkDeleteOpen(false)}>
+                    Hủy
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    onClick={handleBulkDelete}
+                    disabled={bulkDeleteMutation.isPending}
+                  >
+                    {bulkDeleteMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {bulkDeleteMutation.isPending ? 'Đang xoá...' : 'Xóa'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
-        <Button asChild>
-          <Link href="/admin/categories/create">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Thêm danh mục
-          </Link>
-        </Button>
-      </div>
-    </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Không có dữ liệu nào để hiển thị.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="flex items-center justify-between">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} hàng
-          được chọn.
+        <div className="flex flex-col md:flex-row w-full md:w-auto gap-4 md:gap-2">
+          <div className="relative w-full md:w-[300px]">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Tìm kiếm danh mục..."
+              className="pl-8 w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Button asChild>
+            <Link href="/admin/categories/create">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Thêm danh mục
+            </Link>
+          </Button>
         </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+      </div>
+      
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : isError ? (
+        <div className="flex justify-center items-center h-64">
+          <p className="text-destructive">Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.</p>
+        </div>
+      ) : (
+        <>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => {
+                      return (
+                        <TableHead key={header.id}>
+                          {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                        </TableHead>
+                      )
+                    })}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                      Không có dữ liệu nào để hiển thị.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+          <p className="text-sm font-medium">Số hàng mỗi trang</p>
+          <select
+            value={queryParams.limit}
+            onChange={(e) => {
+              const newLimit = Number(e.target.value);
+              setQueryParams(prev => ({ ...prev, limit: newLimit, page: 1 }));
+            }}
+            className="h-8 w-[70px] rounded-md border border-input bg-background px-2 py-1 text-sm"
           >
-            Trước
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-            Sau
-          </Button>
+            {[5, 10, 20, 30, 50].map((pageSize) => (
+              <option key={pageSize} value={pageSize}>
+                {pageSize}
+              </option>
+            ))}
+          </select>
         </div>
-      </div>
+            <div className="flex items-center space-x-2">
+              {/* <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setQueryParams(prev => ({ ...prev, page: prev.page! - 1 }));
+                }}
+                disabled={pagination.page <= 1}
+              >
+                Trước
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Trang {pagination.page} / {pagination.totalPages}
+              </span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  setQueryParams(prev => ({ ...prev, page: prev.page! + 1 }));
+                }}
+                disabled={pagination.page >= pagination.totalPages}
+              >
+                Sau
+              </Button> */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setQueryParams(prev => ({ ...prev, page: prev.page! - 1 }));
+                }}
+                disabled={pagination.page <= 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <EllipsisPagination 
+                currentPage={queryParams.page}
+                totalPages={pagination.totalPages}
+                onPageChange={(page) => setQueryParams(prev => ({...prev, page }))}
+              />
+               <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  setQueryParams(prev => ({ ...prev, page: prev.page! + 1 }));
+                }}
+                disabled={pagination.page >= pagination.totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }

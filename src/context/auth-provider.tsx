@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     
     try {
-      const { data } = await api.get('/users/profile');
+      const { data } = await api.get('/api/users/profile');
       setUser(data);
     } catch (error) {
       console.error('Tải dữ liệu người dùng thất bại:', error);
@@ -70,7 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     try {
       setLoading(true);
-      const { data } = await api.post<LoginResponse>('/auth/login', {
+      const { data } = await api.post<LoginResponse>('/api/auth/login', {
         email,
         mat_khau: password,
       });
@@ -90,7 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (userData: RegisterData) => {
     try {
       setLoading(true);
-      await api.post('/auth/register', userData);
+      await api.post('/api/auth/register', userData);
       toast.success('Đăng kí thành công! Vui lòng vào email để xác thực.');
       setLoading(false);
       router.push('/auth/login');
@@ -104,7 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
-      await api.post('/auth/logout');
+      await api.post('/api/auth/logout');
     } catch (error) {
       console.error('Lỗi đăng xuất:', error);
     } finally {
@@ -118,7 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const forgotPassword = async (email: string) => {
     try {
       setLoading(true);
-      await api.post('/auth/forgot-password', { email });
+      await api.post('/api/auth/forgot-password', { email });
       toast.success('Đường dẫn cài lại mật khẩu đã được gửi qua email của bạn.');
       setLoading(false);
       router.push('/auth/login');
@@ -133,7 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const resetPassword = async (token: string, password: string) => {
     try {
       setLoading(true);
-      await api.post(`/auth/reset-password/${token}`, { mat_khau: password });
+      await api.post(`/api/auth/reset-password/${token}`, { mat_khau: password });
       toast.success('Cài lại mật khảu thành công! Bây giờ bạn có thể đăng nhập với mật khảu mới.');
       setLoading(false);
       router.push('/auth/login');
@@ -174,7 +174,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const verifyEmail = useCallback(async (token: string) => {
     try {
       setLoading(true);
-      await api.get(`/auth/verify-email/${token}`);
+      await api.get(`/api/auth/verify-email/${token}`);
       toast.success('Xác thực email thành công! Bạn có thể đăng nhập ngay bây giờ.');
       setLoading(false);
       router.push('/auth/login');
@@ -187,7 +187,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   },[router]);
 
   const googleLogin = () => {
-    window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/google`;
+    window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/google`;
   };
 
   return (
