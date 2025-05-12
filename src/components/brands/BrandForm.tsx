@@ -12,16 +12,16 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import toast from "react-hot-toast"
-import { brandFormSchema } from "@/lib/validations/brand.validator"
+import { thuongHieuFormSchema } from "@/lib/validations/brand.validator"
 
-type BrandFormValues = z.infer<typeof brandFormSchema>
+type BrandFormValues = z.infer<typeof thuongHieuFormSchema>
 
 export default function BrandForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
 
   const form = useForm<BrandFormValues>({
-    resolver: zodResolver(brandFormSchema),
+    resolver: zodResolver(thuongHieuFormSchema),
     defaultValues: {
       ten: "",
       mota: "",

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const brandFormSchema = z.object({
+export const thuongHieuFormSchema = z.object({
   ten: z
     .string()
     .min(2, {
