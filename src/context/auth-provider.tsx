@@ -19,6 +19,7 @@ interface AuthContextType {
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   verifyEmail: (token: string) => Promise<void>;
   googleLogin: () => void;
+  isAdmin: () => boolean;
 }
 
 interface RegisterData {
@@ -39,9 +40,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
-
+  const isAdmin = () => {
+    return user?.vai_tro === 'admin';
+  };
   const loadUser = useCallback(async () => {
     setLoading(true);
     const accessToken = Cookies.get('accessToken');
@@ -54,6 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data } = await api.get('/api/users/profile');
       setUser(data);
+      setLoading(false);
     } catch (error) {
       console.error('Tải dữ liệu người dùng thất bại:', error);
       // Don't clear tokens here as the interceptor will handle token refresh
@@ -205,6 +209,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         changePassword,
         verifyEmail,
         googleLogin,
+        isAdmin,
       }}
     >
       {children}

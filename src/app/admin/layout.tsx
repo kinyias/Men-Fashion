@@ -1,5 +1,6 @@
 'use client';
 
+import AdminRoute from '@/components/layouts/AdminRoute';
 import DashboardSideBar from '@/components/layouts/DashboardSideBar';
 import HeaderDashboard from '@/components/layouts/HeaderDashboard';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
@@ -14,6 +15,7 @@ export default function DashboardLayout({
   return (
     <div className="flex min-h-screen flex-col">
       <AuthProvider>
+      <AdminRoute>
       <SidebarProvider>
       <DashboardSideBar />
       <SidebarInset>
@@ -27,6 +29,7 @@ export default function DashboardLayout({
         </main>
         </SidebarInset>
         </SidebarProvider>
+    </AdminRoute>
       </AuthProvider>
     </div>
   );
