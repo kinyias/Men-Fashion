@@ -1,14 +1,18 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Trash2, Plus, Upload, X } from "lucide-react"
+import { useRouter, useParams } from "next/navigation"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import toast from "react-hot-toast"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Label } from "@/components/ui/label"
@@ -23,351 +27,567 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { SimpleEditor } from "../tiptap/tiptap-templates/simple/simple-editor"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { createProduct, getProductById, updateProduct } from "@/lib/api/api-products"
+import { getCategories } from "@/lib/api/api-categories"
+import { getSubCategories } from "@/lib/api/api-sub-categories"
+import { getBrands } from "@/lib/api/api-brands"
+import { getColors } from "@/lib/api/api-colors"
+import { getSizes } from "@/lib/api/api-sizes"
+import { LoaiSanPham } from "@/types"
+import { Loader2 } from "lucide-react"
+import { Progress } from "@/components/ui/progress"
 import Image from "next/image"
-
-// Schema matches the Products table
+// Schema for SanPham
 const productFormSchema = z.object({
-  name: z.string().min(2, {
-    message: "Tên sản phẩm phải có ít nhất 2 kí tự.",
+  ten: z.string().min(2, {
+    message: "Tên sản phẩm phải có ít nhất 2 ký tự.",
   }),
-  description: z.string().min(10, {
-    message: "Mô tả phải có ít nhất 10 kí tự.",
+  mota: z.string().optional(),
+  giaban: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+    message: "Giá bán phải là số dương.",
   }),
-  base_price: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-    message: "Giá phải là số dương.",
-  }),
-  sale_price: z.string().optional(),
-  category_id: z.string({
+  giagiam: z.string().optional(),
+  hinhanh: z.string().optional(),
+  noibat: z.boolean(),
+  trangthai: z.boolean(),
+  madanhmuc: z.string({
     required_error: "Vui lòng chọn danh mục.",
   }),
-  brand_id: z.string({
+  maloaisanpham: z.string({
+    required_error: "Vui lòng chọn loại sản phẩm.",
+  }),
+  mathuonghieu: z.string({
     required_error: "Vui lòng chọn thương hiệu.",
   }),
-  is_active: z.boolean(),
 })
 
 type ProductFormValues = z.infer<typeof productFormSchema>
 
-// Sample data for categories and brands
-const categories = [
-  { id: "1", name: "T-Shirts" },
-  { id: "2", name: "Jeans" },
-  { id: "3", name: "Dresses" },
-  { id: "4", name: "Jackets" },
-  { id: "5", name: "Shoes" },
-]
-
-const brands = [
-  { id: "1", name: "Fashion Brand A" },
-  { id: "2", name: "Fashion Brand B" },
-  { id: "3", name: "Fashion Brand C" },
-  { id: "4", name: "Fashion Brand D" },
-]
-
-// Sample data for colors
-const sampleColors = [
-  { id: "1", name: "Black", hex: "#000000" },
-  { id: "2", name: "White", hex: "#FFFFFF" },
-  { id: "3", name: "Navy Blue", hex: "#000080" },
-  { id: "4", name: "Red", hex: "#FF0000" },
-  { id: "5", name: "Green", hex: "#008000" },
-  { id: "6", name: "Yellow", hex: "#FFFF00" },
-  { id: "7", name: "Purple", hex: "#800080" },
-  { id: "8", name: "Pink", hex: "#FFC0CB" },
-  { id: "9", name: "Gray", hex: "#808080" },
-  { id: "10", name: "Brown", hex: "#A52A2A" },
-  { id: "11", name: "Orange", hex: "#FFA500" },
-  { id: "12", name: "Teal", hex: "#008080" },
-]
-
-// Sample data for sizes
-const sampleSizes = [
-  { id: "1", name: "XS", code: "XS" },
-  { id: "2", name: "S", code: "S" },
-  { id: "3", name: "M", code: "M" },
-  { id: "4", name: "L", code: "L" },
-  { id: "5", name: "XL", code: "XL" },
-  { id: "6", name: "XXL", code: "XXL" },
-  { id: "7", name: "28", code: "W28" },
-  { id: "8", name: "30", code: "W30" },
-  { id: "9", name: "32", code: "W32" },
-  { id: "10", name: "34", code: "W34" },
-  { id: "11", name: "36", code: "W36" },
-  { id: "12", name: "38", code: "W38" },
-]
-
-// Interface for ProductColors
-interface ProductColor {
-  color_id: string
-  color_name: string
-  color_hex: string
-  is_available: boolean
-  images: ProductImage[]
+// Interface for MauSac with images (HinhAnhMauSac)
+interface MauSacWithImages {
+  ma: number
+  ten: string
+  ma_mau: string
+  hinhAnhs: HinhAnhMauSac[]
 }
 
-// Interface for ProductImages
-interface ProductImage {
-  image_id: string
-  image_url: string
-  is_primary: boolean
-  sort_order: number
+// Interface for HinhAnhMauSac
+interface HinhAnhMauSac {
+  ma: number
+  hinhAnh: string
+  anhChinh: boolean
+  mamausac: number,
+  masp: number,
 }
 
-// Interface for ProductSizes
-interface ProductSize {
-  size_id: string
-  size_name: string
-  size_code: string
-  stock_quantity: number
+// Interface for BienThe
+interface BienThe {
+  ma: number
+  gia: string
+  soluong: number
+  msp: number
+  mamausac: number
+  makichco: number
 }
-
-// Interface for ProductColorSizes (inventory matrix)
-interface ProductColorSize {
-  color_id: string
-  size_id: string
-  sku: string
-  price: string
-  stock_quantity: number
+export interface CreateSanPhamData {
+  ten: string;
+  mota?: string;
+  giaban: number;
+  giagiam?: number;
+  hinhanh?: string;
+  noibat: boolean;
+  trangthai: boolean;
+  madanhmuc: number;
+  maloaisanpham: number;
+  mathuonghieu: number;
+  bienThes?: BienThe[];
+  mauSacs?: HinhAnhMauSac[];
 }
-
 export default function ProductForm() {
-  // State for ProductColors
-  const [colors, setColors] = useState<ProductColor[]>([])
+  const router = useRouter()
+  const params = useParams()
+  const queryClient = useQueryClient()
+  const productId = params?.id ? Number(params.id) : undefined
+  const isEditMode = !!productId
+  
+  // State for selected colors with images
+  const [selectedColors, setSelectedColors] = useState<MauSacWithImages[]>([])
 
-  // State for ProductSizes
-  const [sizes, setSizes] = useState<ProductSize[]>([])
+  // State for selected sizes
+  const [selectedSizes, setSelectedSizes] = useState<{ ma: number; ten: string }[]>([])
 
-  // State for ProductColorSizes (inventory matrix)
-  const [inventory, setInventory] = useState<ProductColorSize[]>([])
+  // State for variants (BienThe)
+  const [variants, setVariants] = useState<BienThe[]>([])
+
+  // State for filtered sub-categories based on selected category
+  const [filteredSubCategories, setFilteredSubCategories] = useState<LoaiSanPham[]>([])
 
   // State for color selection dialog
   const [colorDialogOpen, setColorDialogOpen] = useState(false)
-  const [selectedColorIds, setSelectedColorIds] = useState<string[]>([])
+  const [selectedColorIds, setSelectedColorIds] = useState<number[]>([])
 
   // State for size selection dialog
   const [sizeDialogOpen, setSizeDialogOpen] = useState(false)
-  const [selectedSizeIds, setSelectedSizeIds] = useState<string[]>([])
+  const [selectedSizeIds, setSelectedSizeIds] = useState<number[]>([])
+  
+  // State for upload progress
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [isUploading, setIsUploading] = useState(false)
+  
+  // Fetch product data if in edit mode
+  const { data: product, isLoading: isLoadingProduct } = useQuery({
+    queryKey: ['product', productId],
+    queryFn: () => getProductById(productId!),
+    enabled: isEditMode,
+  })
+  
+  // Fetch categories, brands, etc.
+  const { data: categoriesData } = useQuery({
+    queryKey: ['categories-dropdown'],
+    queryFn: () => getCategories({ page: 1, limit: 100 }),
+  })
+  
+  const { data: brandsData } = useQuery({
+    queryKey: ['brands-dropdown'],
+    queryFn: () => getBrands({ page: 1, limit: 100 }),
+  })
+  
+  const { data: colorsData } = useQuery({
+    queryKey: ['colors-dropdown'],
+    queryFn: () => getColors({ page: 1, limit: 100 }),
+  })
+  
+  const { data: sizesData } = useQuery({
+    queryKey: ['sizes-dropdown'],
+    queryFn: () => getSizes({ page: 1, limit: 100 }),
+  })
+  const createMutation = useMutation({
+    mutationFn: (data: CreateSanPhamData) => createProduct(data),
+    onSuccess: () => {
+      toast.success('Tạo sản phẩm thành công')
+      // router.push('/admin/products')
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+    },
+    onError: (error) => {
+      console.error("Error creating product:", error)
+      toast.error('Tạo sản phẩm thất bại')
+    }
+  })
+  
+  // Update product mutation
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number, data: CreateSanPhamData }) => 
+      updateProduct(id, data),
+    onSuccess: () => {
+      toast.success('Cập nhật sản phẩm thành công')
+      router.push('/admin/products')
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: ['product', productId] })
+    },
+    onError: (error) => {
+      console.error("Error updating product:", error)
+      toast.error('Cập nhật sản phẩm thất bại')
+    }
+  })
+
+  const isSubmitting = createMutation.isPending || updateMutation.isPending
+  // Use real data if available, otherwise use sample data
+  const danhMucs =  useMemo(() =>categoriesData?.data || [] , [categoriesData?.data])
+  const thuongHieus =  useMemo(() =>brandsData?.data || [] , [brandsData?.data])
+  
+  // Wrap in useMemo to prevent unnecessary re-renders
+  const realMauSacs = useMemo(() => colorsData?.data || [], [colorsData?.data])
+  const realKichCos = useMemo(() => sizesData?.data || [], [sizesData?.data])
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
-      name: "",
-      description: "",
-      base_price: "",
-      sale_price: "",
-      category_id: "",
-      brand_id: "",
-      is_active: true,
+      ten: "",
+      mota: "",
+      giaban: "",
+      giagiam: "",
+      hinhanh: "",
+      noibat: false,
+      trangthai: true,
+      madanhmuc: "",
+      maloaisanpham: "",
+      mathuonghieu: "",
     },
   })
 
-  function onSubmit(data: ProductFormValues) {
-    // In a real application, you would send this data to your API
-    console.log("Form submitted:", data)
-    console.log("Colors:", colors)
-    console.log("Sizes:", sizes)
-    console.log("Inventory:", inventory)
+  // Load product data into form when in edit mode
+  useEffect(() => {
+    if (product && isEditMode) {
+      form.reset({
+        ten: product.ten,
+        mota: product.mota || "",
+        giaban: product.giaban.toString(),
+        giagiam: product.giagiam ? product.giagiam.toString() : "",
+        hinhanh: product.hinhanh || "",
+        noibat: product.noibat,
+        trangthai: product.trangthai,
+        madanhmuc: product.madanhmuc.toString(),
+        maloaisanpham: product.maloaisanpham.toString(),
+        mathuonghieu: product.mathuonghieu.toString(),
+      })
+      
+      // Load colors, sizes, and variants
+      if (product.bienThes && product.bienThes.length > 0) {
+        // Extract unique colors and sizes from variants
+        const uniqueColorIds = [...new Set(product.bienThes.map(bt => bt.mamausac))]
+        const uniqueSizeIds = [...new Set(product.bienThes.map(bt => bt.makichco))]
+        
+        // Set selected colors
+        const productColors = uniqueColorIds.map(colorId => {
+          const color = realMauSacs.find(c => c.ma === colorId)
+          if (!color) return null
+          
+          // Get images for this color
+          const colorImages = product.hinhAnhMauSacs?.[colorId] || []
+          
+          return {
+            ma: color.ma,
+            ten: color.ten,
+            ma_mau: color.ma_mau,
+            hinhAnhs: colorImages.map(img => ({
+              ma: img.ma,
+              hinhAnh: img.hinhAnh,
+              anhChinh: img.anhChinh
+            }))
+          }
+        }).filter(Boolean) as MauSacWithImages[]
+        
+        setSelectedColors(productColors)
+        
+        // Set selected sizes
+        const productSizes = uniqueSizeIds.map(sizeId => {
+          const size = realKichCos.find(s => s.ma === sizeId)
+          if (!size) return null
+          return {
+            ma: size.ma,
+            ten: size.ten
+          }
+        }).filter(Boolean) as { ma: number; ten: string }[]
+        
+        setSelectedSizes(productSizes)
+        
+        // Set variants
+        setVariants(product.bienThes.map(bt => ({
+          ma: bt.ma,
+          gia: bt.gia.toString(),
+          soluong: bt.soluong,
+          msp: bt.msp,
+          mamausac: bt.mamausac,
+          makichco: bt.makichco
+        })))
+      }
+    }
+  }, [product, isEditMode, form, realMauSacs, realKichCos])
 
-    // Show success message
-    alert("Product created successfully!")
-  }
+  // Watch for category changes to filter sub-categories
+  const selectedCategoryId = form.watch("madanhmuc")
+
+  useEffect(() => {
+    if (selectedCategoryId) {
+      const categoryId = Number.parseInt(selectedCategoryId)
+      
+      // Fetch sub-categories for the selected category
+      getSubCategories({ madanhmuc: categoryId, page: 1, limit: 100 })
+        .then(response => {
+          setFilteredSubCategories(response.data)
+          form.setValue("maloaisanpham", "")
+        })
+        .catch(error => {
+          console.error("Error fetching sub-categories:", error)
+          setFilteredSubCategories([])
+        })
+    }
+  }, [selectedCategoryId, form])
 
   // Function to add selected colors
   const addSelectedColors = () => {
     const newColors = selectedColorIds
-      .filter((id) => !colors.some((color) => color.color_id === id))
+      .filter((id) => !selectedColors.some((color) => color.ma === id))
       .map((id) => {
-        const sampleColor = sampleColors.find((color) => color.id === id)!
+        const color = realMauSacs.find((color) => color.ma === id)!
         return {
-          color_id: sampleColor.id,
-          color_name: sampleColor.name,
-          color_hex: sampleColor.hex,
-          is_available: true,
-          images: [],
+          ma: color.ma,
+          ten: color.ten,
+          ma_mau: color.ma_mau,
+          hinhAnhs: [],
         }
       })
 
     if (newColors.length > 0) {
-      const updatedColors = [...colors, ...newColors]
-      setColors(updatedColors)
+      const updatedColors = [...selectedColors, ...newColors]
+      setSelectedColors(updatedColors)
 
-      // Update inventory for new colors
-      const newInventoryItems = newColors.flatMap((color) =>
-        sizes.map((size) => ({
-          color_id: color.color_id,
-          size_id: size.size_id,
-          sku: `${color.color_name.substring(0, 3).toUpperCase()}-${size.size_name}-${Math.floor(Math.random() * 1000)}`,
-          price: "",
-          stock_quantity: 0,
+      // Update variants for new colors
+      const newVariants = newColors.flatMap((color) =>
+        selectedSizes.map((size) => ({
+          ma: Math.floor(Math.random() * 10000), // Temporary ID for UI
+          gia: form.getValues("giaban"),
+          soluong: 0,
+          msp: 0, // Will be set after product creation
+          mamausac: color.ma,
+          makichco: size.ma,
         })),
       )
 
-      setInventory([...inventory, ...newInventoryItems])
+      setVariants([...variants, ...newVariants])
     }
 
     setColorDialogOpen(false)
+    setSelectedColorIds([])
   }
 
   // Function to add selected sizes
   const addSelectedSizes = () => {
     const newSizes = selectedSizeIds
-      .filter((id) => !sizes.some((size) => size.size_id === id))
+      .filter((id) => !selectedSizes.some((size) => size.ma === id))
       .map((id) => {
-        const sampleSize = sampleSizes.find((size) => size.id === id)!
+        const size = realKichCos.find((size) => size.ma === id)!
         return {
-          size_id: sampleSize.id,
-          size_name: sampleSize.name,
-          size_code: sampleSize.code,
-          stock_quantity: 0,
+          ma: size.ma,
+          ten: size.ten,
         }
       })
 
     if (newSizes.length > 0) {
-      const updatedSizes = [...sizes, ...newSizes]
-      setSizes(updatedSizes)
+      const updatedSizes = [...selectedSizes, ...newSizes]
+      setSelectedSizes(updatedSizes)
 
-      // Update inventory for new sizes
-      const newInventoryItems = newSizes.flatMap((size) =>
-        colors.map((color) => ({
-          color_id: color.color_id,
-          size_id: size.size_id,
-          sku: `${color.color_name.substring(0, 3).toUpperCase()}-${size.size_name}-${Math.floor(Math.random() * 1000)}`,
-          price: "",
-          stock_quantity: 0,
+      // Update variants for new sizes
+      const newVariants = newSizes.flatMap((size) =>
+        selectedColors.map((color) => ({
+          ma: Math.floor(Math.random() * 10000), // Temporary ID for UI
+          gia: form.getValues("giaban"),
+          soluong: 0,
+          msp: 0, // Will be set after product creation
+          mamausac: color.ma,
+          makichco: size.ma,
         })),
       )
 
-      setInventory([...inventory, ...newInventoryItems])
+      setVariants([...variants, ...newVariants])
     }
 
     setSizeDialogOpen(false)
+    setSelectedSizeIds([])
   }
 
   // Function to remove a color
-  const removeColor = (colorId: string) => {
-    setColors(colors.filter((color) => color.color_id !== colorId))
-    // Also remove from inventory
-    setInventory(inventory.filter((item) => item.color_id !== colorId))
+  const removeColor = (colorId: number) => {
+    setSelectedColors(selectedColors.filter((color) => color.ma !== colorId))
+    // Also remove from variants
+    setVariants(variants.filter((variant) => variant.mamausac !== colorId))
   }
 
   // Function to remove a size
-  const removeSize = (sizeId: string) => {
-    setSizes(sizes.filter((size) => size.size_id !== sizeId))
-    // Also remove from inventory
-    setInventory(inventory.filter((item) => item.size_id !== sizeId))
+  const removeSize = (sizeId: number) => {
+    setSelectedSizes(selectedSizes.filter((size) => size.ma !== sizeId))
+    // Also remove from variants
+    setVariants(variants.filter((variant) => variant.makichco !== sizeId))
   }
 
-  // Functions for managing images
-  const addImage = (colorId: string, imageUrl: string) => {
-    setColors(
-      colors.map((color) => {
-        if (color.color_id === colorId) {
-          const newImages = [...color.images]
-          const newImageId = (newImages.length + 1).toString()
+  // Function to add image to a color
+  const addImageToColor = (colorId: number, imageUrl: string) => {
+    setSelectedColors(
+      selectedColors.map((color) => {
+        if (color.ma === colorId) {
+          const newImages = [...color.hinhAnhs]
+          const newImageId = Math.floor(Math.random() * 10000) // Temporary ID for UI
           newImages.push({
-            image_id: newImageId,
-            image_url: imageUrl,
-            is_primary: newImages.length === 0, // First image is primary
-            sort_order: newImages.length,
+            ma: newImageId,
+            hinhAnh: imageUrl,
+            anhChinh: newImages.length === 0, // First image is primary
+            mamausac: color.ma,
+            masp: 0, // Will be set after product creation
           })
-          return { ...color, images: newImages }
+          return { ...color, hinhAnhs: newImages }
         }
         return color
       }),
     )
   }
 
-  const removeImage = (colorId: string, imageId: string) => {
-    setColors(
-      colors.map((color) => {
-        if (color.color_id === colorId) {
-          const newImages = color.images.filter((img) => img.image_id !== imageId)
+  // Function to remove image from a color
+  const removeImageFromColor = (colorId: number, imageId: number) => {
+    setSelectedColors(
+      selectedColors.map((color) => {
+        if (color.ma === colorId) {
+          const newImages = color.hinhAnhs.filter((img) => img.ma !== imageId)
           // If we removed the primary image, make the first one primary
-          if (newImages.length > 0 && !color.images.find((img) => img.image_id === imageId)?.is_primary) {
-            newImages[0].is_primary = true
+          if (newImages.length > 0 && !color.hinhAnhs.find((img) => img.ma === imageId)?.anhChinh) {
+            newImages[0].anhChinh = true
           }
-          return { ...color, images: newImages }
+          return { ...color, hinhAnhs: newImages }
         }
         return color
       }),
     )
   }
 
-  const setPrimaryImage = (colorId: string, imageId: string) => {
-    setColors(
-      colors.map((color) => {
-        if (color.color_id === colorId) {
-          const newImages = color.images.map((img) => ({
+  // Function to set primary image for a color
+  const setPrimaryImage = (colorId: number, imageId: number) => {
+    setSelectedColors(
+      selectedColors.map((color) => {
+        if (color.ma === colorId) {
+          const newImages = color.hinhAnhs.map((img) => ({
             ...img,
-            is_primary: img.image_id === imageId,
+            anhChinh: img.ma === imageId,
           }))
-          return { ...color, images: newImages }
+          return { ...color, hinhAnhs: newImages }
         }
         return color
       }),
     )
   }
 
-  // Function for updating color availability
-//   const updateColorAvailability = (colorId: string, isAvailable: boolean) => {
-//     setColors(colors.map((color) => (color.color_id === colorId ? { ...color, is_available: isAvailable } : color)))
-//   }
-
-  // Function for updating size stock quantity
-//   const updateSizeStock = (sizeId: string, stockQuantity: number) => {
-//     setSizes(sizes.map((size) => (size.size_id === sizeId ? { ...size, stock_quantity: stockQuantity } : size)))
-//   }
-
-  // Function for managing inventory
-  const updateInventoryItem = (colorId: string, sizeId: string, data: Partial<ProductColorSize>) => {
-    setInventory((prev) =>
-      prev.map((item) => (item.color_id === colorId && item.size_id === sizeId ? { ...item, ...data } : item)),
+  // Function to update variant price and quantity
+  const updateVariant = (colorId: number, sizeId: number, data: { gia?: string; soluong?: number }) => {
+    setVariants(
+      variants.map((variant) => {
+        if (variant.mamausac === colorId && variant.makichco === sizeId) {
+          return { ...variant, ...data }
+        }
+        return variant
+      }),
     )
   }
 
-  const getInventoryItem = (colorId: string, sizeId: string) => {
+  // Function to get variant by color and size
+  const getVariant = (colorId: number, sizeId: number) => {
     return (
-      inventory.find((item) => item.color_id === colorId && item.size_id === sizeId) || {
-        color_id: colorId,
-        size_id: sizeId,
-        sku: "",
-        price: "",
-        stock_quantity: 0,
+      variants.find((variant) => variant.mamausac === colorId && variant.makichco === sizeId) || {
+        ma: 0,
+        gia: form.getValues("giaban"),
+        soluong: 0,
+        msp: 0,
+        mamausac: colorId,
+        makichco: sizeId,
       }
     )
   }
 
   // Image upload handling
-  const handleImageUpload = (colorId: string, files: FileList | null) => {
+  const handleImageUpload = async (colorId: number, files: FileList | null) => {
     if (!files) return
+    
+    setIsUploading(true)
+    setUploadProgress(0)
+    
+    try {
+      for (const file of Array.from(files)) {
+        // Simulate progress updates
+        const progressInterval = setInterval(() => {
+          setUploadProgress(prev => {
+            if (prev >= 90) {
+              clearInterval(progressInterval)
+              return prev
+            }
+            return prev + 10
+          })
+        }, 200)
+        
+        const formData = new FormData()
+        formData.append('file', file)
+        
+        const response = await fetch('/api/cloudinary', {
+          method: 'POST',
+          body: formData,
+        })
+        
+        clearInterval(progressInterval)
+        
+        if (!response.ok) {
+          throw new Error('Failed to upload image')
+        }
+        
+        setUploadProgress(100)
+        const data = await response.json()
+        addImageToColor(colorId, data.secure_url)
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      toast.error('Lỗi khi tải ảnh lên')
+    } finally {
+      setIsUploading(false)
+      setUploadProgress(0)
+    }
+  }
 
-    Array.from(files).forEach((file) => {
-      // In a real app, you would upload these to a storage service
-      // For this example, we'll just create object URLs
-      const imageUrl = URL.createObjectURL(file)
-      addImage(colorId, imageUrl)
-    })
+  function onSubmit(data: ProductFormValues) {
+    // Validate that at least one color and size is selected
+    if (selectedColors.length === 0) {
+      alert("Vui lòng chọn ít nhất một màu sắc")
+      return
+    }
+
+    if (selectedSizes.length === 0) {
+      alert("Vui lòng chọn ít nhất một kích cỡ")
+      return
+    }
+
+    // Validate that all colors have at least one image
+    const colorsWithoutImages = selectedColors.filter((color) => color.hinhAnhs.length === 0)
+    if (colorsWithoutImages.length > 0) {
+      alert(`Vui lòng thêm ít nhất một hình ảnh cho màu: ${colorsWithoutImages.map((c) => c.ten).join(", ")}`)
+      return
+    }
+
+    // In a real application, you would send this data to your API
+    const productData: CreateSanPhamData = {
+      ...data,
+      madanhmuc: Number.parseInt(data.madanhmuc),
+      maloaisanpham: Number.parseInt(data.maloaisanpham),
+      mathuonghieu: Number.parseInt(data.mathuonghieu),
+      giaban: Number.parseFloat(data.giaban),
+      giagiam: data.giagiam ? Number.parseFloat(data.giagiam) : undefined,
+      bienThes: variants,
+      mauSacs: selectedColors.flatMap(mauSac => mauSac.hinhAnhs),
+    }
+
+    console.log("Sản phẩm:", productData)
+    console.log("Màu sắc:", selectedColors)
+    console.log("Kích cỡ:", selectedSizes)
+    console.log("Biến thể:", variants)
+
+    // Submit based on mode
+    if (isEditMode && productId) {
+      updateMutation.mutate({ id: productId, data: productData })
+    } else {
+      createMutation.mutate(productData)
+    }
   }
 
   return (
+    <>
+    {isLoadingProduct ? (
+      <div className="flex h-[50vh] w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2 text-lg font-medium">Đang tải dữ liệu sản phẩm...</span>
+      </div>
+    ) : (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
-        {/* Products Table Section */}
+        {/* SanPham Section */}
         <Card>
           <CardHeader>
             <CardTitle>Thông tin sản phẩm</CardTitle>
+            <CardDescription>Nhập thông tin cơ bản của sản phẩm</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <FormField
                 control={form.control}
-                name="name"
+                name="ten"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Tên sản phẩm</FormLabel>
                     <FormControl>
-                      <Input placeholder="Áo thun cổ điển" {...field} />
+                      <Input placeholder="Áo thun cotton" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -377,12 +597,12 @@ export default function ProductForm() {
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="base_price"
+                  name="giaban"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Giá (đ)</FormLabel>
+                      <FormLabel>Giá bán (VNĐ)</FormLabel>
                       <FormControl>
-                        <Input type="number" min="0" step="1" placeholder="0" {...field} />
+                        <Input type="number" min="0" step="1000" placeholder="299000" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -391,14 +611,14 @@ export default function ProductForm() {
 
                 <FormField
                   control={form.control}
-                  name="sale_price"
+                  name="giagiam"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Giá giảm (đ)</FormLabel>
+                      <FormLabel>Giá giảm (VNĐ)</FormLabel>
                       <FormControl>
-                        <Input type="number" min="0" step="1" placeholder="0" {...field} />
+                        <Input type="number" min="0" step="1000" placeholder="199000" {...field} />
                       </FormControl>
-                      {/* <FormDescription>Tùy chọn</FormDescription> */}
+                      <FormDescription>Không bắt buộc</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -407,20 +627,20 @@ export default function ProductForm() {
 
               <FormField
                 control={form.control}
-                name="category_id"
+                name="madanhmuc"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Danh mục</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Chọn danh mục" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {categories.map((category) => (
-                          <SelectItem key={category.id} value={category.id}>
-                            {category.name}
+                        {danhMucs.map((category) => (
+                          <SelectItem key={category.ma} value={category.ma.toString()}>
+                            {category.ten}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -432,20 +652,47 @@ export default function ProductForm() {
 
               <FormField
                 control={form.control}
-                name="brand_id"
+                name="maloaisanpham"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Loại sản phẩm</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCategoryId}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue
+                            placeholder={selectedCategoryId ? "Chọn loại sản phẩm" : "Chọn danh mục trước"}
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {filteredSubCategories.map((subCategory) => (
+                          <SelectItem key={subCategory.ma} value={subCategory.ma.toString()}>
+                            {subCategory.ten}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="mathuonghieu"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Thương hiệu</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Chọn thương hiệu" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {brands.map((brand) => (
-                          <SelectItem key={brand.id} value={brand.id}>
-                            {brand.name}
+                        {thuongHieus.map((brand) => (
+                          <SelectItem key={brand.ma} value={brand.ma.toString()}>
+                            {brand.ten}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -457,82 +704,101 @@ export default function ProductForm() {
 
               <FormField
                 control={form.control}
-                name="description"
+                name="mota"
                 render={({ field }) => (
                   <FormItem className="md:col-span-2">
-                    <FormLabel>Mô tả</FormLabel>
+                    <FormLabel>Mô tả sản phẩm</FormLabel>
                     <FormControl>
-                       <div className="border">
-                       <SimpleEditor onChange={field.onChange} />
-                       </div>
+                      <Textarea placeholder="Nhập mô tả sản phẩm..." className="min-h-32" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="is_active"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">Trạng thái</FormLabel>
-                      <FormDescription>Ẩn/hiện sản phẩm</FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch checked={field.value} onCheckedChange={field.onChange} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+              <div className="flex flex-col gap-4 md:flex-row md:col-span-2">
+                <FormField
+                  control={form.control}
+                  name="noibat"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 flex-1">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Sản phẩm nổi bật</FormLabel>
+                        <FormDescription>Đánh dấu sản phẩm này là nổi bật trên trang chủ</FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="trangthai"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 flex-1">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Trạng thái</FormLabel>
+                        <FormDescription>Bật để hiển thị sản phẩm trên cửa hàng</FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* ProductColors Section */}
+        {/* MauSac Section */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Màu sắc</CardTitle>
+            <div>
+              <CardTitle>Màu sắc</CardTitle>
+              <CardDescription>Chọn các màu sắc có sẵn cho sản phẩm này</CardDescription>
+            </div>
             <Dialog open={colorDialogOpen} onOpenChange={setColorDialogOpen}>
               <DialogTrigger asChild>
                 <Button type="button" variant="outline" size="sm">
                   <Plus className="h-4 w-4 mr-2" />
-                    Thêm màu sắc
+                  Thêm màu sắc
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle>Chọn màu sắc</DialogTitle>
-                  <DialogDescription>Chọn màu sắc cho sản phẩm.</DialogDescription>
+                  <DialogDescription>Chọn các màu sắc có sẵn cho sản phẩm này.</DialogDescription>
                 </DialogHeader>
                 <div className="grid grid-cols-2 gap-4 py-4">
-                  {sampleColors.map((color) => {
-                    const isSelected = selectedColorIds.includes(color.id)
-                    const isAlreadyAdded = colors.some((c) => c.color_id === color.id)
+                  {realMauSacs.map((color) => {
+                    const isSelected = selectedColorIds.includes(color.ma)
+                    const isAlreadyAdded = selectedColors.some((c) => c.ma === color.ma)
 
                     return (
                       <div
-                        key={color.id}
+                        key={color.ma}
                         className={`flex items-center space-x-2 rounded-md border p-2 ${
                           isSelected ? "border-primary bg-primary/5" : ""
                         } ${isAlreadyAdded ? "opacity-50" : ""}`}
                       >
                         <Checkbox
-                          id={`color-${color.id}`}
+                          id={`color-${color.ma}`}
                           checked={isSelected}
                           onCheckedChange={(checked) => {
                             if (checked) {
-                              setSelectedColorIds([...selectedColorIds, color.id])
+                              setSelectedColorIds([...selectedColorIds, color.ma])
                             } else {
-                              setSelectedColorIds(selectedColorIds.filter((id) => id !== color.id))
+                              setSelectedColorIds(selectedColorIds.filter((id) => id !== color.ma))
                             }
                           }}
                           disabled={isAlreadyAdded}
                         />
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full border" style={{ backgroundColor: color.hex }}></div>
-                          <Label htmlFor={`color-${color.id}`}>{color.name}</Label>
+                          <div className="w-6 h-6 rounded-full border" style={{ backgroundColor: color.ma_mau }}></div>
+                          <Label htmlFor={`color-${color.ma}`}>{color.ten}</Label>
                         </div>
                       </div>
                     )
@@ -540,224 +806,208 @@ export default function ProductForm() {
                 </div>
                 <div className="flex justify-end">
                   <Button type="button" onClick={addSelectedColors}>
-                    Thêm
+                    Thêm màu đã chọn
                   </Button>
                 </div>
               </DialogContent>
             </Dialog>
           </CardHeader>
           <CardContent>
-            {colors.length === 0 ? (
+            {selectedColors.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                Chưa chọn màu sắc nào. Vui lòng nhấn &quot;Thêm màu sắc&quot; để chọn màu cho sản phẩm.
+                Chưa có màu sắc nào được chọn. Nhấn &quot;Thêm màu sắc&quot; để chọn màu cho sản phẩm này.
               </div>
             ) : (
-              <div className="space-y-6">
-                {colors.map((color) => (
-                  <div key={color.color_id} className="border rounded-lg p-6 space-y-6">
-                    <div className="flex flex-col md:flex-row gap-6">
-                      <div className="flex-1 space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className="w-6 h-6 rounded-full border"
-                              style={{ backgroundColor: color.color_hex }}
-                            ></div>
-                            <span className="font-medium">{color.color_name}</span>
-                          </div>
+              <Accordion type="multiple" className="space-y-4">
+                {selectedColors.map((color) => (
+                  <AccordionItem key={color.ma} value={`color-${color.ma}`} className="border rounded-lg">
+                    <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-full border" style={{ backgroundColor: color.ma_mau }}></div>
+                        <span className="font-medium">{color.ten}</span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-6 pb-4 pt-0">
+                      <div className="flex justify-end mb-4">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeColor(color.ma)}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Xóa màu này
+                        </Button>
+                      </div>
 
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeColor(color.color_id)}
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Xóa
-                          </Button>
+                      {/* HinhAnhMauSac Section */}
+                      <div className="mt-4">
+                        <h3 className="text-lg font-medium mb-4">Hình ảnh cho màu {color.ten}</h3>
+                        <div
+                          className="border-2 border-dashed rounded-lg p-4 text-center"
+                          onDragOver={(e) => e.preventDefault()}
+                          onDrop={(e) => {
+                            e.preventDefault()
+                            handleImageUpload(color.ma, e.dataTransfer.files)
+                          }}
+                        >
+                          <Label htmlFor={`file-upload-${color.ma}`} className="cursor-pointer">
+                            <div className="flex flex-col items-center justify-center py-4">
+                              <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                              <p className="text-sm font-medium">Kéo thả hình ảnh hoặc nhấn để chọn</p>
+                              <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF tối đa 5MB</p>
+                            </div>
+                            <Input
+                              id={`file-upload-${color.ma}`}
+                              type="file"
+                              accept="image/*"
+                              multiple
+                              className="hidden"
+                              onChange={(e) => handleImageUpload(color.ma, e.target.files)}
+                            />
+                            {isUploading && (
+    <div className="flex items-center gap-2">
+      <Progress value={uploadProgress} className="h-2 w-24" />
+      <span className="text-xs text-muted-foreground">{uploadProgress}%</span>
+    </div>
+  )}
+                          </Label>
                         </div>
 
-                        {/* <div className="flex items-center space-x-2">
-                          <Switch
-                            id={`available-${color.color_id}`}
-                            checked={color.is_available}
-                            onCheckedChange={(checked: boolean) => updateColorAvailability(color.color_id, checked)}
-                          />
-                          <Label htmlFor={`available-${color.color_id}`}>Available for purchase</Label>
-                        </div> */}
-                      </div>
-                    </div>
-
-                    {/* ProductImages Section */}
-                    <div className="mt-4">
-                      <h3 className="text-lg font-medium mb-4">Hình ảnh cho {color.color_name}</h3>
-                      <div
-                        className="border-2 border-dashed rounded-lg p-4 text-center"
-                        onDragOver={(e) => e.preventDefault()}
-                        onDrop={(e) => {
-                          e.preventDefault()
-                          handleImageUpload(color.color_id, e.dataTransfer.files)
-                        }}
-                      >
-                        <Label htmlFor={`file-upload-${color.color_id}`} className="cursor-pointer">
-                          <div className="flex flex-col items-center justify-center py-4">
-                            <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                            <p className="text-sm font-medium">Drag & drop images or click to browse</p>
-                            <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 5MB</p>
-                          </div>
-                          <Input
-                            id={`file-upload-${color.color_id}`}
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            className="hidden"
-                            onChange={(e) => handleImageUpload(color.color_id, e.target.files)}
-                          />
-                        </Label>
-                      </div>
-
-                      {color.images.length > 0 && (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                          {color.images.map((image) => (
-                            <div
-                              key={image.image_id}
-                              className={`relative group border rounded-md p-1 ${
-                                image.is_primary ? "ring-2 ring-primary" : "hover:bg-muted/50"
-                              }`}
-                            >
-                              <Image
-                                src={image.image_url || "/placeholder.svg"}
-                                alt={`Product ${color.color_name} - Image ${image.image_id}`}
-                                className="h-32 w-full object-cover rounded-md"
-                              />
-                              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 rounded-md">
-                                {!image.is_primary && (
+                        {color.hinhAnhs.length > 0 && (
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                            {color.hinhAnhs.map((image) => (
+                              <div
+                                key={image.ma}
+                                className={`relative group border rounded-md p-1 ${
+                                  image.anhChinh ? "ring-2 ring-primary" : "hover:bg-muted/50"
+                                }`}
+                              >
+                                <Image
+                                  src={image.hinhAnh || "/placeholder.svg"}
+                                  alt={`Sản phẩm ${color.ten} - Hình ${image.ma}`}
+                                  className="h-32 w-full object-cover rounded-md"
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 rounded-md">
+                                  {!image.anhChinh && (
+                                    <Button
+                                      type="button"
+                                      variant="secondary"
+                                      size="sm"
+                                      className="mr-2"
+                                      onClick={() => setPrimaryImage(color.ma, image.ma)}
+                                    >
+                                      Đặt làm ảnh chính
+                                    </Button>
+                                  )}
                                   <Button
                                     type="button"
-                                    variant="secondary"
-                                    size="sm"
-                                    className="mr-2"
-                                    onClick={() => setPrimaryImage(color.color_id, image.image_id)}
+                                    variant="destructive"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={() => removeImageFromColor(color.ma, image.ma)}
                                   >
-                                    Chọn làm ảnh đại diện
+                                    <X className="h-4 w-4" />
                                   </Button>
-                                )}
-                                <Button
-                                  type="button"
-                                  variant="destructive"
-                                  size="icon"
-                                  className="h-8 w-8"
-                                  onClick={() => removeImage(color.color_id, image.image_id)}
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
-                              </div>
-                              {image.is_primary && (
-                                <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
-                                  Ảnh đại điẹn
                                 </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                                {image.anhChinh && (
+                                  <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
+                                    Ảnh chính
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
                 ))}
-              </div>
+              </Accordion>
             )}
           </CardContent>
         </Card>
 
-        {/* ProductSizes Section */}
+        {/* KichCo Section */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Kích thước</CardTitle>
+            <div>
+              <CardTitle>Kích cỡ</CardTitle>
+              <CardDescription>Chọn các kích cỡ có sẵn cho sản phẩm này</CardDescription>
+            </div>
             <Dialog open={sizeDialogOpen} onOpenChange={setSizeDialogOpen}>
               <DialogTrigger asChild>
                 <Button type="button" variant="outline" size="sm">
                   <Plus className="h-4 w-4 mr-2" />
-                  Thêm kích thước
+                  Thêm kích cỡ
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Chọn kích thước</DialogTitle>
-                  <DialogDescription>Chọn kích thước cho sản phẩm.</DialogDescription>
+                  <DialogTitle>Chọn kích cỡ</DialogTitle>
+                  <DialogDescription>Chọn các kích cỡ có sẵn cho sản phẩm này.</DialogDescription>
                 </DialogHeader>
                 <div className="grid grid-cols-3 gap-4 py-4">
-                  {sampleSizes.map((size) => {
-                    const isSelected = selectedSizeIds.includes(size.id)
-                    const isAlreadyAdded = sizes.some((s) => s.size_id === size.id)
+                  {realKichCos.map((size) => {
+                    const isSelected = selectedSizeIds.includes(size.ma)
+                    const isAlreadyAdded = selectedSizes.some((s) => s.ma === size.ma)
 
                     return (
                       <div
-                        key={size.id}
+                        key={size.ma}
                         className={`flex items-center space-x-2 rounded-md border p-2 ${
                           isSelected ? "border-primary bg-primary/5" : ""
                         } ${isAlreadyAdded ? "opacity-50" : ""}`}
                       >
                         <Checkbox
-                          id={`size-${size.id}`}
+                          id={`size-${size.ma}`}
                           checked={isSelected}
                           onCheckedChange={(checked) => {
                             if (checked) {
-                              setSelectedSizeIds([...selectedSizeIds, size.id])
+                              setSelectedSizeIds([...selectedSizeIds, size.ma])
                             } else {
-                              setSelectedSizeIds(selectedSizeIds.filter((id) => id !== size.id))
+                              setSelectedSizeIds(selectedSizeIds.filter((id) => id !== size.ma))
                             }
                           }}
                           disabled={isAlreadyAdded}
                         />
-                        <Label htmlFor={`size-${size.id}`}>{size.name}</Label>
+                        <Label htmlFor={`size-${size.ma}`}>{size.ten}</Label>
                       </div>
                     )
                   })}
                 </div>
                 <div className="flex justify-end">
                   <Button type="button" onClick={addSelectedSizes}>
-                   Thêm kích thước đã chọn
+                    Thêm kích cỡ đã chọn
                   </Button>
                 </div>
               </DialogContent>
             </Dialog>
           </CardHeader>
           <CardContent>
-            {sizes.length === 0 ? (
+            {selectedSizes.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-               Chưa chọn kích thước nào. Vui lòng nhấn &quot;Thêm kích thước&quot; để chọn màu cho sản phẩm.
+                Chưa có kích cỡ nào được chọn. Nhấn &quot;Thêm kích cỡ&quot; để chọn kích cỡ cho sản phẩm này.
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {sizes.map((size) => (
-                  <Card key={size.size_id} className="relative">
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {selectedSizes.map((size) => (
+                  <Card key={size.ma} className="relative">
                     <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="font-medium">{size.size_name}</div>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="font-medium text-lg">{size.ten}</div>
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
                           className="h-8 w-8 p-0"
-                          onClick={() => removeSize(size.size_id)}
+                          onClick={() => removeSize(size.ma)}
                         >
                           <Trash2 className="h-4 w-4 text-red-500" />
                           <span className="sr-only">Xóa</span>
                         </Button>
                       </div>
-                      <div className="text-sm text-muted-foreground mb-4">Mã: {size.size_code}</div>
-                      {/* <Label htmlFor={`size-stock-${size.size_id}`} className="block mb-2">
-                        Default Stock Quantity
-                      </Label>
-                      <Input
-                        id={`size-stock-${size.size_id}`}
-                        type="number"
-                        min="0"
-                        value={size.stock_quantity}
-                        onChange={(e) => updateSizeStock(size.size_id, Number.parseInt(e.target.value) || 0)}
-                        placeholder="0"
-                      /> */}
                     </CardContent>
                   </Card>
                 ))}
@@ -766,86 +1016,71 @@ export default function ProductForm() {
           </CardContent>
         </Card>
 
-        {/* ProductColorSizes Section (Inventory Matrix) */}
-        {colors.length > 0 && sizes.length > 0 ? (
+        {/* BienThe Section (Inventory Matrix) */}
+        {selectedColors.length > 0 && selectedSizes.length > 0 ? (
           <Card>
             <CardHeader>
-              <CardTitle>Sô lượng</CardTitle>
+              <CardTitle>Quản lý tồn kho</CardTitle>
+              <CardDescription>Thiết lập giá và số lượng cho từng biến thể màu sắc/kích cỡ</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[100px]">Màu sắc / kích thước</TableHead>
-                      {sizes.map((size) => (
-                        <TableHead key={size.size_id}>{size.size_name}</TableHead>
+                      <TableHead className="w-[100px]">Màu / Kích cỡ</TableHead>
+                      {selectedSizes.map((size) => (
+                        <TableHead key={size.ma}>{size.ten}</TableHead>
                       ))}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {colors.map((color) => (
-                      <TableRow key={color.color_id}>
+                    {selectedColors.map((color) => (
+                      <TableRow key={color.ma}>
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: color.color_hex }} />
-                            {color.color_name}
+                            <div className="w-4 h-4 rounded-full" style={{ backgroundColor: color.ma_mau }} />
+                            {color.ten}
                           </div>
                         </TableCell>
 
-                        {sizes.map((size) => {
-                          const item = getInventoryItem(color.color_id, size.size_id)
+                        {selectedSizes.map((size) => {
+                          const variant = getVariant(color.ma, size.ma)
 
                           return (
-                            <TableCell key={size.size_id} className="p-2">
+                            <TableCell key={size.ma} className="p-2">
                               <div className="space-y-2">
-                                {/* <div>
-                                  <Label htmlFor={`sku-${color.color_id}-${size.size_id}`} className="text-xs">
-                                    SKU
+                                <div>
+                                  <Label htmlFor={`gia-${color.ma}-${size.ma}`} className="text-xs">
+                                    Giá (VNĐ)
                                   </Label>
                                   <Input
-                                    id={`sku-${color.color_id}-${size.size_id}`}
-                                    value={item.sku}
-                                    onChange={(e) =>
-                                      updateInventoryItem(color.color_id, size.size_id, { sku: e.target.value })
-                                    }
-                                    className="h-8 text-xs"
+                                    id={`gia-${color.ma}-${size.ma}`}
+                                    type="number"
+                                    min="0"
+                                    step="1000"
+                                    value={variant.gia}
+                                    onChange={(e) => updateVariant(color.ma, size.ma, { gia: e.target.value })}
+                                    className="h-8"
                                   />
-                                </div> */}
+                                </div>
 
-                                <div className="grid grid-cols-2 gap-2">
-                                  <div>
-                                    <Label htmlFor={`stock-${color.color_id}-${size.size_id}`} className="text-xs">
-                                      Số lượng
-                                    </Label>
-                                    <Input
-                                      id={`stock-${color.color_id}-${size.size_id}`}
-                                      type="number"
-                                      min="0"
-                                      value={item.stock_quantity}
-                                      onChange={(e) =>
-                                        updateInventoryItem(color.color_id, size.size_id, {
-                                          stock_quantity: Number.parseInt(e.target.value) || 0,
-                                        })
-                                      }
-                                      className="h-8"
-                                    />
-                                  </div>
-
-                                  <div>
-                                    <Label htmlFor={`price-${color.color_id}-${size.size_id}`} className="text-xs">
-                                      Giá (đ)
-                                    </Label>
-                                    <Input
-                                      id={`price-${color.color_id}-${size.size_id}`}
-                                      value={item.price}
-                                      onChange={(e) =>
-                                        updateInventoryItem(color.color_id, size.size_id, { price: e.target.value })
-                                      }
-                                      placeholder="Tùy chọn"
-                                      className="h-8"
-                                    />
-                                  </div>
+                                <div>
+                                  <Label htmlFor={`soluong-${color.ma}-${size.ma}`} className="text-xs">
+                                    Số lượng
+                                  </Label>
+                                  <Input
+                                    id={`soluong-${color.ma}-${size.ma}`}
+                                    type="number"
+                                    min="0"
+                                    value={variant.soluong}
+                                    onChange={(e) =>
+                                      updateVariant(color.ma, size.ma, {
+                                        soluong: Number.parseInt(e.target.value) || 0,
+                                      })
+                                    }
+                                    className="h-8"
+                                  />
                                 </div>
                               </div>
                             </TableCell>
@@ -859,22 +1094,33 @@ export default function ProductForm() {
             </CardContent>
           </Card>
         ) : (
-          colors.length > 0 && (
+          selectedColors.length > 0 && (
             <Card>
               <CardContent className="p-8 text-center text-muted-foreground">
-                Vui lòng thêm kích thước để tạo biến thể.
+                Vui lòng thêm kích cỡ để tạo bảng quản lý tồn kho.
               </CardContent>
             </Card>
           )
         )}
 
-        <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline">
-            Hủy
-          </Button>
-          <Button type="submit">Lưu</Button>
-        </div>
+<div className="flex justify-end gap-4">
+  <Button 
+    type="button" 
+    variant="outline" 
+    onClick={() => router.back()} 
+    disabled={isSubmitting}
+  >
+    Hủy
+  </Button>
+  <Button type="submit" disabled={isSubmitting}>
+    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+    {isSubmitting ? "Đang lưu..." : isEditMode ? "Cập nhật" : "Lưu"}
+  </Button>
+</div>
       </form>
     </Form>
+    )
+  }
+  </>
   )
 }

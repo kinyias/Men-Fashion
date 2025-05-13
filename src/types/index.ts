@@ -5,3 +5,4 @@ export * from './sub-category'
 export * from './brands';
 export * from './sizes';
 export * from './colors';
+export * from './product';
