@@ -33,7 +33,7 @@ import { getSubCategories } from "@/lib/api/api-sub-categories"
 import { getBrands } from "@/lib/api/api-brands"
 import { getColors } from "@/lib/api/api-colors"
 import { getSizes } from "@/lib/api/api-sizes"
-import { LoaiSanPham } from "@/types"
+import { LoaiSanPham, SanPham } from "@/types"
 import { Loader2 } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import Image from "next/image"
@@ -117,7 +117,7 @@ export interface CreateSanPhamData {
     masp: number,
   }[];
 }
-export default function ProductForm() {
+export default function ProductForm({product}:{product: SanPham}) {
   const router = useRouter()
   const params = useParams()
   const queryClient = useQueryClient()
@@ -148,12 +148,6 @@ export default function ProductForm() {
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
   
-  // Fetch product data if in edit mode
-  const { data: product, isLoading: isLoadingProduct } = useQuery({
-    queryKey: ['product', productId],
-    queryFn: () => getProductById(productId!),
-    enabled: isEditMode,
-  })
   
   // Fetch categories, brands, etc.
   const { data: categoriesData } = useQuery({
@@ -216,34 +210,22 @@ export default function ProductForm() {
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
-      ten: "",
-      mota: "",
-      giaban: "",
-      giagiam: "",
-      hinhanh: "",
-      noibat: false,
-      trangthai: true,
-      madanhmuc: "",
-      maloaisanpham: "",
-      mathuonghieu: "",
+      ten: product.ten || "",
+      mota: product.mota || "",
+      giaban: product.giaban.toString() || "",
+      giagiam: product.giagiam ? product.giagiam.toString() : "",
+      hinhanh: product.hinhanh || "",
+      noibat: product.noibat || false,
+      trangthai: product.trangthai || true,
+      madanhmuc: product.madanhmuc.toString() || "",
+      maloaisanpham: product.maloaisanpham.toString() || "",
+      mathuonghieu: product.mathuonghieu.toString() || "",
     },
   })
 
   // Load product data into form when in edit mode
   useEffect(() => {
     if (product && isEditMode) {
-      form.reset({
-        ten: product.ten,
-        mota: product.mota || "",
-        giaban: product.giaban.toString(),
-        giagiam: product.giagiam ? product.giagiam.toString() : "",
-        hinhanh: product.hinhanh || "",
-        noibat: product.noibat,
-        trangthai: product.trangthai,
-        madanhmuc: product.madanhmuc.toString(),
-        maloaisanpham: product.maloaisanpham.toString(),
-        mathuonghieu: product.mathuonghieu.toString(),
-      })
       
       // Load colors, sizes, and variants
       if (product.bienThes && product.bienThes.length > 0) {
@@ -591,11 +573,6 @@ export default function ProductForm() {
       mauSacs: selectedColors.flatMap(mauSac => mauSac.hinhAnhs),
     }
 
-    console.log("Sản phẩm:", productData)
-    console.log("Màu sắc:", selectedColors)
-    console.log("Kích cỡ:", selectedSizes)
-    console.log("Biến thể:", variants)
-
     // Submit based on mode
     if (isEditMode && productId) {
       updateMutation.mutate({ id: productId, data: productData })
@@ -605,12 +582,7 @@ export default function ProductForm() {
   }
   return (
     <>
-    {isLoadingProduct ? (
-      <div className="flex h-[50vh] w-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2 text-lg font-medium">Đang tải dữ liệu sản phẩm...</span>
-      </div>
-    ) : (
+ 
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
         {/* SanPham Section */}
@@ -790,9 +762,9 @@ export default function ProductForm() {
                     <FormLabel>Mô tả sản phẩm</FormLabel>
                     <FormControl>
                     <div className="border">
-                      {field.value}
+                     
                       <SimpleEditor 
-                          // key={field.value} // Add key to force re-render when value changes
+                         
                           content={field.value || ''} 
                           onChange={field.onChange}
                         />
@@ -1266,8 +1238,7 @@ export default function ProductForm() {
 </div>
       </form>
     </Form>
-    )
-  }
+
   </>
   )
 }
