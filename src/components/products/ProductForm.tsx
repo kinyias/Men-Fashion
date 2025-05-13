@@ -12,7 +12,6 @@ import toast from "react-hot-toast"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Label } from "@/components/ui/label"
@@ -38,6 +37,9 @@ import { LoaiSanPham } from "@/types"
 import { Loader2 } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import Image from "next/image"
+import { UploadButton } from "@/utils/uploadthing"
+import axios from "axios"
+import { SimpleEditor } from "../tiptap/tiptap-templates/simple/simple-editor"
 // Schema for SanPham
 const productFormSchema = z.object({
   ten: z.string().min(2, {
@@ -101,8 +103,19 @@ export interface CreateSanPhamData {
   madanhmuc: number;
   maloaisanpham: number;
   mathuonghieu: number;
-  bienThes?: BienThe[];
-  mauSacs?: HinhAnhMauSac[];
+  bienThes?: {
+    gia: string
+    soluong: number
+    msp: number
+    mamausac: number
+    makichco: number
+  }[];
+  mauSacs?: {
+    hinhAnh: string
+    anhChinh: boolean
+    mamausac: number,
+    masp: number,
+  }[];
 }
 export default function ProductForm() {
   const router = useRouter()
@@ -282,12 +295,21 @@ export default function ProductForm() {
           makichco: bt.makichco
         })))
       }
+      if (product.madanhmuc) {
+        getSubCategories({ madanhmuc: product.madanhmuc, page: 1, limit: 100 })
+          .then(response => {
+            setFilteredSubCategories(response.data)
+          })
+          .catch(error => {
+            console.error("Error fetching sub-categories:", error)
+            setFilteredSubCategories([])
+          })
+      }
     }
   }, [product, isEditMode, form, realMauSacs, realKichCos])
 
   // Watch for category changes to filter sub-categories
   const selectedCategoryId = form.watch("madanhmuc")
-
   useEffect(() => {
     if (selectedCategoryId) {
       const categoryId = Number.parseInt(selectedCategoryId)
@@ -296,7 +318,14 @@ export default function ProductForm() {
       getSubCategories({ madanhmuc: categoryId, page: 1, limit: 100 })
         .then(response => {
           setFilteredSubCategories(response.data)
-          form.setValue("maloaisanpham", "")
+          const currentSubCategoryId = form.getValues("maloaisanpham")
+          const subCategoryExists = response.data.some(
+            subCat => subCat.ma.toString() === currentSubCategoryId
+          )
+          
+          if (!subCategoryExists && currentSubCategoryId) {
+            form.setValue("maloaisanpham", "")
+          }
         })
         .catch(error => {
           console.error("Error fetching sub-categories:", error)
@@ -326,7 +355,7 @@ export default function ProductForm() {
       // Update variants for new colors
       const newVariants = newColors.flatMap((color) =>
         selectedSizes.map((size) => ({
-          ma: Math.floor(Math.random() * 10000), // Temporary ID for UI
+          ma: 0, // Temporary ID for UI
           gia: form.getValues("giaban"),
           soluong: 0,
           msp: 0, // Will be set after product creation
@@ -361,7 +390,7 @@ export default function ProductForm() {
       // Update variants for new sizes
       const newVariants = newSizes.flatMap((size) =>
         selectedColors.map((color) => ({
-          ma: Math.floor(Math.random() * 10000), // Temporary ID for UI
+          ma: 0, // Temporary ID for UI
           gia: form.getValues("giaban"),
           soluong: 0,
           msp: 0, // Will be set after product creation
@@ -397,9 +426,8 @@ export default function ProductForm() {
       selectedColors.map((color) => {
         if (color.ma === colorId) {
           const newImages = [...color.hinhAnhs]
-          const newImageId = Math.floor(Math.random() * 10000) // Temporary ID for UI
           newImages.push({
-            ma: newImageId,
+            ma: 0,
             hinhAnh: imageUrl,
             anhChinh: newImages.length === 0, // First image is primary
             mamausac: color.ma,
@@ -517,7 +545,21 @@ export default function ProductForm() {
       setUploadProgress(0)
     }
   }
+  const handleImageDelete = (image: string) => {
+    const imageKey = image.substring(image.lastIndexOf('/') + 1);
 
+    axios
+      .post('/api/uploadthing/delete', { imageKey })
+      .then((res) => {
+        if (res.data.success) {
+          form.setValue('hinhanh', '');
+          toast.success('Hình ảnh đã được xoá');
+        }
+      })
+      .catch(() => {
+        toast.error('Đã xảy ra lỗi khi xoá hình ảnh');
+      })
+  };
   function onSubmit(data: ProductFormValues) {
     // Validate that at least one color and size is selected
     if (selectedColors.length === 0) {
@@ -561,7 +603,6 @@ export default function ProductForm() {
       createMutation.mutate(productData)
     }
   }
-
   return (
     <>
     {isLoadingProduct ? (
@@ -573,6 +614,8 @@ export default function ProductForm() {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
         {/* SanPham Section */}
+        <div className="grid gap-6 md:grid-cols-[2fr_1fr]">
+        <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>Thông tin sản phẩm</CardTitle>
@@ -618,22 +661,23 @@ export default function ProductForm() {
                       <FormControl>
                         <Input type="number" min="0" step="1000" placeholder="199000" {...field} />
                       </FormControl>
-                      <FormDescription>Không bắt buộc</FormDescription>
+                      
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
-
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="space-y-6 w-full">
               <FormField
                 control={form.control}
                 name="madanhmuc"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="w-full">
                     <FormLabel>Danh mục</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue placeholder="Chọn danh mục" />
                         </SelectTrigger>
                       </FormControl>
@@ -649,16 +693,18 @@ export default function ProductForm() {
                   </FormItem>
                 )}
               />
-
+                </div>
+              
+<div className="space-y-6 w-full">
               <FormField
                 control={form.control}
                 name="maloaisanpham"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="w-full">
                     <FormLabel>Loại sản phẩm</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCategoryId}>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!selectedCategoryId && filteredSubCategories.length === 0}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue
                             placeholder={selectedCategoryId ? "Chọn loại sản phẩm" : "Chọn danh mục trước"}
                           />
@@ -667,7 +713,7 @@ export default function ProductForm() {
                       <SelectContent>
                         {filteredSubCategories.map((subCategory) => (
                           <SelectItem key={subCategory.ma} value={subCategory.ma.toString()}>
-                            {subCategory.ten}
+                            {subCategory.ten }
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -676,6 +722,8 @@ export default function ProductForm() {
                   </FormItem>
                 )}
               />
+</div>
+                  </div>
 
               <FormField
                 control={form.control}
@@ -701,22 +749,7 @@ export default function ProductForm() {
                   </FormItem>
                 )}
               />
-
-              <FormField
-                control={form.control}
-                name="mota"
-                render={({ field }) => (
-                  <FormItem className="md:col-span-2">
-                    <FormLabel>Mô tả sản phẩm</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Nhập mô tả sản phẩm..." className="min-h-32" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex flex-col gap-4 md:flex-row md:col-span-2">
+  <div className="flex flex-col gap-4 md:flex-row md:col-span-2">
                 <FormField
                   control={form.control}
                   name="noibat"
@@ -749,9 +782,121 @@ export default function ProductForm() {
                   )}
                 />
               </div>
+              <FormField
+                control={form.control}
+                name="mota"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>Mô tả sản phẩm</FormLabel>
+                    <FormControl>
+                    <div className="border">
+                      {field.value}
+                      <SimpleEditor 
+                          // key={field.value} // Add key to force re-render when value changes
+                          content={field.value || ''} 
+                          onChange={field.onChange}
+                        />
+                       </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
             </div>
           </CardContent>
         </Card>
+          </div>
+        <div className="space-y-6">
+          <Card>
+            <CardContent>
+            <FormField
+                  control={form.control}
+                  name="hinhanh"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Hình ảnh đại diện</FormLabel>
+                      <FormControl>
+                      <div className="space-y-4">
+                          {field.value && (
+                            <div className="relative w-full h-full overflow-hidden rounded-md">
+                              <Image 
+                                src={field.value} 
+                                alt="Ảnh đại diện" 
+                                className="object-cover w-full h-full"
+                                width={500}
+                                height={300}
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="sm"
+                                className="absolute top-2 right-2 cursor-pointer"
+                                onClick={() => field.value && handleImageDelete(field.value)}
+                              >
+                                Xóa
+                              </Button>
+                            </div>
+                          )}
+                          
+                          {!field.value && (
+                            <div className="flex flex-col items-center h-full max-w-[500px] p-6 border-2 border-dashed border-primary/50 rounded">
+                              {isUploading && (
+                                <div className="w-full mb-4">
+                                  <p className="text-sm text-muted-foreground mb-2 text-center">
+                                    Đang tải lên: {uploadProgress/100}%
+                                  </p>
+                                  <Progress value={uploadProgress} className="h-2" />
+                                </div>
+                              )}
+                              
+                              <UploadButton
+                                endpoint="imageUploader"
+                                onUploadBegin={() => {
+                                  setIsUploading(true);
+                                  setUploadProgress(0);
+                                }}
+                                onUploadProgress={(progress) => {
+                                  setUploadProgress(Math.round(progress * 100));
+                                }}
+                                onClientUploadComplete={(res) => {
+                                  // Update the form field with the uploaded image URL
+                                  field.onChange(res[0].url);
+                                  
+                                  // Reset upload state
+                                  setIsUploading(false);
+                                  setUploadProgress(0);
+                                  
+                                  // Show success toast
+                                  toast.success("Tải ảnh lên thành công");
+                                }}
+                                onUploadError={(error: Error) => {
+                                  // Reset upload state
+                                  setIsUploading(false);
+                                  setUploadProgress(0);
+                                  
+                                  // Show error toast
+                                  toast.error(`Lỗi tải ảnh: ${error.message}`);
+                                }}
+                                appearance={{
+                                  button: "bg-blue-500 text-primary-foreground hover:bg-primary/90 px-5",
+                                  allowedContent: "text-sm text-muted-foreground",
+                                }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormDescription>Hình ảnh đại diện cho loại sản phẩm.</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+            
+            </CardContent>
+          </Card>
+          </div>
+          </div>
 
         {/* MauSac Section */}
         <Card>
@@ -888,6 +1033,8 @@ export default function ProductForm() {
                                   src={image.hinhAnh || "/placeholder.svg"}
                                   alt={`Sản phẩm ${color.ten} - Hình ${image.ma}`}
                                   className="h-32 w-full object-cover rounded-md"
+                                  width={500}
+                                  height={300}
                                 />
                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 rounded-md">
                                   {!image.anhChinh && (

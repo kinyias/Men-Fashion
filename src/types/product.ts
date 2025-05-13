@@ -105,6 +105,17 @@ export interface CreateSanPhamData {
   madanhmuc: number;
   maloaisanpham: number;
   mathuonghieu: number;
-  bienThes?: BienThe[];
-  mauSacs?: HinhAnhMauSac[];
+  bienThes?: {
+    gia: string
+    soluong: number
+    msp: number
+    mamausac: number
+    makichco: number
+  }[];
+  mauSacs?: {
+    hinhAnh: string
+    anhChinh: boolean
+    mamausac: number,
+    masp: number,
+  }[];
 }
