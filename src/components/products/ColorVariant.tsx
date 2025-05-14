@@ -1,185 +1,224 @@
-"use client"
-
-import type React from "react"
-
-import { useState } from "react"
-import { Trash2, Upload, X } from "lucide-react"
-
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Progress } from "@/components/ui/progress"
+import { MauSacWithImages } from "@/types"
 import Image from "next/image"
+import { Plus, Trash2, Upload, X } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion"
+import { Label } from "../ui/label"
+import { Input } from "../ui/input"
 
 interface ColorVariantProps {
-  id: string
-  name: string
-  colorCode: string
-  onUpdate: (id: string, data: { name?: string; colorCode?: string }) => void
-  onRemove: (id: string) => void
-  canRemove: boolean
+  selectedColors: MauSacWithImages[]
+  availableColors: any[]
+  colorDialogOpen: boolean
+  setColorDialogOpen: (open: boolean) => void
+  selectedColorIds: number[]
+  setSelectedColorIds: (ids: number[]) => void
+  onAddColors: () => void
+  onRemoveColor: (colorId: number) => void
+  onAddImageToColor: (colorId: number, imageUrl: string) => void
+  onRemoveImageFromColor: (colorId: number, imageId: number) => void
+  onSetPrimaryImage: (colorId: number, imageId: number) => void
+  onHandleImageUpload: (colorId: number, files: FileList | null) => void
+  isUploading: boolean
+  uploadProgress: number
 }
 
-export default function ColorVariant({ id, name, colorCode, onUpdate, onRemove, canRemove }: ColorVariantProps) {
-  const [images, setImages] = useState<string[]>([])
-  const [dragActive, setDragActive] = useState(false)
-
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true)
-    } else if (e.type === "dragleave") {
-      setDragActive(false)
-    }
-  }
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFiles(e.dataTransfer.files)
-    }
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.preventDefault()
-    if (e.target.files && e.target.files[0]) {
-      handleFiles(e.target.files)
-    }
-  }
-
-  const handleFiles = (files: FileList) => {
-    const newImages: string[] = []
-
-    Array.from(files).forEach((file) => {
-      // In a real app, you would upload these to a storage service
-      // For this example, we'll just create object URLs
-      const imageUrl = URL.createObjectURL(file)
-      newImages.push(imageUrl)
-    })
-
-    setImages([...images, ...newImages])
-  }
-
-  const removeImage = (index: number) => {
-    const newImages = [...images]
-    newImages.splice(index, 1)
-    setImages(newImages)
-  }
-
+export function ColorVariant({
+  selectedColors,
+  availableColors,
+  colorDialogOpen,
+  setColorDialogOpen,
+  selectedColorIds,
+  setSelectedColorIds,
+  onAddColors,
+  onRemoveColor,
+  onAddImageToColor,
+  onHandleImageUpload,
+  onRemoveImageFromColor,
+  onSetPrimaryImage,
+  isUploading,
+  uploadProgress
+}: ColorVariantProps) {
   return (
     <Card>
-      <CardContent className="p-6">
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="flex-1 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-full border" style={{ backgroundColor: colorCode }} />
-                <Input
-                  value={name}
-                  onChange={(e) => onUpdate(id, { name: e.target.value })}
-                  placeholder="Color name (e.g., Navy Blue)"
-                  className="max-w-xs"
-                />
-              </div>
+    <CardHeader className="flex flex-row items-center justify-between">
+      <div>
+        <CardTitle>Màu sắc</CardTitle>
+        <CardDescription>Chọn các màu sắc có sẵn cho sản phẩm này</CardDescription>
+      </div>
+      <Dialog open={colorDialogOpen} onOpenChange={setColorDialogOpen}>
+        <DialogTrigger asChild>
+          <Button type="button" variant="outline" size="sm">
+            <Plus className="h-4 w-4 mr-2" />
+            Thêm màu sắc
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Chọn màu sắc</DialogTitle>
+            <DialogDescription>Chọn các màu sắc có sẵn cho sản phẩm này.</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            {availableColors.map((color) => {
+              const isSelected = selectedColorIds.includes(color.ma)
+              const isAlreadyAdded = selectedColors.some((c) => c.ma === color.ma)
 
-              {canRemove && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onRemove(id)}
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
+              return (
+                <div
+                  key={color.ma}
+                  className={`flex items-center space-x-2 rounded-md border p-2 ${
+                    isSelected ? "border-primary bg-primary/5" : ""
+                  } ${isAlreadyAdded ? "opacity-50" : ""}`}
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Remove
-                </Button>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor={`color-code-${id}`}>Color Code</Label>
-              <div className="flex items-center gap-2 mt-1">
-                <Input
-                  id={`color-code-${id}`}
-                  type="color"
-                  value={colorCode}
-                  onChange={(e) => onUpdate(id, { colorCode: e.target.value })}
-                  className="w-12 h-10 p-1"
-                />
-                <Input
-                  value={colorCode}
-                  onChange={(e) => onUpdate(id, { colorCode: e.target.value })}
-                  placeholder="#000000"
-                  className="font-mono"
-                />
-              </div>
-            </div>
+                  <Checkbox
+                    id={`color-${color.ma}`}
+                    checked={isSelected}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedColorIds([...selectedColorIds, color.ma])
+                      } else {
+                        setSelectedColorIds(selectedColorIds.filter((id) => id !== color.ma))
+                      }
+                    }}
+                    disabled={isAlreadyAdded}
+                  />
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full border" style={{ backgroundColor: color.ma_mau }}></div>
+                    <Label htmlFor={`color-${color.ma}`}>{color.ten}</Label>
+                  </div>
+                </div>
+              )
+            })}
           </div>
-
-          <div className="flex-1">
-            <Accordion type="single" collapsible defaultValue="images">
-              <AccordionItem value="images" className="border-none">
-                <AccordionTrigger className="py-0">Images for this color</AccordionTrigger>
-                <AccordionContent className="pt-4">
-                  <div
-                    className={`border-2 border-dashed rounded-lg p-4 text-center ${
-                      dragActive ? "border-primary bg-primary/5" : "border-gray-300"
-                    }`}
-                    onDragEnter={handleDrag}
-                    onDragLeave={handleDrag}
-                    onDragOver={handleDrag}
-                    onDrop={handleDrop}
+          <div className="flex justify-end">
+            <Button type="button" onClick={onAddColors}>
+              Thêm màu đã chọn
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </CardHeader>
+    <CardContent>
+      {selectedColors.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          Chưa có màu sắc nào được chọn. Nhấn &quot;Thêm màu sắc&quot; để chọn màu cho sản phẩm này.
+        </div>
+      ) : (
+        <Accordion type="multiple" className="space-y-4">
+          {selectedColors.map((color) => (
+            <AccordionItem key={color.ma} value={`color-${color.ma}`} className="border rounded-lg">
+              <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <div className="w-6 h-6 rounded-full border" style={{ backgroundColor: color.ma_mau }}></div>
+                  <span className="font-medium">{color.ten}</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 pb-4 pt-0">
+                <div className="flex justify-end mb-4">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onRemoveColor(color.ma)}
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
                   >
-                    <Label htmlFor={`file-upload-${id}`} className="cursor-pointer">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Xóa màu này
+                  </Button>
+                </div>
+
+                {/* HinhAnhMauSac Section */}
+                <div className="mt-4">
+                  <h3 className="text-lg font-medium mb-4">Hình ảnh cho màu {color.ten}</h3>
+                  <div
+                    className="border-2 border-dashed rounded-lg p-4 text-center"
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault()
+                      onHandleImageUpload(color.ma, e.dataTransfer.files)
+                    }}
+                  >
+                    <Label htmlFor={`file-upload-${color.ma}`} className="cursor-pointer">
                       <div className="flex flex-col items-center justify-center py-4">
                         <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                        <p className="text-sm font-medium">Drag & drop images or click to browse</p>
-                        <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 5MB</p>
+                        <p className="text-sm font-medium">Kéo thả hình ảnh hoặc nhấn để chọn</p>
+                        <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF tối đa 5MB</p>
                       </div>
                       <Input
-                        id={`file-upload-${id}`}
+                        id={`file-upload-${color.ma}`}
                         type="file"
                         accept="image/*"
                         multiple
                         className="hidden"
-                        onChange={handleChange}
+                        onChange={(e) => onHandleImageUpload(color.ma, e.target.files)}
                       />
+                      {isUploading && (
+<div className="flex items-center gap-2">
+<Progress value={uploadProgress} className="h-2 w-24" />
+<span className="text-xs text-muted-foreground">{uploadProgress}%</span>
+</div>
+)}
                     </Label>
                   </div>
 
-                  {images.length > 0 && (
-                    <div className="grid grid-cols-3 gap-2 mt-4">
-                      {images.map((image, index) => (
-                        <div key={index} className="relative group">
+                  {color.hinhAnhs.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                      {color.hinhAnhs.map((image) => (
+                        <div
+                          key={image.ma}
+                          className={`relative group border rounded-md p-1 ${
+                            image.anhChinh ? "ring-2 ring-primary" : "hover:bg-muted/50"
+                          }`}
+                        >
                           <Image
-                            src={image || "/placeholder.svg"}
-                            alt={`Product ${name} - Image ${index + 1}`}
-                            className="h-24 w-full object-cover rounded-md"
+                            src={image.hinhAnh || "/placeholder.svg"}
+                            alt={`Sản phẩm ${color.ten} - Hình ${image.ma}`}
+                            className="h-32 w-full object-cover rounded-md"
+                            width={500}
+                            height={300}
                           />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="h-6 w-6 absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() => removeImage(index)}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 rounded-md">
+                            {!image.anhChinh && (
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                size="sm"
+                                className="mr-2"
+                                onClick={() => onSetPrimaryImage(color.ma, image.ma)}
+                              >
+                                Đặt làm ảnh chính
+                              </Button>
+                            )}
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => onRemoveImageFromColor(color.ma, image.ma)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          {image.anhChinh && (
+                            <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
+                              Ảnh chính
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
                   )}
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      )}
+    </CardContent>
+  </Card>
   )
 }

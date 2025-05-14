@@ -61,15 +61,20 @@ interface HinhAnhMauSac {
 }
 
 // Interface for BienThe
-interface BienThe {
+export interface BienThe {
   ma: number
   gia: string
   soluong: number
-  msp: number
+  masp: number
   mamausac: number
   makichco: number
 }
-
+export interface MauSacWithImages {
+  ma: number
+  ten: string
+  ma_mau: string
+  hinhAnhs: HinhAnhMauSac[]
+}
 
 export interface SanPhamQueryParams {
   page: number;
@@ -108,7 +113,7 @@ export interface CreateSanPhamData {
   bienThes?: {
     gia: string
     soluong: number
-    msp: number
+    masp: number
     mamausac: number
     makichco: number
   }[];
