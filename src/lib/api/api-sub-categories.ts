@@ -40,3 +40,15 @@ export const deleteManySubCategories = async (ids: number[]): Promise<{ message:
   const response = await api.delete('/api/loaisanpham/bulk', { data: { ids } });
   return response.data;
 };
+
+export const getFeaturedSubCategories = async (): Promise<LoaiSanPhamResponse> => {
+  const params = new URLSearchParams();
+  params.append('page', '1');
+  params.append('limit', '100');
+  params.append('sortBy', 'ma');
+  params.append('sortOrder', 'desc');
+  params.append('noibat', 'true');
+
+  const response = await api.get(`/api/loaisanpham?${params.toString()}`);
+  return response.data;
+};
