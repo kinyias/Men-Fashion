@@ -6,7 +6,7 @@ import { Loader2 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import React from 'react'
 
-export default function page() {
+export default function ProductEditPage() {
   const params = useParams();
   const productId = params.id !== 'create' ? Number(params.id) : undefined;
   const isEditMode = !!productId;

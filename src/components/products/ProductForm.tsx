@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { Trash2, Plus, Upload, X } from "lucide-react"
 import { useRouter, useParams } from "next/navigation"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import toast from "react-hot-toast"
@@ -14,20 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Checkbox } from "@/components/ui/checkbox"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { createProduct, getProductById, updateProduct } from "@/lib/api/api-products"
+import { createProduct, updateProduct } from "@/lib/api/api-products"
 import { getCategories } from "@/lib/api/api-categories"
 import { getSubCategories } from "@/lib/api/api-sub-categories"
 import { getBrands } from "@/lib/api/api-brands"
@@ -43,6 +30,7 @@ import { SimpleEditor } from "../tiptap/tiptap-templates/simple/simple-editor"
 import { ColorVariant } from "./ColorVariant"
 import { SizeVariant } from "./SizeVariant"
 import { ColorSizeMatrix } from "./ColorSizeMatrix"
+import { formatNumber, parseCurrency } from "@/utils/currency"
 // Schema for SanPham
 const productFormSchema = z.object({
   ten: z.string().min(2, {
@@ -467,20 +455,6 @@ export default function ProductForm({product}:{product: SanPham}) {
     )
   }
 
-  // Function to get variant by color and size
-  const getVariant = (colorId: number, sizeId: number) => {
-    return (
-      variants.find((variant) => variant.mamausac === colorId && variant.makichco === sizeId) || {
-        ma: 0,
-        gia: form.getValues("giaban"),
-        soluong: 0,
-        masp: 0,
-        mamausac: colorId,
-        makichco: sizeId,
-      }
-    )
-  }
-
   // Image upload handling
   const handleImageUpload = async (colorId: number, files: FileList | null) => {
     if (!files) return
@@ -617,7 +591,18 @@ export default function ProductForm({product}:{product: SanPham}) {
                     <FormItem>
                       <FormLabel>Giá bán (VNĐ)</FormLabel>
                       <FormControl>
-                        <Input type="number" min="0" step="1000" placeholder="299000" {...field} />
+                        <Input type="number" min="0" step="1" placeholder="299000" {...field}
+                         value={formatNumber(Number(field.value))} // Display formatted value
+                        //  onFocus={(e) =>
+                        //    (e.target.value = field.value.toString())
+                        //  } // Show raw number on focus
+                         onBlur={(e) =>
+                           field.onChange(parseCurrency(e.target.value))
+                         } // Parse back to number on blur
+                         onChange={(e) =>
+                           field.onChange(parseCurrency(e.target.value))
+                         } // Handle manual typing
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -631,7 +616,18 @@ export default function ProductForm({product}:{product: SanPham}) {
                     <FormItem>
                       <FormLabel>Giá giảm (VNĐ)</FormLabel>
                       <FormControl>
-                        <Input type="number" min="0" step="1000" placeholder="199000" {...field} />
+                        <Input type="number" min="0" step="1" placeholder="199000" {...field} 
+                         value={formatNumber(Number(field.value))} // Display formatted value
+                        //  onFocus={(e) =>
+                        //    (e.target.value = field.value?.toString() || '')
+                        //  } // Show raw number on focus
+                         onBlur={(e) =>
+                           field.onChange(parseCurrency(e.target.value))
+                         } // Parse back to number on blur
+                         onChange={(e) =>
+                           field.onChange(parseCurrency(e.target.value))
+                         } // Handle manual typing
+                        />
                       </FormControl>
                       
                       <FormMessage />

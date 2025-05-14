@@ -36,7 +36,6 @@ export function ColorVariant({
   setSelectedColorIds,
   onAddColors,
   onRemoveColor,
-  onAddImageToColor,
   onHandleImageUpload,
   onRemoveImageFromColor,
   onSetPrimaryImage,
