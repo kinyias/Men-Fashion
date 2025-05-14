@@ -151,7 +151,6 @@ export function ProductsTable() {
     const imageKey = getImageKey(product.hinhanh);
     try {
       await axios.post('/api/uploadthing/delete', { imageKey });
-      console.log(`Deleted image: ${imageKey}`);
     } catch (error) {
       console.error(`Failed to delete image: ${imageKey}`, error);
     }
