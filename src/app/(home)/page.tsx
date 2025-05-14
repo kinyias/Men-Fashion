@@ -2,6 +2,7 @@ import { BlogSection } from '@/components/blog/BlogSection'
 import { HeroCarousel } from '@/components/home/HeroCarousel';
 import NewsletterSection from '@/components/home/NewsletterSection';
 import { FeatureProduct } from '@/components/products/FeatureProduct';
+import { ProductTabs } from '@/components/products/ProductTabs';
 import SubCategoryFeature from '@/components/sub-category/SubCategoryFeature';
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
@@ -49,11 +50,12 @@ export default function HomePage() {
             </div>
 
             <div className="mt-10">
-        <FeatureProduct />
+            <FeatureProduct />
             </div>
           </div>
         </section>
-
+        <ProductTabs
+    />
         <BlogSection />
       </div>
         <NewsletterSection />
