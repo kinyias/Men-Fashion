@@ -20,7 +20,7 @@ import { getSubCategories } from "@/lib/api/api-sub-categories"
 import { getBrands } from "@/lib/api/api-brands"
 import { getColors } from "@/lib/api/api-colors"
 import { getSizes } from "@/lib/api/api-sizes"
-import { ApiError, LoaiSanPham, SanPham } from "@/types"
+import { ApiError, BienThe, CreateSanPhamData, LoaiSanPham, MauSacWithImages, SanPham } from "@/types"
 import { Loader2 } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import Image from "next/image"
@@ -57,57 +57,7 @@ const productFormSchema = z.object({
 
 type ProductFormValues = z.infer<typeof productFormSchema>
 
-// Interface for MauSac with images (HinhAnhMauSac)
-interface MauSacWithImages {
-  ma: number
-  ten: string
-  ma_mau: string
-  hinhAnhs: HinhAnhMauSac[]
-}
 
-// Interface for HinhAnhMauSac
-interface HinhAnhMauSac {
-  ma: number
-  hinhAnh: string
-  anhChinh: boolean
-  mamausac: number,
-  masp: number,
-}
-
-// Interface for BienThe
-interface BienThe {
-  ma: number
-  gia: string
-  soluong: number
-  masp: number
-  mamausac: number
-  makichco: number
-}
-export interface CreateSanPhamData {
-  ten: string;
-  mota?: string;
-  giaban: number;
-  giagiam?: number;
-  hinhanh?: string;
-  noibat: boolean;
-  trangthai: boolean;
-  madanhmuc: number;
-  maloaisanpham: number;
-  mathuonghieu: number;
-  bienThes?: {
-    gia: string
-    soluong: number
-    masp: number
-    mamausac: number
-    makichco: number
-  }[];
-  mauSacs?: {
-    hinhAnh: string
-    anhChinh: boolean
-    mamausac: number,
-    masp: number,
-  }[];
-}
 export default function ProductForm({product}:{product: SanPham}) {
   const router = useRouter()
   const params = useParams()
@@ -326,7 +276,7 @@ export default function ProductForm({product}:{product: SanPham}) {
       const newVariants = newColors.flatMap((color) =>
         selectedSizes.map((size) => ({
           ma: 0, // Temporary ID for UI
-          gia: form.getValues("giaban"),
+          gia: form.getValues("giagiam") || form.getValues("giaban"),
           soluong: 0,
           masp: 0, // Will be set after product creation
           mamausac: color.ma,
@@ -361,7 +311,7 @@ export default function ProductForm({product}:{product: SanPham}) {
       const newVariants = newSizes.flatMap((size) =>
         selectedColors.map((color) => ({
           ma: 0, // Temporary ID for UI
-          gia: form.getValues("giaban"),
+          gia: form.getValues("giagiam") || form.getValues("giaban"),
           soluong: 0,
           masp: 0, // Will be set after product creation
           mamausac: color.ma,
@@ -519,19 +469,19 @@ export default function ProductForm({product}:{product: SanPham}) {
   function onSubmit(data: ProductFormValues) {
     // Validate that at least one color and size is selected
     if (selectedColors.length === 0) {
-      alert("Vui lòng chọn ít nhất một màu sắc")
+      toast.error("Vui lòng chọn ít nhất một màu sắc")
       return
     }
 
     if (selectedSizes.length === 0) {
-      alert("Vui lòng chọn ít nhất một kích cỡ")
+      toast.error("Vui lòng chọn ít nhất một kích cỡ")
       return
     }
 
     // Validate that all colors have at least one image
     const colorsWithoutImages = selectedColors.filter((color) => color.hinhAnhs.length === 0)
     if (colorsWithoutImages.length > 0) {
-      alert(`Vui lòng thêm ít nhất một hình ảnh cho màu: ${colorsWithoutImages.map((c) => c.ten).join(", ")}`)
+      toast.error(`Vui lòng thêm ít nhất một hình ảnh cho màu: ${colorsWithoutImages.map((c) => c.ten).join(", ")}`)
       return
     }
 

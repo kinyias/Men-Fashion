@@ -52,7 +52,7 @@ export interface SanPham {
 //   anhChinh: boolean;
 //   mamausac: number;
 // }
-interface HinhAnhMauSac {
+export interface HinhAnhMauSac {
   ma: number
   hinhAnh: string
   anhChinh: boolean
