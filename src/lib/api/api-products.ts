@@ -1,5 +1,5 @@
 import api from '@/lib/axios-client';
-import { SanPham, SanPhamQueryParams, SanPhamResponse, CreateSanPhamData } from '@/types/product';
+import { SanPham, SanPhamQueryParams, SanPhamResponse, CreateSanPhamData, SanPhamWithRatingResonse } from '@/types/product';
 
 export const getProducts = async (
   queryParams: SanPhamQueryParams
@@ -17,6 +17,25 @@ export const getProducts = async (
   if (queryParams.trangthai !== undefined) params.append('trangthai', queryParams.trangthai.toString());
 
   const response = await api.get(`/api/sanpham?${params.toString()}`);
+  return response.data;
+};
+
+export const getProductsWithVariant = async (
+  queryParams: SanPhamQueryParams
+): Promise<SanPhamWithRatingResonse> => {
+  const params = new URLSearchParams();
+  params.append('page', queryParams.page.toString());
+  params.append('limit', queryParams.limit.toString());
+  if (queryParams.sortBy) params.append('sortBy', queryParams.sortBy);
+  if (queryParams.sortOrder) params.append('sortOrder', queryParams.sortOrder);
+  if (queryParams.search) params.append('search', queryParams.search);
+  if (queryParams.madanhmuc) params.append('madanhmuc', queryParams.madanhmuc.toString());
+  if (queryParams.maloaisanpham) params.append('maloaisanpham', queryParams.maloaisanpham.toString());
+  if (queryParams.mathuonghieu) params.append('mathuonghieu', queryParams.mathuonghieu.toString());
+  if (queryParams.noibat !== undefined) params.append('noibat', queryParams.noibat.toString());
+  if (queryParams.trangthai !== undefined) params.append('trangthai', queryParams.trangthai.toString());
+
+  const response = await api.get(`/api/sanpham/with-variants?${params.toString()}`);
   return response.data;
 };
 

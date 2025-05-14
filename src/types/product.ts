@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { productFormSchema } from "@/lib/validations/product.validator";
+import { MauSac } from "./colors";
+import { KichCo } from "./sizes";
 
 export type ProductFormValues = z.infer<typeof productFormSchema>;
 
@@ -35,23 +37,19 @@ export interface SanPham {
   hinhAnhMauSacs?: Record<number, HinhAnhMauSac[]>;
 }
 
-// export interface BienThe {
-//   ma: number;
-//   gia: number;
-//   soluong: number;
-//   msp: number;
-//   mamausac: number;
-//   makichco: number;
-//   mauSac?: MauSac;
-//   kichCo?: KichCo;
-// }
+export interface SanPhamWithRating extends SanPham  {
+  danhGia_trungbinh: number;
+}
+export interface SanPhamWithRatingResonse {
+  data: SanPhamWithRating[];
+  pagination: {
+    page: number;
+    limit: number;
+    totalItems: number;
+    totalPages: number;
+  };
+}
 
-// export interface HinhAnhMauSac {
-//   ma: number;
-//   hinhAnh: string;
-//   anhChinh: boolean;
-//   mamausac: number;
-// }
 export interface HinhAnhMauSac {
   ma: number
   hinhAnh: string
@@ -68,6 +66,8 @@ export interface BienThe {
   masp: number
   mamausac: number
   makichco: number
+  mauSac?: MauSac
+  kichCo?: KichCo
 }
 export interface MauSacWithImages {
   ma: number

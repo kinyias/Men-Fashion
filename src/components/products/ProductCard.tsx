@@ -7,75 +7,65 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ShoppingBag, Star } from 'lucide-react';
 import { formatCurrency } from '@/utils/currency';
 import toast from 'react-hot-toast';
+import { MauSac, SanPhamWithRating } from '@/types';
 
-interface Color {
-  id: string;
-  name: string;
-  hex: string;
-}
-interface Size {
-  id: string
-  name: string
-  available: boolean
-}
-interface Product {
-  name: string;
-  category: string;
-  price: number;
-  image: string;
-  rating: number;
-  isNew?: boolean;
-  colors: Color[];
-  sizes?: Size[]
-}
-const defaultSizes: Size[] = [
-  { id: "xs", name: "XS", available: true },
-  { id: "s", name: "S", available: true },
-  { id: "m", name: "M", available: true },
-  { id: "l", name: "L", available: true },
-  { id: "xl", name: "XL", available: true },
-  { id: "xxl", name: "XXL", available: false },
-]
-export default function ProductCard({ product }: { product: Product }) {
-  const [selectedColor, setSelectedColor] = useState(product.colors[0])
-  const [selectedSize, setSelectedSize] = useState<string | null>(null)
-  const [showQuickAdd, setShowQuickAdd] = useState(false)
+export default function ProductCard({ product }: { product: SanPhamWithRating }) {
+  // Get unique colors from variants
+  const uniqueColors = (product.bienThes || []).reduce((acc, variant) => {
+    if (variant.mauSac?.ma !== undefined && !acc.some(c => c.ma === variant.mauSac!.ma)) {
+      acc.push(variant.mauSac);
+    }
+    return acc;
+  }, [] as MauSac[]);
 
-  const sizes = product.sizes || defaultSizes
+  // Get unique sizes from variants
+  const uniqueSizes =(product.bienThes || []).reduce((acc, variant) => {
+    if (variant.kichCo && !acc.some(s => s.ma === variant.kichCo!.ma)) {
+      acc.push({
+        ma: variant.kichCo.ma,
+        ten: variant.kichCo.ten,
+        available: variant.soluong > 0
+      });
+    }
+    return acc;
+  }, [] as { ma: number; ten: string, available: boolean }[]);
+
+  const [selectedColor, setSelectedColor] = useState(uniqueColors[0]);
+  const [selectedSize, setSelectedSize] = useState<number | null>(null);
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
 
   const handleAddToCart = () => {
     if (!selectedSize) {
-     toast.error("Vui lòng chọn kích thước")
-      return
+      toast.error("Vui lòng chọn kích thước");
+      return;
     }
 
-    toast.success(`Đã thêm ${product.name} (${selectedColor.name}, ${selectedSize}) vào giỏ hàng`)
+    toast.success(`Đã thêm ${product.ten} vào giỏ hàng`);
+    setShowQuickAdd(false);
+  };
+  // Get the main image for the selected color or fallback to product image
+  const getMainImage = () => {
+    if (product.hinhAnhMauSacs && selectedColor) {
+      const colorImage = Object.values(product.hinhAnhMauSacs).flat().find(img => img.anhChinh && img.mamausac ==  selectedColor.ma);
+      if (colorImage) {
+        return colorImage.hinhAnh;
+      }
+    }
+    return product.hinhanh || "/placeholder.svg";
+  };
 
-    setShowQuickAdd(false)
-  }
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg pt-0">
       <div className="aspect-square relative overflow-hidden bg-muted/30">
-        {/* <div className="absolute top-3 right-3 z-10 flex gap-1.5">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white"
-            aria-label="Add to wishlist"
-          >
-            <Heart className="h-4 w-4" />
-          </Button>
-        </div> */}
         <Image
-          src={`${product.image
-          }`}
-          alt={`${product.name} in ${selectedColor.name}`}
+          src={getMainImage()}
+          alt={`${product.ten}`}
           width={400}
           height={400}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
 
-      <div
+        <div
           className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 pt-12 transition-all duration-300 ${
             showQuickAdd ? "opacity-100" : "opacity-0 group-hover:opacity-100"
           }`}
@@ -90,46 +80,25 @@ export default function ProductCard({ product }: { product: Product }) {
               <div className="space-y-2">
                 <p className="text-xs font-medium text-gray-900">Chọn kích cỡ</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {sizes.map((size) => (
+                  {uniqueSizes.map((size) => (
                     <button
-                      key={size.id}
+                      key={size.ma}
                       className={`min-w-[2.5rem] h-8 px-2 rounded-md text-xs font-medium transition-colors
                         ${
                           !size.available
                             ? "bg-muted/50 text-muted-foreground cursor-not-allowed"
-                            : selectedSize === size.id
+                            : selectedSize === size.ma
                               ? "bg-primary text-primary-foreground"
                               : "bg-muted hover:bg-muted/80"
                         }`}
                       disabled={!size.available}
-                      onClick={() => setSelectedSize(size.id)}
+                      onClick={() => setSelectedSize(size.ma)}
                     >
-                      {size.name}
+                      {size.ten}
                     </button>
                   ))}
                 </div>
               </div>
-
-              {/* Color Selection */}
-              {/* <div className="space-y-2">
-                <p className="text-xs font-medium text-gray-900">Chọn màu sắc</p>
-                <div className="flex gap-1.5">
-                  {product.colors.map((color) => (
-                    <button
-                      key={color.id}
-                      className={`h-8 w-8 rounded-full border flex items-center justify-center ${
-                        selectedColor.id === color.id ? "ring-2 ring-primary ring-offset-2" : "ring-0"
-                      }`}
-                      style={{ backgroundColor: color.hex }}
-                      onClick={() => setSelectedColor(color)}
-                      aria-label={`Select ${color.name} color`}
-                      title={color.name}
-                    >
-                      {selectedColor.id === color.id && <Check className="h-3 w-3 text-white" />}
-                    </button>
-                  ))}
-                </div>
-              </div> */}
 
               {/* Add to Cart Button */}
               <Button className="w-full" size="sm" onClick={handleAddToCart}>
@@ -138,40 +107,56 @@ export default function ProductCard({ product }: { product: Product }) {
               </Button>
             </div>
           )}
-          </div>
-          
+        </div>
       </div>
 
       <CardContent className="p-4">
         <div className="space-y-2">
-          <div className="flex gap-1">
-            {product.colors.map((color) => (
-              <button
-                key={color.id}
-                className={`h-5 w-5 rounded-full border cursor-pointer ${
-                  selectedColor.id === color.id
-                    ? 'ring-2 ring-primary ring-offset-2'
-                    : 'ring-0'
-                }`}
-                style={{ backgroundColor: color.hex }}
-                onClick={() => setSelectedColor(color)}
-                aria-label={`Select ${color.name} color`}
-                title={color.name}
-              />
-            ))}
-          </div>
+          {uniqueColors.length > 0 && (
+            <div className="flex gap-1">
+              {uniqueColors.map((color) => (
+                <button
+                  key={color.ma}
+                  className={`h-5 w-5 rounded-full border cursor-pointer ${
+                    selectedColor?.ma === color.ma
+                      ? 'ring-2 ring-primary ring-offset-2'
+                      : 'ring-0'
+                  }`}
+                  style={{ backgroundColor: color.ma_mau }}
+                  onClick={() => {
+                    setSelectedColor(color);
+                    setSelectedSize(null); // Reset size when color changes
+                  }}
+                  aria-label={`Select ${color.ten} color`}
+                  title={color.ten}
+                />
+              ))}
+            </div>
+          )}
+          
           <div className="flex items-center justify-between">
-            <h3 className="font-medium line-clamp-1">{product.name}</h3>
+            <h3 className="font-medium line-clamp-1">{product.ten}</h3>
             <div className="flex items-center">
               <Star className="h-3.5 w-3.5 fill-yellow-300 text-yellow-300" />
-              <span className="ml-1 text-xs font-medium">{product.rating}</span>
+              <span className="ml-1 text-xs font-medium">
+                {product.danhGia_trungbinh || 0}
+              </span>
             </div>
           </div>
 
-          <p className="text-xs text-muted-foreground">{product.category}</p>
+          <p className="text-xs text-muted-foreground">{product.danhMuc?.ten}</p>
 
           <div className="flex items-center justify-start pt-1">
-            <p className="font-bold">{formatCurrency(product.price)}</p>
+            {product.giagiam && product.giagiam < product.giaban ? (
+              <>
+                <p className="font-bold text-primary">{formatCurrency(product.giagiam)}</p>
+                <p className="ml-2 text-sm text-muted-foreground line-through">
+                  {formatCurrency(product.giaban)}
+                </p>
+              </>
+            ) : (
+              <p className="font-bold">{formatCurrency(product.giaban)}</p>
+            )}
           </div>
         </div>
       </CardContent>
