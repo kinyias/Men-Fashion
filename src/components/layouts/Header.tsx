@@ -9,64 +9,8 @@ import { MobileMenu } from "./MobileMenu"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { useAuth } from "@/context/auth-provider"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu"
-
-const navigationItems = [
-  {
-    name: "Hàng mới về",
-    href: "#",
-    hasDropdown: false,
-  },
-  {
-    name: "Áo",
-    href: "#",
-    hasDropdown: true,
-    subcategories: [
-      { name: "Áo thun", href: "#" },
-      { name: "Áo sơ mi", href: "#" },
-      { name: "Vest", href: "#" },
-      { name: "Jeans", href: "#" },
-      { name: "Áo polo", href: "#" },
-      { name: "Áo T-Shirt", href: "#" },
-      { name: "Áo Len", href: "#" },
-      { name: "Áo Nỉ", href: "#" },
-    ],
-  },
-  {
-    name: "Quần",
-    href: "#",
-    hasDropdown: true,
-    subcategories: [
-      { name: "Quần tây", href: "#" },
-      { name: "Quần short", href: "#" },
-      { name: "Quần khaki", href: "#" },
-      { name: "Quần jean", href: "#" },
-      { name: "Quần jogger", href: "#" },
-      { name: "Quần nỉ", href: "#" },
-    ],
-  },
-  {
-    name: "Giày",
-    href: "#",
-    hasDropdown: true,
-    subcategories: [
-      { name: "Giày tây", href: "#" },
-      { name: "Sneaker", href: "#" },
-      { name: "Giày thể thao", href: "#" },
-    ],
-  },
-  {
-    name: "Phụ kiện",
-    href: "#",
-    hasDropdown: true,
-    subcategories: [
-      { name: "Vớ nam", href: "#" },
-      { name: "Mũ nón", href: "#" },
-      { name: "Túi sách", href: "#" },
-      { name: "Cà vạt & nơ", href: "#" },
-      { name: "Thắt lưng", href: "#" },
-    ],
-  },
-]
+import { useQuery } from "@tanstack/react-query"
+import { getCategories, getSubCategories } from "@/lib/api"
 
 export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false)
@@ -74,6 +18,41 @@ export default function Header() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const isMobile = useMediaQuery("(max-width: 768px)")
   const { user, logout } = useAuth();
+
+  // Fetch categories
+  const { data: categoriesData } = useQuery({
+    queryKey: ['header-categories'],
+    queryFn: () => getCategories({ page: 1, limit: 100 }),
+  })
+
+  // Fetch sub-categories
+  const { data: subCategoriesData } = useQuery({
+    queryKey: ['header-sub-categories'],
+    queryFn: () => getSubCategories({ page: 1, limit: 100 }),
+  })
+
+  // Process categories and sub-categories
+  const navigationItems =
+  [
+    {
+      name: "Hàng mới về",
+      href: "#",
+      hasDropdown: false,
+      subcategories: []
+    },
+  ...categoriesData?.data.map(category => ({
+    name: category.ten,
+    href: `/category/${category.ma}`,
+    hasDropdown: true,
+    subcategories: subCategoriesData?.data
+      .filter(sub => sub.madanhmuc === category.ma)
+      .map(sub => ({
+        name: sub.ten,
+        href: `/sub-category/${sub.ma}`
+      })) || []
+  })) || []
+]
+
   // Close mobile menu when screen size changes to desktop
   useEffect(() => {
     if (!isMobile && isMobileMenuOpen) {
