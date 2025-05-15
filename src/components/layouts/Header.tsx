@@ -13,9 +13,164 @@ import { useQuery } from "@tanstack/react-query"
 import { getCategories, getSubCategories } from "@/lib/api"
 import { useCartStore } from "@/lib/store/cart-store"
 import { Skeleton } from "@/components/ui/skeleton"
+import { SearchSidebar } from "./SearchSideBar"
+const searchableProducts = [
+  {
+    name: "Áo sơ mi Oxford cổ điển",
+    category: "Áo sơ mi",
+    subcategory: "Áo sơ mi thường",
+    price: 89.99,
+    image: "/placeholder.svg?height=400&width=400",
+    rating: 4.8,
+    colors: [
+      { id: "blue", name: "Xanh dương", hex: "#1e40af" },
+      { id: "white", name: "Trắng", hex: "#ffffff" },
+      { id: "black", name: "Đen", hex: "#171717" },
+      { id: "gray", name: "Xám", hex: "#6b7280" },
+    ],
+  },
+  {
+    name: "Quần Chinos ôm dáng",
+    category: "Quần",
+    price: 69.99,
+    image: "/placeholder.svg?height=400&width=400",
+    rating: 4.6,
+    colors: [
+      { id: "khaki", name: "Màu kaki", hex: "#d4b996" },
+      { id: "navy", name: "Xanh hải quân", hex: "#0f172a" },
+      { id: "olive", name: "Xanh ô liu", hex: "#4b5320" },
+      { id: "gray", name: "Xám", hex: "#6b7280" },
+    ],
+  },
+  {
+    name: "Túi du lịch da",
+    category: "Phụ kiện",
+    subcategory: "Túi xách",
+    price: 199.99,
+    image: "/placeholder.svg?height=400&width=400",
+    rating: 4.9,
+    colors: [
+      { id: "brown", name: "Nâu", hex: "#7c4a3a" },
+      { id: "black", name: "Đen", hex: "#171717" },
+      { id: "tan", name: "Nâu nhạt", hex: "#d2b48c" },
+    ],
+  },
+  {
+    name: "Áo khoác len cao cấp",
+    category: "Áo khoác",
+    price: 249.99,
+    image: "/placeholder.svg?height=400&width=400",
+    rating: 4.7,
+    colors: [
+      { id: "charcoal", name: "Xám đậm", hex: "#36454f" },
+      { id: "camel", name: "Màu lạc đà", hex: "#c19a6b" },
+      { id: "navy", name: "Xanh hải quân", hex: "#0f172a" },
+    ],
+  },
+  {
+    name: "Áo sơ mi vải lanh thường ngày",
+    category: "Áo sơ mi",
+    subcategory: "Áo sơ mi thường",
+    price: 79.99,
+    image: "/placeholder.svg?height=400&width=400",
+    rating: 4.5,
+    colors: [
+      { id: "white", name: "Trắng", hex: "#ffffff" },
+      { id: "beige", name: "Be", hex: "#f5f5dc" },
+      { id: "lightblue", name: "Xanh nhạt", hex: "#add8e6" },
+    ],
+  },
+  {
+    name: "Đồng hồ thiết kế",
+    category: "Phụ kiện",
+    subcategory: "Đồng hồ",
+    price: 299.99,
+    image: "/placeholder.svg?height=400&width=400",
+    rating: 4.9,
+    colors: [
+      { id: "silver", name: "Bạc", hex: "#c0c0c0" },
+      { id: "gold", name: "Vàng", hex: "#ffd700" },
+      { id: "black", name: "Đen", hex: "#171717" },
+    ],
+  },
+  {
+    name: "Áo len Merino",
+    category: "Đồ len",
+    price: 129.99,
+    image: "/placeholder.svg?height=600&width=500",
+    colors: [
+      { id: "charcoal", name: "Xám đậm", hex: "#36454f" },
+      { id: "navy", name: "Xanh hải quân", hex: "#0f172a" },
+      { id: "burgundy", name: "Rượu vang", hex: "#800020" },
+    ],
+  },
+  {
+    name: "Giày Chelsea da",
+    category: "Giày dép",
+    subcategory: "Bốt",
+    price: 189.99,
+    image: "/placeholder.svg?height=600&width=500",
+    colors: [
+      { id: "brown", name: "Nâu", hex: "#7c4a3a" },
+      { id: "black", name: "Đen", hex: "#171717" },
+    ],
+  },
+  {
+    name: "Quần jean selvedge",
+    category: "Quần",
+    subcategory: "Quần jeans",
+    price: 149.99,
+    image: "/placeholder.svg?height=600&width=500",
+    colors: [
+      { id: "indigo", name: "Chàm", hex: "#3f51b5" },
+      { id: "black", name: "Đen", hex: "#171717" },
+    ],
+  },
+  {
+    name: "Áo sơ mi kẻ sọc",
+    category: "Áo sơ mi",
+    subcategory: "Áo sơ mi công sở",
+    price: 84.99,
+    image: "/placeholder.svg?height=400&width=400",
+    rating: 4.5,
+    colors: [
+      { id: "blue", name: "Xanh dương", hex: "#1e40af" },
+      { id: "gray", name: "Xám", hex: "#6b7280" },
+    ],
+  },
+  {
+    name: "Áo thun cotton cao cấp",
+    category: "Áo sơ mi",
+    subcategory: "Áo thun",
+    price: 29.99,
+    image: "/placeholder.svg?height=400&width=400",
+    rating: 4.8,
+    colors: [
+      { id: "white", name: "Trắng", hex: "#ffffff" },
+      { id: "black", name: "Đen", hex: "#171717" },
+      { id: "gray", name: "Xám", hex: "#6b7280" },
+      { id: "navy", name: "Xanh hải quân", hex: "#0f172a" },
+    ],
+  },
+  {
+    name: "Áo Polo cotton dệt",
+    category: "Áo sơ mi",
+    subcategory: "Áo polo",
+    price: 49.99,
+    image: "/placeholder.svg?height=400&width=400",
+    rating: 4.8,
+    colors: [
+      { id: "navy", name: "Xanh hải quân", hex: "#0f172a" },
+      { id: "white", name: "Trắng", hex: "#ffffff" },
+      { id: "red", name: "Đỏ", hex: "#dc2626" },
+      { id: "green", name: "Xanh lá", hex: "#16a34a" },
+    ],
+  },
+];
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const isMobile = useMediaQuery("(max-width: 768px)")
   const { user, logout } = useAuth();
@@ -170,7 +325,7 @@ export default function Header() {
 
           {/* Right side icons */}
           <div className="flex items-center gap-2 md:gap-4">
-            <Button variant="ghost" size="icon" aria-label="Search" className="rounded-full">
+            <Button variant="ghost" size="icon" aria-label="Search" className="rounded-full" onClick={() => setIsSearchOpen(true)}>
               <Search className="h-5 w-5" />
             </Button>
 
@@ -234,6 +389,8 @@ export default function Header() {
 
       {/* Cart Sidebar */}
       <CartSidebar />
+      {/* Search Sidebar */}
+      <SearchSidebar isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} products={searchableProducts} />
     </>
   )
 }
