@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { getSubCategories, getProducts } from "@/lib/api"
+import { getSubCategories, getProductsWithVariant } from "@/lib/api"
 import { DanhMuc} from "@/types"
 import { useQuery } from "@tanstack/react-query"
+import ProductCard from "./ProductCard"
 
 export function ProductTab({category}:{category:DanhMuc}) {
   const [selectedSubCategory, setSelectedSubCategory] = useState<number | null>(null)
@@ -23,7 +24,7 @@ export function ProductTab({category}:{category:DanhMuc}) {
   // Fetch products based on selected sub-category
   const { data: productsData } = useQuery({
     queryKey: ['products', selectedSubCategory],
-    queryFn: () => getProducts({ 
+    queryFn: () => getProductsWithVariant({ 
       page: 1, 
       limit: 100,
       maloaisanpham: selectedSubCategory || undefined 
@@ -77,9 +78,9 @@ export function ProductTab({category}:{category:DanhMuc}) {
               <TabsContent key={subcategory.ma} value={subcategory.ma.toString()} className="mt-0">
                 {products.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
-                    {/* {products.map((product) => (
+                    {products.map((product) => (
                       <ProductCard key={`${subcategory.ma}-${product.ma}`} product={product} />
-                    ))} */}
+                    ))}
                   </div>
                 ) : (
                   <div className="text-center py-12">
@@ -91,13 +92,7 @@ export function ProductTab({category}:{category:DanhMuc}) {
           </Tabs>
         )}
 
-        {(!subcategories || subcategories.length === 0) && products.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
-            {/* {products.map((product) => (
-              <ProductCard key={`all-${product.ma}`} product={product} />
-            ))} */}
-          </div>
-        )}
+       
         
         {(!subcategories || subcategories.length === 0) && products.length === 0 && (
           <div className="text-center py-12">

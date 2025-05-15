@@ -12,6 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { useQuery } from "@tanstack/react-query"
 import { getCategories, getSubCategories } from "@/lib/api"
 import { useCartStore } from "@/lib/store/cart-store"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -19,14 +20,15 @@ export default function Header() {
   const isMobile = useMediaQuery("(max-width: 768px)")
   const { user, logout } = useAuth();
   const { itemCount, toggleCart } = useCartStore()
+  
   // Fetch categories
-  const { data: categoriesData } = useQuery({
+  const { data: categoriesData, isLoading: isCategoryLoading } = useQuery({
     queryKey: ['header-categories'],
     queryFn: () => getCategories({ page: 1, limit: 100 }),
   })
 
   // Fetch sub-categories
-  const { data: subCategoriesData } = useQuery({
+  const { data: subCategoriesData,isLoading: isSubCategoryLoading } = useQuery({
     queryKey: ['header-sub-categories'],
     queryFn: () => getSubCategories({ page: 1, limit: 100 }),
   })
@@ -70,6 +72,35 @@ export default function Header() {
 
   const closeDropdowns = () => {
     setActiveDropdown(null)
+  }
+  if(isCategoryLoading || isSubCategoryLoading) {
+    return (
+      <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur-md">
+        <div className="container mx-auto flex h-16 items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Link href="/">
+              <div className="flex items-center gap-2 font-bold text-xl">
+              <Skeleton className="hidden md:block h-9 w-24 rounded-full" />
+              </div>
+            </Link>
+          </div>
+
+          {/* Desktop Navigation Skeleton */}
+          <nav className="hidden md:flex items-center gap-8">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-4 w-24" />
+            ))}
+          </nav>
+
+          {/* Right side icons Skeleton */}
+          <div className="flex items-center gap-2 md:gap-4">
+            <Skeleton className="h-9 w-9 rounded-full" />
+            <Skeleton className="h-9 w-9 rounded-full" />
+            <Skeleton className="hidden md:block h-9 w-24 rounded-full" />
+          </div>
+        </div>
+      </header>
+    )
   }
 
   return (
