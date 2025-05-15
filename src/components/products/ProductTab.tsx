@@ -1,11 +1,9 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { getSubCategories, getProductsWithVariant } from "@/lib/api"
+import { useMemo } from "react"
+import { getSubCategories } from "@/lib/api"
 import { DanhMuc} from "@/types"
 import { useQuery } from "@tanstack/react-query"
-import ProductCard from "./ProductCard"
 import ProductTabSub from "./ProductTabSub"
 
 export function ProductTab({category}:{category:DanhMuc}) {

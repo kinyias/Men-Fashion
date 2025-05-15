@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import { MauSac, SanPhamWithRating } from '@/types';
 import { useCartStore } from '@/lib/store/cart-store';
 
+interface SizeWithAvailability{ ma: number; ten: string, available: boolean }
 export default function ProductCard({ product }: { product: SanPhamWithRating }) {
   // Get unique colors from variants
   const uniqueColors = (product.bienThes || []).reduce((acc, variant) => {
@@ -29,7 +30,7 @@ export default function ProductCard({ product }: { product: SanPhamWithRating })
       });
     }
     return acc;
-  }, [] as { ma: number; ten: string, available: boolean }[]);
+  }, [] as SizeWithAvailability[]);
 
   const [selectedColor, setSelectedColor] = useState(uniqueColors[0]);
   const [selectedSize, setSelectedSize] = useState(uniqueSizes[0]);
@@ -69,7 +70,6 @@ export default function ProductCard({ product }: { product: SanPhamWithRating })
     }
     return product.hinhanh || "/placeholder.svg";
   };
-
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg pt-0">
       <div className="aspect-square relative overflow-hidden bg-muted/30">
@@ -83,7 +83,7 @@ export default function ProductCard({ product }: { product: SanPhamWithRating })
 
         <div
           className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 pt-12 transition-all duration-300 ${
-            showQuickAdd ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+           "opacity-0 group-hover:opacity-100"
           }`}
         >
           <Button className="w-full mb-2" size="sm" onClick={() => setShowQuickAdd(!showQuickAdd)}>
@@ -99,18 +99,23 @@ export default function ProductCard({ product }: { product: SanPhamWithRating })
                   {uniqueSizes.map((size) => (
                     <button
                       key={size.ma}
-                      className={`min-w-[2.5rem] h-8 px-2 rounded-md text-xs font-medium transition-colors
+                      className={`min-w-[2.5rem] h-8 px-2 rounded-md text-xs font-medium transition-colors relative group/size
                         ${
                           !size.available
                             ? "bg-muted/50 text-muted-foreground cursor-not-allowed"
                             : selectedSize.ma === size.ma
                               ? "bg-primary text-primary-foreground"
-                              : "bg-muted hover:bg-muted/80"
+                              : "bg-muted hover:bg-muted/80 cursor-pointer"
                         }`}
                       disabled={!size.available}
                       onClick={() => setSelectedSize(size)}
                     >
                       {size.ten}
+                      {!size.available && (
+                        <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/80 text-white text-xs rounded opacity-0 group-hover/size:opacity-100 transition-opacity whitespace-nowrap">
+                          Hết hàng
+                        </span>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -160,7 +165,6 @@ export default function ProductCard({ product }: { product: SanPhamWithRating })
             </div>
           </div>
 
-          <p className="text-xs text-muted-foreground">{product.danhMuc?.ten}</p>
 
           <div className="flex items-center justify-start pt-1">
             {product.giagiam && product.giagiam < product.giaban ? (

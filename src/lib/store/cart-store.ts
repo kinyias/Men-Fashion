@@ -63,7 +63,7 @@ export const useCartStore = create<CartState>()(
           }
         })
         // Open cart after adding item
-        get().openCart()
+        // get().openCart()
       },
 
       updateItemQuantity: (itemId, mamausac, makichco, quantity) => {

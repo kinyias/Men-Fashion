@@ -1,6 +1,6 @@
 "use client"
 import React, { useMemo, useState } from 'react'
-import { LoaiSanPham, SanPhamWithRating } from '@/types'
+import { LoaiSanPham } from '@/types'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import ProductCard from './ProductCard'
 import { useQuery } from '@tanstack/react-query'
