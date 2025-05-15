@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2 } from "lucide-react"
 import toast from "react-hot-toast"
 import { loaiSanPhamFormSchema } from "@/lib/validations/subCategory.validator"
-import { LoaiSanPhamFormValues } from "@/types/sub-category"
+import { LoaiSanPham, LoaiSanPhamFormValues } from "@/types/sub-category"
 import { createSubCategory, getSubCategoryById, updateSubCategory } from "@/lib/api/api-sub-categories"
 import { getCategories } from "@/lib/api/api-categories"
 import { UploadButton } from "@/utils/uploadthing"
@@ -25,7 +25,7 @@ import Image from "next/image"
 import { Progress } from "@/components/ui/progress"
 import { Skeleton } from "../ui/skeleton"
 
-export default function SubCategoryForm() {
+export default function SubCategoryForm({subCategory}: {subCategory: LoaiSanPham}) {
   const router = useRouter()
   const params = useParams()
   const queryClient = useQueryClient()
@@ -35,12 +35,7 @@ export default function SubCategoryForm() {
   const [isUploading, setIsUploading] = useState(false)
   
   
-  // Fetch sub-category data if in edit mode
-  const { data: subCategory, isLoading: isLoadingSubCategory } = useQuery({
-    queryKey: ['sub-category', subCategoryId],
-    queryFn: () => getSubCategoryById(subCategoryId!),
-    enabled: isEditMode,
-  })
+
   // Fetch categories for dropdown
   const { data: categoriesData, isLoading: isLoadingCategories } = useQuery({
     queryKey: ['categories-dropdown'],
@@ -58,18 +53,6 @@ export default function SubCategoryForm() {
       madanhmuc: subCategory?.madanhmuc || undefined,
     },
   })
-  
-  useEffect(() => {
-    if (subCategory) {
-      form.reset({
-        ten: subCategory.ten || "",
-        mota: subCategory.mota || "",
-        hinhanh: subCategory.hinhanh || "",
-        noibat: subCategory.noibat || false,
-        madanhmuc: subCategory.madanhmuc,
-      });
-    }
-  }, [subCategory, form]);
   
   // Create sub-category mutation
   const createMutation = useMutation({
@@ -135,12 +118,6 @@ export default function SubCategoryForm() {
             <CardTitle>{isEditMode ? 'Cập nhật loại sản phẩm' : 'Thông tin loại sản phẩm'}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {isLoadingSubCategory ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : (
-              <>
                 <FormField
                   control={form.control}
                   name="ten"
@@ -211,15 +188,12 @@ export default function SubCategoryForm() {
                     </FormItem>
                   )}
                 />
-
-              </>
-            )}
           </CardContent>
           <CardFooter className="flex justify-end gap-4">
-            <Button type="button" variant="outline" onClick={() => router.back()} disabled={isSubmitting || isLoadingSubCategory}>
+            <Button type="button" variant="outline" onClick={() => router.back()} disabled={isSubmitting}>
               Hủy
             </Button>
-            <Button type="submit" disabled={isSubmitting || isLoadingSubCategory}>
+            <Button type="submit" disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isSubmitting ? "Đang lưu..." : isEditMode ? "Cập nhật" : "Lưu"}
             </Button>
@@ -229,12 +203,6 @@ export default function SubCategoryForm() {
         <div className="space-y-6">
         <Card>
           <CardContent className="space-y-6">
-            {isLoadingSubCategory ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : (
-              <>
                 <FormField
                   control={form.control}
                   name="hinhanh"
@@ -338,8 +306,8 @@ export default function SubCategoryForm() {
                     </FormItem>
                   )}
                 />
-              </>
-            )}
+    
+
           </CardContent>
         </Card>
           </div>

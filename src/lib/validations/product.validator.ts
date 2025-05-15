@@ -1,28 +1,25 @@
 import { z } from "zod";
 
+// Schema for SanPham
 export const productFormSchema = z.object({
   ten: z.string().min(2, {
-    message: "Tên sản phẩm phải có ít nhất 2 kí tự.",
+    message: "Tên sản phẩm phải có ít nhất 2 ký tự.",
   }),
-  mota: z.string().min(10, {
-    message: "Mô tả phải có ít nhất 10 kí tự.",
-  }).optional(),
-  giaban: z.coerce.number().positive({
+  mota: z.string().optional(),
+  giaban: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
     message: "Giá bán phải là số dương.",
   }),
-  giagiam: z.coerce.number().positive({
-    message: "Giá giảm phải là số dương.",
-  }).optional(),
+  giagiam: z.string().optional(),
   hinhanh: z.string().optional(),
   noibat: z.boolean(),
   trangthai: z.boolean(),
-  madanhmuc: z.coerce.number({
+  madanhmuc: z.string({
     required_error: "Vui lòng chọn danh mục.",
   }),
-  maloaisanpham: z.coerce.number({
+  maloaisanpham: z.string({
     required_error: "Vui lòng chọn loại sản phẩm.",
   }),
-  mathuonghieu: z.coerce.number({
+  mathuonghieu: z.string({
     required_error: "Vui lòng chọn thương hiệu.",
   }),
 });

@@ -27,29 +27,8 @@ import { ColorVariant } from "./ColorVariant"
 import { SizeVariant } from "./SizeVariant"
 import { ColorSizeMatrix } from "./ColorSizeMatrix"
 import { formatNumber, parseCurrency } from "@/utils/currency"
-// Schema for SanPham
-const productFormSchema = z.object({
-  ten: z.string().min(2, {
-    message: "Tên sản phẩm phải có ít nhất 2 ký tự.",
-  }),
-  mota: z.string().optional(),
-  giaban: z.string().refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-    message: "Giá bán phải là số dương.",
-  }),
-  giagiam: z.string().optional(),
-  hinhanh: z.string().optional(),
-  noibat: z.boolean(),
-  trangthai: z.boolean(),
-  madanhmuc: z.string({
-    required_error: "Vui lòng chọn danh mục.",
-  }),
-  maloaisanpham: z.string({
-    required_error: "Vui lòng chọn loại sản phẩm.",
-  }),
-  mathuonghieu: z.string({
-    required_error: "Vui lòng chọn thương hiệu.",
-  }),
-})
+import { productFormSchema } from "@/lib/validations/product.validator"
+
 
 type ProductFormValues = z.infer<typeof productFormSchema>
 
