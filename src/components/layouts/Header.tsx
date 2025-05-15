@@ -11,14 +11,14 @@ import { useAuth } from "@/context/auth-provider"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu"
 import { useQuery } from "@tanstack/react-query"
 import { getCategories, getSubCategories } from "@/lib/api"
+import { useCartStore } from "@/lib/store/cart-store"
 
 export default function Header() {
-  const [isCartOpen, setIsCartOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const isMobile = useMediaQuery("(max-width: 768px)")
   const { user, logout } = useAuth();
-
+  const { itemCount, toggleCart } = useCartStore()
   // Fetch categories
   const { data: categoriesData } = useQuery({
     queryKey: ['header-categories'],
@@ -148,11 +148,11 @@ export default function Header() {
               size="icon"
               aria-label="Shopping cart"
               className="rounded-full relative"
-              onClick={() => setIsCartOpen(true)}
+              onClick={toggleCart}
             >
               <ShoppingBag className="h-5 w-5" />
               <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                3
+                {itemCount() || 0}
               </span>
             </Button>
             {user ? (
@@ -202,7 +202,7 @@ export default function Header() {
       />
 
       {/* Cart Sidebar */}
-      <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      <CartSidebar />
     </>
   )
 }

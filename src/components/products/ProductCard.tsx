@@ -8,6 +8,7 @@ import { ShoppingBag, Star } from 'lucide-react';
 import { formatCurrency } from '@/utils/currency';
 import toast from 'react-hot-toast';
 import { MauSac, SanPhamWithRating } from '@/types';
+import { useCartStore } from '@/lib/store/cart-store';
 
 export default function ProductCard({ product }: { product: SanPhamWithRating }) {
   // Get unique colors from variants
@@ -31,15 +32,30 @@ export default function ProductCard({ product }: { product: SanPhamWithRating })
   }, [] as { ma: number; ten: string, available: boolean }[]);
 
   const [selectedColor, setSelectedColor] = useState(uniqueColors[0]);
-  const [selectedSize, setSelectedSize] = useState<number | null>(null);
+  const [selectedSize, setSelectedSize] = useState(uniqueSizes[0]);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
-
+  const { addItem } = useCartStore()
   const handleAddToCart = () => {
     if (!selectedSize) {
       toast.error("Vui lòng chọn kích thước");
       return;
     }
-
+    addItem({
+      ma: product.ma,
+      ten: product.ten,
+      gia: product.giagiam || product.giaban,
+      mauSac: {
+        ma: selectedColor.ma,
+        ten: selectedColor.ten,
+        ma_mau: selectedColor.ma_mau,
+      },
+      kichCo: {
+        ma: selectedSize.ma,
+        ten: selectedSize.ten,
+      },
+      soLuong: 1,
+      hinhAnh: getMainImage() || "/placeholder.svg",
+    })
     toast.success(`Đã thêm ${product.ten} vào giỏ hàng`);
     setShowQuickAdd(false);
   };
@@ -87,12 +103,12 @@ export default function ProductCard({ product }: { product: SanPhamWithRating })
                         ${
                           !size.available
                             ? "bg-muted/50 text-muted-foreground cursor-not-allowed"
-                            : selectedSize === size.ma
+                            : selectedSize.ma === size.ma
                               ? "bg-primary text-primary-foreground"
                               : "bg-muted hover:bg-muted/80"
                         }`}
                       disabled={!size.available}
-                      onClick={() => setSelectedSize(size.ma)}
+                      onClick={() => setSelectedSize(size)}
                     >
                       {size.ten}
                     </button>
@@ -125,7 +141,7 @@ export default function ProductCard({ product }: { product: SanPhamWithRating })
                   style={{ backgroundColor: color.ma_mau }}
                   onClick={() => {
                     setSelectedColor(color);
-                    setSelectedSize(null); // Reset size when color changes
+                    setSelectedSize(uniqueSizes[0]); // Reset size when color changes
                   }}
                   aria-label={`Select ${color.ten} color`}
                   title={color.ten}
