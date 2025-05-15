@@ -9,6 +9,7 @@ import { formatCurrency } from '@/utils/currency';
 import toast from 'react-hot-toast';
 import { MauSac, SanPhamWithRating } from '@/types';
 import { useCartStore } from '@/lib/store/cart-store';
+import Link from 'next/link';
 
 interface SizeWithAvailability{ ma: number; ten: string, available: boolean }
 export default function ProductCard({ product }: { product: SanPhamWithRating }) {
@@ -73,6 +74,9 @@ export default function ProductCard({ product }: { product: SanPhamWithRating })
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg pt-0">
       <div className="aspect-square relative overflow-hidden bg-muted/30">
+      <Link
+      href={`/san-pham/${product.ma}`}>
+     
         <Image
           src={getMainImage()}
           alt={`${product.ten}`}
@@ -80,7 +84,7 @@ export default function ProductCard({ product }: { product: SanPhamWithRating })
           height={400}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-
+      </Link>
         <div
           className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4 pt-12 transition-all duration-300 ${
            "opacity-0 group-hover:opacity-100"
@@ -156,7 +160,11 @@ export default function ProductCard({ product }: { product: SanPhamWithRating })
           )}
           
           <div className="flex items-center justify-between">
-            <h3 className="font-medium line-clamp-1">{product.ten}</h3>
+            <Link
+            href={`/san-pham/${product.ma}`}
+            >
+            <h3 className="font-medium line-clamp-1 hover:text-primary transition duration-300">{product.ten}</h3>
+            </Link>
             <div className="flex items-center">
               <Star className="h-3.5 w-3.5 fill-yellow-300 text-yellow-300" />
               <span className="ml-1 text-xs font-medium">

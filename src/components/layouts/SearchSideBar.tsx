@@ -110,7 +110,7 @@ export function SearchSidebar({ isOpen, onClose, products }: SearchSidebarProps)
 
       {/* Search Sidebar */}
       <div
-        className={`fixed top-0 left-0 right-0 bg-background z-50 shadow-xl transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 right-0 bg-background z-50 transform transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-y-0" : "-translate-y-full"
         }`}
       >
