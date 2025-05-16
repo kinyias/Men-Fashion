@@ -1,75 +1,70 @@
 import * as z from "zod"
 
-// Shipping information schema
+// Shipping information schema to match DonHang model
 export const shippingSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
-  phone: z
+  ho: z.string().min(2, "Họ phải có ít nhất 2 ký tự"),
+  ten: z.string().min(2, "Tên phải có ít nhất 2 ký tự"),
+  email: z.string().email("Vui lòng nhập email hợp lệ").optional(),
+  sdt: z
     .string()
-    .min(10, "Phone number must be at least 10 digits")
-    .regex(/^[0-9+\-\s()]*$/, "Please enter a valid phone number"),
-  address: z.string().min(5, "Address must be at least 5 characters"),
-  city: z.string().min(2, "City must be at least 2 characters"),
-  state: z.string().min(2, "State must be at least 2 characters"),
-  zipCode: z.string().min(5, "ZIP code must be at least 5 characters"),
-  country: z.string().min(2, "Please select a country"),
-  shippingMethod: z.enum(["standard", "express"], {
-    required_error: "Please select a shipping method",
+    .min(10, "Số điện thoại phải có ít nhất 10 số")
+    .regex(/^[0-9]{10,11}$/, "Vui lòng nhập số điện thoại hợp lệ"),
+  diachi: z.string().min(5, "Địa chỉ phải có ít nhất 5 ký tự"),
+  thanhpho: z.string().min(2, "Vui lòng nhập tên thành phố"),
+  quan: z.string().min(2, "Vui lòng nhập tên quận"),
+  phuong: z.string().min(2, "Vui lòng nhập tên phường"),
+  ghichu: z.string().optional(),
+  phuongthucgiaohang: z.enum(["standard", "express"], {
+    required_error: "Vui lòng chọn phương thức giao hàng",
   }),
 })
 
-// Payment information schema with conditional validation
+// Payment information schema to match ThanhToan model
 export const paymentSchema = z
   .object({
-    paymentMethod: z.enum(["credit", "momo", "vnpay"], {
-      required_error: "Please select a payment method",
+    phuongthuc: z.enum(["credit", "momo", "vnpay"], {
+      required_error: "Vui lòng chọn phương thức thanh toán",
     }),
     cardNumber: z.string().refine(
       (val) => {
-        // Only validate if payment method is credit
         if (val === "") return true
         return /^[0-9]{16}$/.test(val)
       },
-      { message: "Card number must be 16 digits" },
+      { message: "Số thẻ phải có 16 chữ số" },
     ),
     cardName: z.string().refine(
       (val) => {
-        // Only validate if payment method is credit
         if (val === "") return true
         return val.length >= 3
       },
-      { message: "Cardholder name must be at least 3 characters" },
+      { message: "Tên chủ thẻ phải có ít nhất 3 ký tự" },
     ),
     expiryDate: z.string().refine(
       (val) => {
-        // Only validate if payment method is credit
         if (val === "") return true
         return /^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(val)
       },
-      { message: "Expiry date must be in MM/YY format" },
+      { message: "Ngày hết hạn phải có định dạng MM/YY" },
     ),
     cvv: z.string().refine(
       (val) => {
-        // Only validate if payment method is credit
         if (val === "") return true
         return /^[0-9]{3,4}$/.test(val)
       },
-      { message: "CVV must be 3 or 4 digits" },
+      { message: "CVV phải có 3 hoặc 4 chữ số" },
     ),
     saveCard: z.boolean(),
     sameAsShipping: z.boolean(),
   })
   .refine(
     (data) => {
-      // If payment method is credit, all credit card fields must be filled
-      if (data.paymentMethod === "credit") {
+      if (data.phuongthuc === "credit") {
         return !!data.cardNumber && !!data.cardName && !!data.expiryDate && !!data.cvv
       }
       return true
     },
     {
-      message: "Please fill in all credit card details",
+      message: "Vui lòng điền đầy đủ thông tin thẻ",
       path: ["cardNumber"],
     },
   )

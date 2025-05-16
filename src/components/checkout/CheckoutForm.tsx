@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { checkoutSchema, type CheckoutFormValues } from "@/lib/validations/checkout.validator"
+import { Textarea } from "../ui/textarea"
 
 interface CheckoutFormProps {
   onSubmit: (data: CheckoutFormValues) => void
@@ -16,24 +17,23 @@ interface CheckoutFormProps {
 }
 
 export function CheckoutForm({ onSubmit, isProcessing }: CheckoutFormProps) {
-  // Tạo form cho toàn bộ quy trình thanh toán
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       shipping: {
-        firstName: "",
-        lastName: "",
+        ho: "",
+        ten: "",
         email: "",
-        phone: "",
-        address: "",
-        city: "",
-        state: "",
-        zipCode: "",
-        country: "US",
-        shippingMethod: "standard",
+        sdt: "",
+        diachi: "",
+        thanhpho: "",
+        quan: "",
+        phuong: "",
+        ghichu: "",
+        phuongthucgiaohang: "standard",
       },
       payment: {
-        paymentMethod: "credit",
+        phuongthuc: "credit",
         cardNumber: "",
         cardName: "",
         expiryDate: "",
@@ -46,7 +46,7 @@ export function CheckoutForm({ onSubmit, isProcessing }: CheckoutFormProps) {
   })
 
   const { watch } = form
-  const paymentMethod = watch("payment.paymentMethod")
+  const paymentMethod = watch("payment.phuongthuc")
 
   // Định dạng số thẻ
   const formatCardNumber = (value: string) => {
@@ -82,17 +82,15 @@ export function CheckoutForm({ onSubmit, isProcessing }: CheckoutFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-        {/* Thông tin giao hàng */}
         <Card>
           <CardContent className="pt-6">
             <div className="space-y-6">
               <h2 className="text-xl font-semibold">Thông tin giao hàng</h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Họ */}
                 <FormField
                   control={form.control}
-                  name="shipping.firstName"
+                  name="shipping.ho"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Họ</FormLabel>
@@ -101,10 +99,9 @@ export function CheckoutForm({ onSubmit, isProcessing }: CheckoutFormProps) {
                     </FormItem>
                   )}
                 />
-                {/* Tên */}
                 <FormField
                   control={form.control}
-                  name="shipping.lastName"
+                  name="shipping.ten"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Tên</FormLabel>
@@ -116,7 +113,6 @@ export function CheckoutForm({ onSubmit, isProcessing }: CheckoutFormProps) {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Email */}
                 <FormField
                   control={form.control}
                   name="shipping.email"
@@ -128,10 +124,9 @@ export function CheckoutForm({ onSubmit, isProcessing }: CheckoutFormProps) {
                     </FormItem>
                   )}
                 />
-                {/* Số điện thoại */}
                 <FormField
                   control={form.control}
-                  name="shipping.phone"
+                  name="shipping.sdt"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Số điện thoại</FormLabel>
@@ -142,10 +137,9 @@ export function CheckoutForm({ onSubmit, isProcessing }: CheckoutFormProps) {
                 />
               </div>
 
-              {/* Địa chỉ */}
               <FormField
                 control={form.control}
-                name="shipping.address"
+                name="shipping.diachi"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Địa chỉ</FormLabel>
@@ -158,7 +152,7 @@ export function CheckoutForm({ onSubmit, isProcessing }: CheckoutFormProps) {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <FormField
                   control={form.control}
-                  name="shipping.city"
+                  name="shipping.thanhpho"
                   render={({ field }) => (
                     <FormItem className="col-span-2">
                       <FormLabel>Tỉnh/Thành phố</FormLabel>
@@ -169,7 +163,7 @@ export function CheckoutForm({ onSubmit, isProcessing }: CheckoutFormProps) {
                 />
                 <FormField
                   control={form.control}
-                  name="shipping.state"
+                  name="shipping.quan"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Quận/Huyện</FormLabel>
@@ -180,7 +174,7 @@ export function CheckoutForm({ onSubmit, isProcessing }: CheckoutFormProps) {
                 />
                 <FormField
                   control={form.control}
-                  name="shipping.zipCode"
+                  name="shipping.phuong"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Phường/xã</FormLabel>
@@ -190,13 +184,20 @@ export function CheckoutForm({ onSubmit, isProcessing }: CheckoutFormProps) {
                   )}
                 />
               </div>
-
-             
-
-              {/* Phương thức giao hàng */}
+              <FormField
+                  control={form.control}
+                  name="shipping.ghichu"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Ghi chú</FormLabel>
+                      <FormControl><Textarea {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               <FormField
                 control={form.control}
-                name="shipping.shippingMethod"
+                name="shipping.phuongthucgiaohang"
                 render={({ field }) => (
                   <FormItem className="space-y-3">
                     <FormLabel>Phương thức giao hàng</FormLabel>
@@ -228,16 +229,14 @@ export function CheckoutForm({ onSubmit, isProcessing }: CheckoutFormProps) {
           </CardContent>
         </Card>
 
-        {/* Thông tin thanh toán */}
         <Card>
           <CardContent className="pt-6">
             <div className="space-y-6">
               <h2 className="text-xl font-semibold">Thông tin thanh toán</h2>
 
-              {/* Phương thức thanh toán */}
               <FormField
                 control={form.control}
-                name="payment.paymentMethod"
+                name="payment.phuongthuc"
                 render={({ field }) => (
                   <FormItem className="space-y-3">
                     <FormLabel>Phương thức thanh toán</FormLabel>

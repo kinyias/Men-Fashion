@@ -6,3 +6,4 @@ export * from './brands';
 export * from './sizes';
 export * from './colors';
 export * from './product';
+export * from './order';

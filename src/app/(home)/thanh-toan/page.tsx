@@ -7,6 +7,7 @@ import { ChevronLeft } from "lucide-react"
 import { CheckoutForm } from "@/components/checkout/CheckoutForm"
 import { OrderSummary } from "@/components/checkout/OrderSummary"
 import type { CheckoutFormValues } from "@/lib/validations/checkout.validator"
+import { DonHangFormValues } from "@/types"
 
 // Sample cart items - in a real app, this would come from your cart state/context
 const cartItems = [
@@ -52,9 +53,21 @@ export default function CheckoutPage() {
   const handleSubmitOrder = (data: CheckoutFormValues) => {
     // Process the order
     setIsProcessing(true)
-
+    const orderData: DonHangFormValues = {
+      ...data.shipping,
+      chiTietDonHangs: cartItems.map((item) => ({
+        masp: Number(item.id),
+        soluong: item.quantity,
+        dongia: item.price,
+        mabienthe: Number(item.id)
+      })),
+     thanhToan:
+      {
+        phuongthuc: data.payment.phuongthuc,
+      }
+    }
     // Log the form data (in a real app, you would send this to your API)
-    console.log("Order submitted:", data)
+    console.log("Order submitted:", orderData)
 
     // Simulate order processing
     setTimeout(() => {
