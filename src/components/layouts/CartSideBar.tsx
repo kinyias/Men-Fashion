@@ -60,7 +60,7 @@ export  function CartSidebar() {
                       <div>
                         <div className="flex justify-between">
                           <Link
-                            href={`/products/${item.ma}`}
+                            href={`/san-pham/${item.ma}`}
                             className="font-medium hover:underline"
                             onClick={closeCart}
                           >
@@ -140,10 +140,15 @@ export  function CartSidebar() {
               </div>
 
               <div className="space-y-2">
-                <Button className="w-full rounded-full">Thanh toán</Button>
+                <Link href={'/thanh-toan'}>
+                <Button className="w-full rounded-full" onClick={closeCart}>Thanh toán</Button>
+                </Link>
                 <Button variant="outline" className="w-full rounded-full" onClick={closeCart}>
                   Tiếp tục mua sắm
                 </Button>
+              </div>
+              <div className="text-xs text-center text-muted-foreground pt-2">
+                <p>Phí giao hàng và nhập khuyễn mãi ở trang thanh toán</p>
               </div>
             </div>
           )}
