@@ -29,7 +29,7 @@ export interface SanPham {
     ma: number;
     ten: string;
   };
-  bienThes?: BienThe[];
+  bienThes: BienThe[];
   _count?: {
     bienThes: number;
     danhGias: number;
@@ -66,8 +66,8 @@ export interface BienThe {
   masp: number
   mamausac: number
   makichco: number
-  mauSac?: MauSac
-  kichCo?: KichCo
+  mauSac: MauSac
+  kichCo: KichCo
 }
 export interface MauSacWithImages {
   ma: number

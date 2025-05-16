@@ -9,16 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { CheckCircle2, X, Tag, Percent, Truck, Search } from "lucide-react"
 import { formatCurrency } from "@/utils/currency"
-
-interface CartItem {
-  id: string
-  name: string
-  price: number
-  quantity: number
-  color: string
-  size: string
-  image: string
-}
+import { CartItem } from "@/lib/store/cart-store"
 
 interface Coupon {
   code: string
@@ -175,24 +166,24 @@ export function OrderSummary({ cartItems, subtotal, shipping, total: initialTota
 
         <div className="space-y-4">
           {cartItems.map((item) => (
-            <div key={item.id} className="flex gap-4">
+            <div key={item.ma} className="flex gap-4">
               <div className="h-20 w-16 bg-muted rounded-md overflow-hidden flex-shrink-0">
                 <Image
-                  src={item.image || "/placeholder.svg"}
-                  alt={item.name}
+                  src={item.hinhAnh || "/placeholder.svg"}
+                  alt={item.ten}
                   width={64}
                   height={80}
                   className="h-full w-full object-cover"
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-sm line-clamp-1">{item.name}</h3>
+                <h3 className="font-medium text-sm line-clamp-1">{item.ten}</h3>
                 <p className="text-xs text-muted-foreground">
-                  {item.color}, Kích cỡ: {item.size}
+                  {item.bienThe.mauSac.ten}, Kích cỡ: {item.bienThe.kichCo.ten}
                 </p>
                 <div className="flex justify-between items-center mt-1">
-                  <p className="text-xs">SL: {item.quantity}</p>
-                  <p className="font-medium">{formatCurrency(item.price)}</p>
+                  <p className="text-xs">SL: {item.soLuong}</p>
+                  <p className="font-medium">{formatCurrency(item.gia)}</p>
                 </div>
               </div>
             </div>

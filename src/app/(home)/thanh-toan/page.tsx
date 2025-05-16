@@ -7,45 +7,14 @@ import { ChevronLeft } from "lucide-react"
 import { CheckoutForm } from "@/components/checkout/CheckoutForm"
 import { OrderSummary } from "@/components/checkout/OrderSummary"
 import type { CheckoutFormValues } from "@/lib/validations/checkout.validator"
-import { DonHangFormValues } from "@/types"
-
-// Sample cart items - in a real app, this would come from your cart state/context
-const cartItems = [
-  {
-    id: "1",
-    name: "Classic Oxford Shirt",
-    price: 89.99,
-    quantity: 1,
-    color: "Blue",
-    size: "M",
-    image: "/placeholder.svg?height=200&width=200",
-  },
-  {
-    id: "2",
-    name: "Slim Fit Chinos",
-    price: 69.99,
-    quantity: 1,
-    color: "Khaki",
-    size: "32",
-    image: "/placeholder.svg?height=200&width=200",
-  },
-  {
-    id: "3",
-    name: "Leather Weekender Bag",
-    price: 199.99,
-    quantity: 1,
-    color: "Brown",
-    size: "One Size",
-    image: "/placeholder.svg?height=200&width=200",
-  },
-]
+import { useCartStore } from "@/lib/store/cart-store"
 
 export default function CheckoutPage() {
   const router = useRouter()
   const [isProcessing, setIsProcessing] = useState(false)
-
+  const {items: cartItems} = useCartStore()
   // Calculate order totals
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const subtotal = cartItems.reduce((sum, item) => sum + item.gia * item.soLuong, 0)
   const shipping = 12.99
   const tax = subtotal * 0.08 // 8% tax rate
   const total = subtotal + shipping + tax
@@ -53,13 +22,13 @@ export default function CheckoutPage() {
   const handleSubmitOrder = (data: CheckoutFormValues) => {
     // Process the order
     setIsProcessing(true)
-    const orderData: DonHangFormValues = {
+    const orderData = {
       ...data.shipping,
       chiTietDonHangs: cartItems.map((item) => ({
-        masp: Number(item.id),
-        soluong: item.quantity,
-        dongia: item.price,
-        mabienthe: Number(item.id)
+        masp: Number(item.ma),
+        soluong: item.soLuong,
+        dongia: item.bienThe.gia,
+        mabienthe: Number(item.ma)
       })),
      thanhToan:
       {

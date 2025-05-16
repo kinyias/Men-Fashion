@@ -52,7 +52,7 @@ export  function CartSidebar() {
               <ScrollArea className="flex-1 px-6 py-4">
               <div className="space-y-4">
                 {items.map((item) => (
-                  <div key={`${item.ma}-${item.mauSac.ma}-${item.kichCo.ma}`} className="flex gap-4">
+                  <div key={`${item.ma}-${item.bienThe.mauSac?.ma}-${item.bienThe.mauSac?.ma}`} className="flex gap-4">
                     <div className="relative h-24 w-20 overflow-hidden rounded-md bg-muted">
                       <Image src={item.hinhAnh || "/placeholder.svg"} alt={item.ten} fill className="object-cover" />
                     </div>
@@ -70,7 +70,7 @@ export  function CartSidebar() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                            onClick={() => removeItem(item.ma, item.mauSac.ma, item.kichCo.ma)}
+                            onClick={() => removeItem(item.ma, item.bienThe.mauSac?.ma || 0, item.bienThe.kichCo?.ma || 0,)}
                             aria-label={`Remove ${item.ten} from cart`}
                           >
                             <X className="h-4 w-4" />
@@ -78,7 +78,7 @@ export  function CartSidebar() {
                         </div>
                         <div className="mt-1 text-sm text-muted-foreground">
                           <span>
-                            {item.mauSac.ten} / {item.kichCo.ten}
+                            {item.bienThe.mauSac?.ten} / {item.bienThe.kichCo?.ten}
                           </span>
                         </div>
                       </div>
@@ -89,7 +89,7 @@ export  function CartSidebar() {
                             size="icon"
                             className="h-8 w-8 rounded-none"
                             onClick={() =>
-                              updateItemQuantity(item.ma, item.mauSac.ma, item.kichCo.ma, Math.max(1, item.soLuong - 1))
+                              updateItemQuantity(item.ma, item.bienThe.mauSac?.ma || 0, item.bienThe.kichCo?.ma || 0, Math.max(1, item.soLuong - 1))
                             }
                             disabled={item.soLuong <= 1}
                             aria-label="Decrease quantity"
@@ -103,7 +103,7 @@ export  function CartSidebar() {
                             value={item.soLuong}
                             onChange={(e) => {
                               const value = parseInt(e.target.value) || 1;
-                              updateItemQuantity(item.ma, item.mauSac.ma, item.kichCo.ma, Math.max(1, value));
+                              updateItemQuantity(item.ma, item.bienThe.mauSac?.ma || 0, item.bienThe.kichCo?.ma || 0, Math.max(1, value));
                             }}
                             className="w-12 text-center text-sm border-0 focus:ring-0 focus:outline-none [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
@@ -112,7 +112,7 @@ export  function CartSidebar() {
                             size="icon"
                             className="h-8 w-8 rounded-none"
                             onClick={() =>
-                              updateItemQuantity(item.ma, item.mauSac.ma, item.kichCo.ma, item.soLuong + 1)
+                              updateItemQuantity(item.ma, item.bienThe.mauSac?.ma || 0, item.bienThe.kichCo?.ma || 0, item.soLuong + 1)
                             }
                             aria-label="Increase quantity"
                           >

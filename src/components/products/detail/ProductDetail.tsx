@@ -11,7 +11,7 @@ import { SizeGuide } from "./SizeGuide"
 import { useCartStore } from "@/lib/store/cart-store"
 import { formatCurrency } from "@/utils/currency"
 import toast from "react-hot-toast"
-import { MauSac, SanPham } from "@/types"
+import { BienThe, MauSac, SanPham } from "@/types"
 interface SizeWithAvailability{ ma: number; ten: string, available: boolean }
 interface MauSacWithAvailability extends MauSac{ available: boolean }
 export default function ProductDetail({product}:{product: SanPham}) {
@@ -42,7 +42,15 @@ export default function ProductDetail({product}:{product: SanPham}) {
   const [showSizeGuide, setShowSizeGuide] = useState(false)
   const [quantity, setQuantity] = useState(1)
   const { addItem } = useCartStore()
-
+  const getSelectedVariant = ():BienThe => {
+    if (!selectedColor || !selectedSize) return product.bienThes[0];
+    
+    return product.bienThes.find(
+      (variant) => 
+        variant.mauSac.ma === selectedColor.ma && 
+        variant.kichCo.ma === selectedSize.ma
+    ) || product.bienThes[0];
+  }
   const handleAddToCart = () => {
     if (!selectedSize) {
         toast.error("Vui lòng chọn kích thước");
@@ -56,15 +64,7 @@ export default function ProductDetail({product}:{product: SanPham}) {
         ma: product.ma,
         ten: product.ten,
         gia: product.giagiam || product.giaban,
-        mauSac: {
-          ma: selectedColor.ma,
-          ten: selectedColor.ten,
-          ma_mau: selectedColor.ma_mau,
-        },
-        kichCo: {
-          ma: selectedSize.ma,
-          ten: selectedSize.ten,
-        },
+        bienThe: getSelectedVariant(),
         soLuong: 1,
         hinhAnh: getMainImage() || "/placeholder.svg",
       })

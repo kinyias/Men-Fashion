@@ -7,14 +7,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ShoppingBag, Star } from 'lucide-react';
 import { formatCurrency } from '@/utils/currency';
 import toast from 'react-hot-toast';
-import { MauSac, SanPhamWithRating } from '@/types';
+import { BienThe, MauSac, SanPhamWithRating } from '@/types';
 import { useCartStore } from '@/lib/store/cart-store';
 import Link from 'next/link';
 
 interface SizeWithAvailability{ ma: number; ten: string, available: boolean }
 export default function ProductCard({ product }: { product: SanPhamWithRating }) {
   // Get unique colors from variants
-  const uniqueColors = (product.bienThes || []).reduce((acc, variant) => {
+  const uniqueColors = product.bienThes.reduce((acc, variant) => {
     if (variant.mauSac?.ma !== undefined && !acc.some(c => c.ma === variant.mauSac!.ma)) {
       acc.push(variant.mauSac);
     }
@@ -22,7 +22,7 @@ export default function ProductCard({ product }: { product: SanPhamWithRating })
   }, [] as MauSac[]);
 
   // Get unique sizes from variants
-  const uniqueSizes =(product.bienThes || []).reduce((acc, variant) => {
+  const uniqueSizes =product.bienThes.reduce((acc, variant) => {
     if (variant.kichCo && !acc.some(s => s.ma === variant.kichCo!.ma)) {
       acc.push({
         ma: variant.kichCo.ma,
@@ -37,6 +37,16 @@ export default function ProductCard({ product }: { product: SanPhamWithRating })
   const [selectedSize, setSelectedSize] = useState(uniqueSizes[0]);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const { addItem } = useCartStore()
+  const getSelectedVariant = ():BienThe => {
+    if (!selectedColor || !selectedSize) return product.bienThes[0];
+    
+    return product.bienThes.find(
+      (variant) => 
+        variant.mauSac?.ma === selectedColor.ma && 
+        variant.kichCo?.ma === selectedSize.ma
+    ) || product.bienThes[0];
+  }
+
   const handleAddToCart = () => {
     if (!selectedSize) {
       toast.error("Vui lòng chọn kích thước");
@@ -46,15 +56,7 @@ export default function ProductCard({ product }: { product: SanPhamWithRating })
       ma: product.ma,
       ten: product.ten,
       gia: product.giagiam || product.giaban,
-      mauSac: {
-        ma: selectedColor.ma,
-        ten: selectedColor.ten,
-        ma_mau: selectedColor.ma_mau,
-      },
-      kichCo: {
-        ma: selectedSize.ma,
-        ten: selectedSize.ten,
-      },
+      bienThe: getSelectedVariant(),
       soLuong: 1,
       hinhAnh: getMainImage() || "/placeholder.svg",
     })

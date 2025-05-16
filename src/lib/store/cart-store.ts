@@ -1,3 +1,4 @@
+import { BienThe } from "@/types"
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 
@@ -5,15 +6,7 @@ export interface CartItem {
   ma: number
   ten: string
   gia: number
-  mauSac: {
-    ma: number
-    ten: string
-    ma_mau: string
-  }
-  kichCo: {
-    ma: number
-    ten: string
-  }
+  bienThe: BienThe
   soLuong: number
   hinhAnh: string
 }
@@ -49,7 +42,7 @@ export const useCartStore = create<CartState>()(
         set((state) => {
           // Check if the item already exists in the cart
           const existingItemIndex = state.items.findIndex(
-            (i) => i.ma === item.ma && i.mauSac.ma === item.mauSac.ma && i.kichCo.ma === item.kichCo.ma,
+            (i) => i.ma === item.ma && i.bienThe.mauSac.ma === item.bienThe.mauSac.ma && i.bienThe.kichCo.ma === item.bienThe.kichCo.ma,
           )
 
           if (existingItemIndex >= 0) {
@@ -69,7 +62,7 @@ export const useCartStore = create<CartState>()(
       updateItemQuantity: (itemId, mamausac, makichco, quantity) => {
         set((state) => ({
           items: state.items.map((item) => {
-            if (item.ma === Number(itemId) && item.mauSac.ma === mamausac && item.kichCo.ma === makichco) {
+            if (item.ma === Number(itemId) && item.bienThe.mauSac.ma === mamausac && item.bienThe.kichCo.ma === makichco) {
               return { ...item, soLuong: quantity }
             }
             return item
@@ -80,7 +73,7 @@ export const useCartStore = create<CartState>()(
       removeItem: (itemId, mamausac, makichco) => {
         set((state) => ({
           items: state.items.filter(
-            (item) => !(item.ma ===  Number(itemId) && item.mauSac.ma === mamausac && item.kichCo.ma === makichco),
+            (item) => !(item.ma === Number(itemId) && item.bienThe.mauSac.ma === mamausac && item.bienThe.kichCo.ma === makichco),
           ),
         }))
       },
@@ -88,7 +81,7 @@ export const useCartStore = create<CartState>()(
       clearCart: () => set({ items: [] }),
 
       findCartItem: (itemId, mamausac, makichco) => {
-        return get().items.find((item) => item.ma ===  Number(itemId) && item.mauSac.ma === mamausac && item.kichCo.ma === makichco)
+        return get().items.find((item) => item.ma === Number(itemId) && item.bienThe.mauSac.ma === mamausac && item.bienThe.kichCo.ma === makichco)
       },
 
       // Derived values

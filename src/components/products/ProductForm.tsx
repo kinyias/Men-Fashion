@@ -16,7 +16,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Switch } from "@/components/ui/switch"
 import { createProduct, updateProduct } from "@/lib/api/api-products"
 import { getCategories, getSubCategories, getBrands,getColors, getSizes } from "@/lib/api"
-import { ApiError, BienThe, CreateSanPhamData, LoaiSanPham, MauSacWithImages, SanPham } from "@/types"
+import { ApiError, CreateSanPhamData, LoaiSanPham, MauSacWithImages, SanPham } from "@/types"
 import { Loader2 } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import Image from "next/image"
@@ -32,7 +32,14 @@ import { productFormSchema } from "@/lib/validations/product.validator"
 
 type ProductFormValues = z.infer<typeof productFormSchema>
 
-
+export interface BienThe {
+  ma: number
+  gia: string
+  soluong: number
+  masp: number
+  mamausac: number
+  makichco: number
+}
 export default function ProductForm({product}:{product: SanPham}) {
   const router = useRouter()
   const params = useParams()
@@ -516,17 +523,15 @@ export default function ProductForm({product}:{product: SanPham}) {
                     <FormItem>
                       <FormLabel>Giá bán (VNĐ)</FormLabel>
                       <FormControl>
-                        <Input type="number" min="0" step="1" placeholder="299000" {...field}
-                         value={formatNumber(Number(field.value))} // Display formatted value
-                        //  onFocus={(e) =>
-                        //    (e.target.value = field.value.toString())
-                        //  } // Show raw number on focus
-                         onBlur={(e) =>
-                           field.onChange(parseCurrency(e.target.value))
-                         } // Parse back to number on blur
-                         onChange={(e) =>
-                           field.onChange(parseCurrency(e.target.value))
-                         } // Handle manual typing
+                        <Input type="text" min={0} placeholder="299000" {...field}
+                          value={formatNumber(Number(field.value))} // Display formatted value
+                      
+                          onBlur={(e) =>
+                            field.onChange(parseCurrency(e.target.value))
+                          } // Parse back to number on blur
+                          onChange={(e) =>
+                            field.onChange(parseCurrency(e.target.value))
+                          } // Handle manual typing
                         />
                       </FormControl>
                       <FormMessage />
@@ -541,7 +546,7 @@ export default function ProductForm({product}:{product: SanPham}) {
                     <FormItem>
                       <FormLabel>Giá giảm (VNĐ)</FormLabel>
                       <FormControl>
-                        <Input type="number" min="0" step="1" placeholder="199000" {...field} 
+                        <Input type="text" min={0} placeholder="199000" {...field} 
                          value={formatNumber(Number(field.value))} // Display formatted value
                         //  onFocus={(e) =>
                         //    (e.target.value = field.value?.toString() || '')

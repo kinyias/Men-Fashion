@@ -1,8 +1,16 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
-import { BienThe, MauSacWithImages } from "@/types"
+import { MauSacWithImages } from "@/types"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
 import { Label } from "../ui/label"
+export interface BienThe {
+  ma: number
+  gia: string
+  soluong: number
+  masp: number
+  mamausac: number
+  makichco: number
+}
 interface ColorSizeMatrixProps {
   selectedColors: MauSacWithImages[]
   selectedSizes: { ma: number; ten: string }[]
