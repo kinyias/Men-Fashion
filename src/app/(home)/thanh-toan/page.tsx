@@ -17,12 +17,21 @@ export default function CheckoutPage() {
   const router = useRouter()
   const [isProcessing, setIsProcessing] = useState(false)
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null)
+  const [shippingMethod, setShippingMethod] = useState<"nhanh" | "tietkiem" | "hoatoc" >("tietkiem");
+  const [shippingPrices, setShippingPrices] = useState<{[key: string]: {
+    price: number,
+    time: number,
+  }}>({});
   const {items: cartItems, clearCart} = useCartStore()
   
   // Calculate order totals
   const subtotal = cartItems.reduce((sum, item) => sum + item.gia * item.soLuong, 0)
-  const shipping = 12.99
-  const total = subtotal + shipping - (appliedCoupon?.discount || 0)
+  const shipping = shippingMethod === "tietkiem" 
+  ? shippingPrices["STK"]?.price 
+  : shippingMethod === "nhanh"
+  ? shippingPrices["SCN"]?.price
+  : shippingPrices["SHT"]?.price;
+  const total = subtotal + (shipping || 0) - (appliedCoupon?.discount || 0)
 
   const createOrderMutation = useMutation({
     mutationFn: createOrder,
@@ -45,6 +54,7 @@ export default function CheckoutPage() {
       ...data.shipping,
       tonggia: total,
       tamtinh: subtotal,
+      phigiaohang: shipping || 0,
       chiTietDonHangs: cartItems.map((item) => ({
         masp:item.ma,
         soluong: item.soLuong,
@@ -55,7 +65,6 @@ export default function CheckoutPage() {
         phuongthuc: data.payment.phuongthuc,
       }
     }
-    
     createOrderMutation.mutate(orderData)
   }
 
@@ -65,22 +74,22 @@ export default function CheckoutPage() {
           <div className="mb-6">
             <Link href="/" className="flex items-center text-sm text-muted-foreground hover:text-foreground">
               <ChevronLeft className="mr-1 h-4 w-4" />
-              Continue Shopping
+              Tiếp tục mua sắm
             </Link>
           </div>
 
-          <h1 className="text-3xl font-bold tracking-tight mb-8">Checkout</h1>
+          <h1 className="text-3xl font-bold tracking-tight mb-8">Thanh toán</h1>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Checkout Form */}
             <div className="lg:col-span-2">
-              <CheckoutForm onSubmit={handleSubmitOrder} isProcessing={isProcessing} />
+              <CheckoutForm onSubmit={handleSubmitOrder} isProcessing={isProcessing} onSetShippingMethod={setShippingMethod} shippingPrices={shippingPrices} onSetShippingPrices={setShippingPrices}  />
             </div>
 
             {/* Order Summary */}
             <div className="lg:col-span-1">
               <div className="sticky top-24">
-                <OrderSummary cartItems={cartItems} appliedCoupon={appliedCoupon} onSetAppliedCoupon={setAppliedCoupon} subtotal={subtotal} shipping={shipping} total={total} />
+                <OrderSummary cartItems={cartItems} appliedCoupon={appliedCoupon} onSetAppliedCoupon={setAppliedCoupon} subtotal={subtotal} shipping={shipping || 0} total={total} />
               </div>
             </div>
           </div>

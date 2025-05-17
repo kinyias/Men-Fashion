@@ -1,22 +1,40 @@
 "use client"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Loader2, ShieldCheck } from "lucide-react"
+import { Loader2, Package, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { checkoutSchema, type CheckoutFormValues } from "@/lib/validations/checkout.validator"
 import { Textarea } from "../ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
+import { useEffect, useState } from "react"
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { calculatePrice, getDistricts, getProvinces, getWards } from "@/lib/api"
+import toast from "react-hot-toast"
+import { ViettelPostPrice, ViettelPostPriceRequest } from "@/types/viettelpost"
+import { formatCurrency } from "@/utils/currency"
+import { formatHoursToDays } from "@/utils/formatTime"
 
 interface CheckoutFormProps {
   onSubmit: (data: CheckoutFormValues) => void
-  isProcessing: boolean
+  isProcessing: boolean,
+  shippingPrices: {[key: string]: {
+    price: number,
+    time: number,
+  }},
+  onSetShippingMethod: (method: "nhanh" | "tietkiem" | "hoatoc") => void,
+  onSetShippingPrices: (prices: {[key: string]: {
+    price: number,
+    time: number,
+  }}) => void,
 }
 
-export function CheckoutForm({ onSubmit, isProcessing }: CheckoutFormProps) {
+export function CheckoutForm({ onSubmit, isProcessing, shippingPrices, onSetShippingMethod, onSetShippingPrices }: CheckoutFormProps) {
+    const [selectedProvince, setSelectedProvince] = useState<number | null>(null);
+    const [selectedDistrict, setSelectedDistrict] = useState<number | null>(null);
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
@@ -30,54 +48,105 @@ export function CheckoutForm({ onSubmit, isProcessing }: CheckoutFormProps) {
         quan: "",
         phuong: "",
         ghichu: "",
-        phuongthucgiaohang: "standard",
+        phuongthucgiaohang: "tietkiem",
       },
       payment: {
-        phuongthuc: "credit",
-        cardNumber: "",
-        cardName: "",
-        expiryDate: "",
-        cvv: "",
-        saveCard: false,
-        sameAsShipping: true,
+        phuongthuc: "cod",
       },
     },
     mode: "onChange",
   })
 
-  const { watch } = form
-  const paymentMethod = watch("payment.phuongthuc")
-
-  // Định dạng số thẻ
-  const formatCardNumber = (value: string) => {
-    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "")
-    const matches = v.match(/\d{4,16}/g)
-    const match = (matches && matches[0]) || ""
-    const parts = []
-
-    for (let i = 0, len = match.length; i < len; i += 4) {
-      parts.push(match.substring(i, i + 4))
-    }
-
-    if (parts.length) {
-      return parts.join(" ")
-    } else {
-      return value
-    }
-  }
-
-  // Định dạng ngày hết hạn
-  const formatExpiryDate = (value: string) => {
-    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "")
-    if (v.length > 2) {
-      return `${v.substring(0, 2)}/${v.substring(2, 4)}`
-    }
-    return v
-  }
-
   const handleSubmit = (data: CheckoutFormValues) => {
-    onSubmit(data)
+    
+    // Get the province name from the selected province ID
+    const selectedProvinceName = provincesData?.data.find(
+      province => province.PROVINCE_ID.toString() === data.shipping.thanhpho
+    )?.PROVINCE_NAME || '';
+
+    // Get the district name from the selected district ID
+    const selectedDistrictName = districtsData?.data.find(
+      district => district.DISTRICT_ID.toString() === data.shipping.quan
+    )?.DISTRICT_NAME || '';
+
+    // Get the ward name from the selected ward ID
+    const selectedWardName = wardsData?.data.find(
+      ward => ward.WARDS_ID.toString() === data.shipping.phuong
+    )?.WARDS_NAME || '';
+    // Create modified data with names instead of IDs
+    const modifiedData = {
+      ...data,
+      shipping: {
+        ...data.shipping,
+        thanhpho: selectedProvinceName,
+        quan: selectedDistrictName,
+        phuong: selectedWardName,
+      }
+    };
+      
+    onSubmit(modifiedData);
   }
+
+  // Mutation để tính phí vận chuyển
+  const calculatePriceMutation = useMutation({
+    mutationFn: (data: ViettelPostPriceRequest) => calculatePrice(data),
+    onSuccess: (data) => {
+      const prices = data.data.reduce((acc: {[key: string]: {
+        price: number,
+        time: number,
+      }}, item: ViettelPostPrice) => {
+        acc[item.service] = {
+          price: item.MONEY_TOTAL,
+          time: item.KPI_HT
+        };
+        return acc;
+      }, {});
+      onSetShippingPrices(prices);
+    },
+    onError: () => {
+      toast.error("Không thể tính phí vận chuyển. Vui lòng thử lại!");
+    }
+  });
+
+  // Fetch provinces
+  const { data: provincesData } = useQuery({
+    queryKey: ['provinces'],
+    queryFn: () => getProvinces(),
+  });
+
+  // Fetch districts based on selected province
+  const { data: districtsData } = useQuery({
+    queryKey: ['districts', selectedProvince],
+    queryFn: () => getDistricts({ provinceId: selectedProvince! }),
+    enabled: !!selectedProvince,
+  });
+
+  // Fetch wards based on selected district
+  const { data: wardsData } = useQuery({
+    queryKey: ['wards', selectedDistrict],
+    queryFn: () => getWards({ districtId: selectedDistrict! }),
+    enabled: !!selectedDistrict,
+  });
+  const isAddressComplete = form.watch('shipping.phuong') !== '';
+  
+  useEffect(() => {
+    if (isAddressComplete) {
+        const priceRequest: ViettelPostPriceRequest = {
+          PRODUCT_WEIGHT: 500,
+          PRODUCT_PRICE: 5000,
+          MONEY_COLLECTION: 0,
+          ORDER_SERVICE_ADD: "",
+          ORDER_SERVICE: "",
+          SENDER_PROVINCE: process.env.NEXT_PUBLIC_VIETTEL_POST_SENDER_PROVINCE || "2",
+          SENDER_DISTRICT: process.env.NEXT_PUBLIC_VIETTEL_POST_SENDER_DISTRICT || "47",
+          RECEIVER_PROVINCE: selectedProvince!.toString(),
+          RECEIVER_DISTRICT: selectedDistrict!.toString(),
+          PRODUCT_TYPE: "HH",
+          NATIONAL_TYPE: 1,
+        };
+        return calculatePriceMutation.mutate(priceRequest);
+    }
+  }, [isAddressComplete, selectedProvince, selectedDistrict]);
 
   return (
     <Form {...form}>
@@ -149,14 +218,36 @@ export function CheckoutForm({ onSubmit, isProcessing }: CheckoutFormProps) {
                 )}
               />
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
                   name="shipping.thanhpho"
                   render={({ field }) => (
-                    <FormItem className="col-span-2">
+                    <FormItem>
                       <FormLabel>Tỉnh/Thành phố</FormLabel>
-                      <FormControl><Input {...field} /></FormControl>
+                      <Select
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          setSelectedProvince(Number(value));
+                          setSelectedDistrict(null);
+                          form.setValue('shipping.quan', '');
+                          form.setValue('shipping.phuong', '');
+                        }}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger  className="w-full">
+                            <SelectValue placeholder="Chọn tỉnh/thành phố" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {provincesData?.data.map((province) => (
+                            <SelectItem key={province.PROVINCE_ID} value={province.PROVINCE_ID.toString()}>
+                              {province.PROVINCE_NAME}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -167,24 +258,155 @@ export function CheckoutForm({ onSubmit, isProcessing }: CheckoutFormProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Quận/Huyện</FormLabel>
-                      <FormControl><Input {...field} /></FormControl>
+                      <Select
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          setSelectedDistrict(Number(value));
+                          form.setValue('shipping.phuong', '');
+                        }}
+                        value={field.value}
+                        disabled={!selectedProvince}
+                      >
+                        <FormControl>
+                          <SelectTrigger  className="w-full">
+                            <SelectValue placeholder="Chọn quận/huyện" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {districtsData?.data.map((district) => (
+                            <SelectItem key={district.DISTRICT_ID} value={district.DISTRICT_ID.toString()}>
+                              {district.DISTRICT_NAME}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="shipping.phuong"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Phường/xã</FormLabel>
-                      <FormControl><Input {...field} /></FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={!selectedDistrict}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full" >
+                            <SelectValue placeholder="Chọn phường/xã" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {wardsData?.data.map((ward) => (
+                            <SelectItem key={ward.WARDS_ID} value={ward.WARDS_ID.toString()}>
+                              {ward.WARDS_NAME}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
-              <FormField
+            
+             {isAddressComplete ? (
+                <FormField
+                  control={form.control}
+                  name="shipping.phuongthucgiaohang"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <FormLabel>Phương thức giao hàng</FormLabel>
+                      <FormControl>
+                        <RadioGroup 
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            onSetShippingMethod(value as "hoatoc" | "nhanh" | "tietkiem");
+                          }} 
+                          defaultValue={field.value} 
+                          className="space-y-2"
+                        >
+                          
+                          <div className="flex items-center space-x-2 border rounded-md p-3">
+                            <FormControl><RadioGroupItem value="tietkiem" id="tietkiem" /></FormControl>
+                            <FormLabel htmlFor="tietkiem" className="flex-1 cursor-pointer">
+                              <div className="font-medium">Tiết kiệm</div>
+                              <div className="text-sm text-muted-foreground"> {shippingPrices["STK"] && (
+                      <div className="text-sm text-muted-foreground">
+                        {formatHoursToDays(shippingPrices["STK"].time)} - {formatHoursToDays(shippingPrices["STK"].time + 24)}
+                      </div>
+                    )}</div>
+                            </FormLabel>
+                            <div className="font-medium">
+                              {calculatePriceMutation.isPending ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                shippingPrices["STK"] ? 
+                                `${formatCurrency(shippingPrices["STK"].price)}` :
+                                'Đang tính...'
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2 border rounded-md p-3">
+                            <FormControl><RadioGroupItem value="nhanh" id="nhanh" /></FormControl>
+                            <FormLabel htmlFor="nhanh" className="flex-1 cursor-pointer">
+                              <div className="font-medium">Nhanh</div>
+                              <div className="text-sm text-muted-foreground">  {shippingPrices["SCN"] && (
+                      <div className="text-sm text-muted-foreground">
+                        {formatHoursToDays(shippingPrices["SCN"].time)} - {formatHoursToDays(shippingPrices["SCN"].time + 24)}
+                      </div>
+                    )}</div>
+                            </FormLabel>
+                            <div className="font-medium">
+                              {calculatePriceMutation.isPending ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                shippingPrices["SCN"] ? 
+                                `${formatCurrency(shippingPrices["SCN"].price)}` :
+                                'Đang tính...'
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2 border rounded-md p-3">
+                            <FormControl><RadioGroupItem value="hoatoc" id="hoatoc" /></FormControl>
+                            <FormLabel htmlFor="hoatoc" className="flex-1 cursor-pointer">
+                              <div className="font-medium">Hỏa tốc</div>
+                              <div className="text-sm text-muted-foreground"> {shippingPrices["SHT"] && (
+                      <div className="text-sm text-muted-foreground">
+                        {formatHoursToDays(shippingPrices["SHT"].time)} - {formatHoursToDays(shippingPrices["SHT"].time + 24)}
+                      </div>
+                    )}</div>
+                            </FormLabel>
+                            <div className="font-medium">
+                              {calculatePriceMutation.isPending ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                shippingPrices["SHT"] ? 
+                                `${formatCurrency(shippingPrices["SHT"].price)}` :
+                                'Đang tính...'
+                              )}
+                            </div>
+                          </div>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ) : (
+                <div className="p-4 py-5 border rounded-md bg-muted/30">
+                  <Package className="mx-auto h-30 w-30 py-5 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground text-center">
+                    Vui lòng chọn địa chỉ giao hàng để có phương thức giao hàng
+                  </p>
+                </div>
+              )}
+                <FormField
                   control={form.control}
                   name="shipping.ghichu"
                   render={({ field }) => (
@@ -195,36 +417,6 @@ export function CheckoutForm({ onSubmit, isProcessing }: CheckoutFormProps) {
                     </FormItem>
                   )}
                 />
-              <FormField
-                control={form.control}
-                name="shipping.phuongthucgiaohang"
-                render={({ field }) => (
-                  <FormItem className="space-y-3">
-                    <FormLabel>Phương thức giao hàng</FormLabel>
-                    <FormControl>
-                      <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="space-y-2">
-                        <div className="flex items-center space-x-2 border rounded-md p-3">
-                          <FormControl><RadioGroupItem value="standard" id="standard" /></FormControl>
-                          <FormLabel htmlFor="standard" className="flex-1 cursor-pointer">
-                            <div className="font-medium">Giao hàng tiêu chuẩn</div>
-                            <div className="text-sm text-muted-foreground">3-5 ngày làm việc</div>
-                          </FormLabel>
-                          <div className="font-medium">$12.99</div>
-                        </div>
-                        <div className="flex items-center space-x-2 border rounded-md p-3">
-                          <FormControl><RadioGroupItem value="express" id="express" /></FormControl>
-                          <FormLabel htmlFor="express" className="flex-1 cursor-pointer">
-                            <div className="font-medium">Giao hàng nhanh</div>
-                            <div className="text-sm text-muted-foreground">1-2 ngày làm việc</div>
-                          </FormLabel>
-                          <div className="font-medium">$24.99</div>
-                        </div>
-                      </RadioGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
           </CardContent>
         </Card>
@@ -243,10 +435,10 @@ export function CheckoutForm({ onSubmit, isProcessing }: CheckoutFormProps) {
                     <FormControl>
                       <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="space-y-2">
                         <div className="flex items-center space-x-2 border rounded-md p-3">
-                          <FormControl><RadioGroupItem value="credit" id="credit" /></FormControl>
-                          <FormLabel htmlFor="credit" className="flex-1 cursor-pointer">
-                            <div className="font-medium">Thẻ tín dụng / Ghi nợ</div>
-                            <div className="text-sm text-muted-foreground">Chấp nhận tất cả các loại thẻ phổ biến</div>
+                          <FormControl><RadioGroupItem value="cod" id="cod" /></FormControl>
+                          <FormLabel htmlFor="cod" className="flex-1 cursor-pointer">
+                            <div className="font-medium">COD</div>
+                            <div className="text-sm text-muted-foreground">(Thanh toán khi nhận hàng)</div>
                           </FormLabel>
                           <div className="flex space-x-1">
                             <div className="h-6 w-10 bg-muted rounded"></div>
@@ -255,8 +447,8 @@ export function CheckoutForm({ onSubmit, isProcessing }: CheckoutFormProps) {
                           </div>
                         </div>
                         <div className="flex items-center space-x-2 border rounded-md p-3">
-                          <FormControl><RadioGroupItem value="momo" id="paypal" /></FormControl>
-                          <FormLabel htmlFor="paypal" className="flex-1 cursor-pointer">
+                          <FormControl><RadioGroupItem value="momo" id="momo" /></FormControl>
+                          <FormLabel htmlFor="momo" className="flex-1 cursor-pointer">
                             <div className="font-medium">Momo</div>
                             <div className="text-sm text-muted-foreground">Thanh toán bằng MOMO</div>
                           </FormLabel>
@@ -265,117 +457,6 @@ export function CheckoutForm({ onSubmit, isProcessing }: CheckoutFormProps) {
                       </RadioGroup>
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Thông tin thẻ */}
-              {paymentMethod === "credit" && (
-                <div className="space-y-4">
-                  {/* Số thẻ */}
-                  <FormField
-                    control={form.control}
-                    name="payment.cardNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Số thẻ</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="1234 5678 9012 3456"
-                            {...field}
-                            onChange={(e) => {
-                              const formatted = formatCardNumber(e.target.value)
-                              field.onChange(formatted.replace(/\s/g, ""))
-                              e.target.value = formatted
-                            }}
-                            maxLength={19}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  {/* Tên trên thẻ */}
-                  <FormField
-                    control={form.control}
-                    name="payment.cardName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tên trên thẻ</FormLabel>
-                        <FormControl><Input placeholder="Nguyễn Văn A" {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Ngày hết hạn & CVV */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="payment.expiryDate"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Ngày hết hạn</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="MM/YY"
-                              {...field}
-                              onChange={(e) => {
-                                const formatted = formatExpiryDate(e.target.value)
-                                field.onChange(formatted)
-                                e.target.value = formatted
-                              }}
-                              maxLength={5}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="payment.cvv"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>CVV</FormLabel>
-                          <FormControl><Input placeholder="123" {...field} type="password" maxLength={4} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  {/* Lưu thẻ */}
-                  <FormField
-                    control={form.control}
-                    name="payment.saveCard"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                        <FormControl>
-                          <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                        </FormControl>
-                        <div className="space-y-1 leading-none">
-                          <FormLabel>Lưu thông tin thẻ cho lần mua sau</FormLabel>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              )}
-
-              {/* Địa chỉ thanh toán giống địa chỉ giao hàng */}
-              <FormField
-                control={form.control}
-                name="payment.sameAsShipping"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                    <FormControl>
-                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Địa chỉ thanh toán giống địa chỉ giao hàng</FormLabel>
-                    </div>
                   </FormItem>
                 )}
               />

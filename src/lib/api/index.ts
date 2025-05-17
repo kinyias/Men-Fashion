@@ -5,3 +5,4 @@ export * from './api-colors';
 export * from './api-sizes';
 export * from './api-products';
 export * from './api-orders';
+export * from './api-viettelpost'

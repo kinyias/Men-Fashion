@@ -10,11 +10,11 @@ export const shippingSchema = z.object({
     .min(10, "Số điện thoại phải có ít nhất 10 số")
     .regex(/^[0-9]{10,11}$/, "Vui lòng nhập số điện thoại hợp lệ"),
   diachi: z.string().min(5, "Địa chỉ phải có ít nhất 5 ký tự"),
-  thanhpho: z.string().min(2, "Vui lòng nhập tên thành phố"),
-  quan: z.string().min(2, "Vui lòng nhập tên quận"),
-  phuong: z.string().min(2, "Vui lòng nhập tên phường"),
+  thanhpho: z.string().min(1, "Vui lòng nhập tên thành phố"),
+  quan: z.string().min(1, "Vui lòng nhập tên quận"),
+  phuong: z.string().min(1, "Vui lòng nhập tên phường"),
   ghichu: z.string().optional(),
-  phuongthucgiaohang: z.enum(["standard", "express"], {
+  phuongthucgiaohang: z.enum(["tietkiem", "nhanh", "hoatoc"], {
     required_error: "Vui lòng chọn phương thức giao hàng",
   }),
 })
@@ -22,52 +22,10 @@ export const shippingSchema = z.object({
 // Payment information schema to match ThanhToan model
 export const paymentSchema = z
   .object({
-    phuongthuc: z.enum(["credit", "momo", "vnpay"], {
+    phuongthuc: z.enum(["cod", "momo", "vnpay"], {
       required_error: "Vui lòng chọn phương thức thanh toán",
     }),
-    cardNumber: z.string().refine(
-      (val) => {
-        if (val === "") return true
-        return /^[0-9]{16}$/.test(val)
-      },
-      { message: "Số thẻ phải có 16 chữ số" },
-    ),
-    cardName: z.string().refine(
-      (val) => {
-        if (val === "") return true
-        return val.length >= 3
-      },
-      { message: "Tên chủ thẻ phải có ít nhất 3 ký tự" },
-    ),
-    expiryDate: z.string().refine(
-      (val) => {
-        if (val === "") return true
-        return /^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(val)
-      },
-      { message: "Ngày hết hạn phải có định dạng MM/YY" },
-    ),
-    cvv: z.string().refine(
-      (val) => {
-        if (val === "") return true
-        return /^[0-9]{3,4}$/.test(val)
-      },
-      { message: "CVV phải có 3 hoặc 4 chữ số" },
-    ),
-    saveCard: z.boolean(),
-    sameAsShipping: z.boolean(),
   })
-  .refine(
-    (data) => {
-      if (data.phuongthuc === "credit") {
-        return !!data.cardNumber && !!data.cardName && !!data.expiryDate && !!data.cvv
-      }
-      return true
-    },
-    {
-      message: "Vui lòng điền đầy đủ thông tin thẻ",
-      path: ["cardNumber"],
-    },
-  )
 
 // Complete checkout schema
 export const checkoutSchema = z.object({

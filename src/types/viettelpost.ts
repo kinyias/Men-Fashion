@@ -82,7 +82,11 @@ export interface ViettelPostPriceResponse {
   status: number;
   error: boolean;
   message: string;
-  data: {
+  data: ViettelPostPrice[];
+}
+
+export interface ViettelPostPrice {
+    service: string;
     MONEY_TOTAL_OLD: number;
     MONEY_TOTAL: number;
     MONEY_TOTAL_FEE: number;
@@ -92,5 +96,4 @@ export interface ViettelPostPriceResponse {
     MONEY_VAS: number;
     MONEY_VAT: number;
     KPI_HT: number;
-  };
-}
+  }

@@ -202,7 +202,7 @@ export function OrderSummary({ cartItems, subtotal, shipping, total, appliedCoup
                   <p className="text-xs text-muted-foreground">
                     {appliedCoupon.discount === shipping
                       ? "Áp dụng miễn phí vận chuyển"
-                      : `Đã giảm $${appliedCoupon.discount.toFixed(2)}`}
+                      : `Đã giảm ${formatCurrency(appliedCoupon.discount)}`}
                   </p>
                 </div>
               </div>
