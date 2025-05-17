@@ -52,7 +52,7 @@ export  function CartSidebar() {
               <ScrollArea className="flex-1 px-6 py-4">
               <div className="space-y-4">
                 {items.map((item) => (
-                  <div key={`${item.ma}-${item.bienThe.mauSac?.ma}-${item.bienThe.mauSac?.ma}`} className="flex gap-4">
+                  <div key={`${item.ma}-${item.bienThe.mauSac?.ma}-${item.bienThe.kichCo?.ma}`} className="flex gap-4">
                     <div className="relative h-24 w-20 overflow-hidden rounded-md bg-muted">
                       <Image src={item.hinhAnh || "/placeholder.svg"} alt={item.ten} fill className="object-cover" />
                     </div>
@@ -143,7 +143,7 @@ export  function CartSidebar() {
                 <Link href={'/thanh-toan'}>
                 <Button className="w-full rounded-full" onClick={closeCart}>Thanh toán</Button>
                 </Link>
-                <Button variant="outline" className="w-full rounded-full" onClick={closeCart}>
+                <Button variant="outline" className="w-full rounded-full mt-2" onClick={closeCart}>
                   Tiếp tục mua sắm
                 </Button>
               </div>

@@ -107,6 +107,8 @@ export interface DonHangFormValues {
   sdt: string;
   ghichu?: string;
   maKhuyenMai?: number;
+  tamtinh: number;
+  tonggia: number;
   chiTietDonHangs: {
     masp: number;
     mabienthe: number;

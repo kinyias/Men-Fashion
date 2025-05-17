@@ -8,42 +8,55 @@ import { CheckoutForm } from "@/components/checkout/CheckoutForm"
 import { OrderSummary } from "@/components/checkout/OrderSummary"
 import type { CheckoutFormValues } from "@/lib/validations/checkout.validator"
 import { useCartStore } from "@/lib/store/cart-store"
+import { createOrder } from "@/lib/api"
+import { useMutation } from "@tanstack/react-query"
+import { ApiError } from "@/types"
+import toast from "react-hot-toast"
 
 export default function CheckoutPage() {
   const router = useRouter()
   const [isProcessing, setIsProcessing] = useState(false)
-  const {items: cartItems} = useCartStore()
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null)
+  const {items: cartItems, clearCart} = useCartStore()
+  
   // Calculate order totals
   const subtotal = cartItems.reduce((sum, item) => sum + item.gia * item.soLuong, 0)
   const shipping = 12.99
-  const tax = subtotal * 0.08 // 8% tax rate
-  const total = subtotal + shipping + tax
+  const total = subtotal + shipping - (appliedCoupon?.discount || 0)
+
+  const createOrderMutation = useMutation({
+    mutationFn: createOrder,
+    onSuccess: () => {
+      clearCart()
+      router.push('/thanh-toan/xac-nhan')
+      setIsProcessing(true)
+    },
+    onError: (error: ApiError) => {
+      toast.error('Đặt hàng thất bại. Vui lòng thử lại!')
+      console.log(error)
+      setIsProcessing(false)
+    },
+    retry:false
+  })
 
   const handleSubmitOrder = (data: CheckoutFormValues) => {
-    // Process the order
     setIsProcessing(true)
     const orderData = {
       ...data.shipping,
+      tonggia: total,
+      tamtinh: subtotal,
       chiTietDonHangs: cartItems.map((item) => ({
-        masp: Number(item.ma),
+        masp:item.ma,
         soluong: item.soLuong,
-        dongia: item.bienThe.gia,
-        mabienthe: Number(item.ma)
+        dongia: item.gia,
+        mabienthe: item.bienThe.ma
       })),
-     thanhToan:
-      {
+      thanhToan: {
         phuongthuc: data.payment.phuongthuc,
       }
     }
-    // Log the form data (in a real app, you would send this to your API)
-    console.log("Order submitted:", orderData)
-
-    // Simulate order processing
-    setTimeout(() => {
-      setIsProcessing(false)
-      // Navigate to order confirmation
-      router.push("/checkout/confirmation")
-    }, 2000)
+    
+    createOrderMutation.mutate(orderData)
   }
 
   return (
@@ -67,7 +80,7 @@ export default function CheckoutPage() {
             {/* Order Summary */}
             <div className="lg:col-span-1">
               <div className="sticky top-24">
-                <OrderSummary cartItems={cartItems} subtotal={subtotal} shipping={shipping} tax={tax} total={total} />
+                <OrderSummary cartItems={cartItems} appliedCoupon={appliedCoupon} onSetAppliedCoupon={setAppliedCoupon} subtotal={subtotal} shipping={shipping} total={total} />
               </div>
             </div>
           </div>

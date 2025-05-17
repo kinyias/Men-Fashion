@@ -23,8 +23,9 @@ interface OrderSummaryProps {
   cartItems: CartItem[]
   subtotal: number
   shipping: number
-  tax: number
   total: number
+  appliedCoupon: { code: string; discount: number } | null
+  onSetAppliedCoupon: (coupon: { code: string; discount: number } | null) => void
 }
 
 // Danh sách mã giảm giá mẫu
@@ -66,17 +67,13 @@ const availableCoupons: Coupon[] = [
   },
 ]
 
-export function OrderSummary({ cartItems, subtotal, shipping, total: initialTotal }: OrderSummaryProps) {
+export function OrderSummary({ cartItems, subtotal, shipping, total, appliedCoupon, onSetAppliedCoupon }: OrderSummaryProps) {
   const [couponCode, setCouponCode] = useState("")
-  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null)
   const [isApplying, setIsApplying] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [filteredCoupons, setFilteredCoupons] = useState<Coupon[]>([])
   const suggestionRef = useRef<HTMLDivElement>(null)
-
-  const discount = appliedCoupon ? appliedCoupon.discount : 0
-  const total = initialTotal - discount
 
   useEffect(() => {
     if (couponCode.trim() === "") {
@@ -128,7 +125,7 @@ export function OrderSummary({ cartItems, subtotal, shipping, total: initialTota
           discountAmount = shipping
         }
 
-        setAppliedCoupon({ code: foundCoupon.code, discount: discountAmount })
+        onSetAppliedCoupon({ code: foundCoupon.code, discount: discountAmount })
       } else {
         setError("Mã giảm giá không hợp lệ hoặc đã hết hạn")
       }
@@ -138,7 +135,7 @@ export function OrderSummary({ cartItems, subtotal, shipping, total: initialTota
   }
 
   const removeCoupon = () => {
-    setAppliedCoupon(null)
+    onSetAppliedCoupon(null)
     setCouponCode("")
     setError(null)
   }
@@ -166,7 +163,7 @@ export function OrderSummary({ cartItems, subtotal, shipping, total: initialTota
 
         <div className="space-y-4">
           {cartItems.map((item) => (
-            <div key={item.ma} className="flex gap-4">
+            <div key={`${item.ma}-${item.bienThe.mamausac}-${item.bienThe.makichco}`} className="flex gap-4">
               <div className="h-20 w-16 bg-muted rounded-md overflow-hidden flex-shrink-0">
                 <Image
                   src={item.hinhAnh || "/placeholder.svg"}
