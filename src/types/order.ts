@@ -26,6 +26,7 @@ export interface DonHang {
   khuyenMai?: KhuyenMai;
   chiTietDonHangs: ChiTietDonHang[];
   thanhToans: ThanhToan[];
+  paymentUrl?: string;
 }
 
 export interface ChiTietDonHang {

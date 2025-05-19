@@ -35,9 +35,15 @@ export default function CheckoutPage() {
 
   const createOrderMutation = useMutation({
     mutationFn: createOrder,
-    onSuccess: () => {
+    onSuccess: (data) => {
       clearCart()
-      router.push('/thanh-toan/xac-nhan')
+      if (data.paymentUrl) {
+        window.location.href = data.paymentUrl;
+      
+      } else {
+        router.push(`/thanh-toan/xac-nhan/${data.ma}`)
+      }
+      router.push(`/thanh-toan/xac-nhan/${data.ma}`)
       setIsProcessing(true)
     },
     onError: (error: ApiError) => {

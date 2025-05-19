@@ -17,6 +17,7 @@ import toast from "react-hot-toast"
 import { ViettelPostPrice, ViettelPostPriceRequest } from "@/types/viettelpost"
 import { formatCurrency } from "@/utils/currency"
 import { formatHoursToDays } from "@/utils/formatTime"
+import Image from "next/image"
 
 interface CheckoutFormProps {
   onSubmit: (data: CheckoutFormValues) => void
@@ -437,22 +438,38 @@ export function CheckoutForm({ onSubmit, isProcessing, shippingPrices, onSetShip
                         <div className="flex items-center space-x-2 border rounded-md p-3">
                           <FormControl><RadioGroupItem value="cod" id="cod" /></FormControl>
                           <FormLabel htmlFor="cod" className="flex-1 cursor-pointer">
-                            <div className="font-medium">COD</div>
+                            <div className="font-medium flex items-center gap-2">
+                              <div className="relative w-8 h-8">
+                                <Image 
+                                  className="object-contain"
+                                  alt="Cod"
+                                  src="/assets/cod.svg" 
+                                  fill
+                                  sizes="(max-width: 40px) 100vw"
+                                />
+                              </div>
+                              COD
+                            </div>
                             <div className="text-sm text-muted-foreground">(Thanh toán khi nhận hàng)</div>
                           </FormLabel>
-                          <div className="flex space-x-1">
-                            <div className="h-6 w-10 bg-muted rounded"></div>
-                            <div className="h-6 w-10 bg-muted rounded"></div>
-                            <div className="h-6 w-10 bg-muted rounded"></div>
-                          </div>
                         </div>
                         <div className="flex items-center space-x-2 border rounded-md p-3">
                           <FormControl><RadioGroupItem value="momo" id="momo" /></FormControl>
                           <FormLabel htmlFor="momo" className="flex-1 cursor-pointer">
-                            <div className="font-medium">Momo</div>
+                            <div className="font-medium flex items-center gap-2">
+                              <div className="relative w-8 h-8">
+                                <Image 
+                                  className="object-contain"
+                                  alt="Momo"
+                                  src="/assets/momo.svg" 
+                                  fill
+                                  sizes="(max-width: 40px) 100vw"
+                                />
+                              </div>
+                              Momo
+                            </div>
                             <div className="text-sm text-muted-foreground">Thanh toán bằng MOMO</div>
                           </FormLabel>
-                          <div className="h-6 w-10 bg-muted rounded"></div>
                         </div>
                       </RadioGroup>
                     </FormControl>

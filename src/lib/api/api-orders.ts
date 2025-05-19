@@ -17,8 +17,13 @@ export const getOrders = async (
   return response.data;
 };
 
-export const getOrderById = async (id: number): Promise<DonHang> => {
+export const getOrderWithOrderItemsById = async (id: number): Promise<DonHang> => {
   const response = await api.get(`/api/donhang/${id}`);
+  return response.data;
+};
+
+export const getOrderById = async (id: number): Promise<DonHang> => {
+  const response = await api.get(`/api/donhang/${id}/xac-nhan`);
   return response.data;
 };
 
