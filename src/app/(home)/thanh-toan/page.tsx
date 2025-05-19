@@ -89,7 +89,7 @@ export default function CheckoutPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Checkout Form */}
             <div className="lg:col-span-2">
-              <CheckoutForm onSubmit={handleSubmitOrder} isProcessing={isProcessing} onSetShippingMethod={setShippingMethod} shippingPrices={shippingPrices} onSetShippingPrices={setShippingPrices}  />
+              <CheckoutForm onSubmit={handleSubmitOrder} total={total} isProcessing={isProcessing} onSetShippingMethod={setShippingMethod} shippingPrices={shippingPrices} onSetShippingPrices={setShippingPrices}  />
             </div>
 
             {/* Order Summary */}

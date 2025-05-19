@@ -65,8 +65,8 @@ export const setAuthTokens = (tokens: AuthTokens) => {
   const { accessToken, refreshToken } = tokens;
   
   // Store tokens in cookies
-  Cookies.set('accessToken', accessToken, { secure: true, sameSite: 'strict' });
-  Cookies.set('refreshToken', refreshToken, { secure: true, sameSite: 'strict' });
+  Cookies.set('accessToken', accessToken, {expires: 7, secure: true, sameSite: 'strict' });
+  Cookies.set('refreshToken', refreshToken, {expires: 7, secure: true, sameSite: 'strict' });
   
   // Update axios headers
   api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;

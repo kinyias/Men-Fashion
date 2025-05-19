@@ -168,7 +168,7 @@ export default function ProductForm({product}:{product: SanPham}) {
             hinhAnhs: colorImages.map(img => ({
               ma: img.ma,
               hinhAnh: img.hinhAnh,
-              anhChinh: img.anhChinh
+              anhChinh: img.anhChinh,
             }))
           }
         }).filter(Boolean) as MauSacWithImages[]

@@ -20,7 +20,8 @@ import { formatHoursToDays } from "@/utils/formatTime"
 import Image from "next/image"
 
 interface CheckoutFormProps {
-  onSubmit: (data: CheckoutFormValues) => void
+  onSubmit: (data: CheckoutFormValues) => void,
+  total: number,
   isProcessing: boolean,
   shippingPrices: {[key: string]: {
     price: number,
@@ -33,7 +34,7 @@ interface CheckoutFormProps {
   }}) => void,
 }
 
-export function CheckoutForm({ onSubmit, isProcessing, shippingPrices, onSetShippingMethod, onSetShippingPrices }: CheckoutFormProps) {
+export function CheckoutForm({ onSubmit, total, isProcessing, shippingPrices, onSetShippingMethod, onSetShippingPrices }: CheckoutFormProps) {
     const [selectedProvince, setSelectedProvince] = useState<number | null>(null);
     const [selectedDistrict, setSelectedDistrict] = useState<number | null>(null);
   const form = useForm<CheckoutFormValues>({
@@ -134,7 +135,7 @@ export function CheckoutForm({ onSubmit, isProcessing, shippingPrices, onSetShip
     if (isAddressComplete) {
         const priceRequest: ViettelPostPriceRequest = {
           PRODUCT_WEIGHT: 500,
-          PRODUCT_PRICE: 5000,
+          PRODUCT_PRICE: total,
           MONEY_COLLECTION: 0,
           ORDER_SERVICE_ADD: "",
           ORDER_SERVICE: "",
