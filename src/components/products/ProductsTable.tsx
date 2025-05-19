@@ -226,14 +226,6 @@ export function ProductsTable() {
       cell: ({ row }) => <div>{formatCurrency(row.getValue("giaban"))}</div>,
     },
     {
-      accessorKey: "_count.bienThes",
-      header: "Số biến thể",
-      cell: ({ row }) => {
-        const count = row.original._count?.bienThes || 0
-        return <div className="text-center">{count}</div>
-      },
-    },
-    {
       accessorKey: "trangthai",
       header: "Trạng thái",
       cell: ({ row }) => {

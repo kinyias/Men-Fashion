@@ -176,7 +176,7 @@ export function ColorVariant({
                           <Image
                             src={image.hinhAnh || "/placeholder.svg"}
                             alt={`Sản phẩm ${color.ten} - Hình ${image.ma}`}
-                            className="h-32 w-full object-cover rounded-md"
+                            className="h-64 w-full object-cover rounded-md"
                             width={500}
                             height={300}
                           />
