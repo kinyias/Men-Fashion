@@ -65,7 +65,7 @@ export default function ProductDetail({product}:{product: SanPham}) {
         ten: product.ten,
         gia: product.giagiam || product.giaban,
         bienThe: getSelectedVariant(),
-        soLuong: 1,
+        soLuong: quantity,
         hinhAnh: getMainImage() || "/placeholder.svg",
       })
       toast.success(`Đã thêm ${product.ten} vào giỏ hàng`)
