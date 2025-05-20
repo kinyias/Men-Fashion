@@ -1,4 +1,5 @@
 import { MauSac } from "./colors";
+import { KhuyenMai } from "./coupons";
 import { KichCo } from "./sizes";
 import { User } from "./user";
 
@@ -55,26 +56,12 @@ export interface ThanhToan {
   madh: number;
 }
 
-export interface KhuyenMai {
-  ma: number;
-  ten: string;
-  loaikhuyenmai: LoaiKhuyenMai;
-  giatrigiam: number;
-  giatridonhang: number;
-  ngaybatdat: Date;
-  ngayketthuc: Date;
-}
 
 export enum TrangThaiDonHang {
   DA_DAT = 'da_dat',
   DANG_XU_LY = 'dang_xu_ly',
   DANG_GIAO_HANG = 'dang_giao_hang',
   DA_GIAO_HANG = 'da_giao_hang'
-}
-
-export enum LoaiKhuyenMai {
-  GIAM_GIA_THEO_TIEN = 'giam_gia_theo_tien',
-  GIAM_GIA_THEO_PHAN_TRAM = 'giam_gia_theo_phan_tram'
 }
 
 export interface DonHangResponse {
