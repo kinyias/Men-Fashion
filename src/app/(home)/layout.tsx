@@ -1,6 +1,7 @@
 
 import Footer from '@/components/layouts/Footer';
 import Header from '@/components/layouts/Header';
+import { ScrollToTop } from '@/components/layouts/ScrollToTop';
 import { AuthProvider } from '@/context/auth-provider';
 
 export default function HomeLayout({
@@ -15,6 +16,7 @@ export default function HomeLayout({
       {/* Header */}
       <Header />
       <main className="flex-1">{children}</main>
+      <ScrollToTop />
       <Footer />
       </div>
     </AuthProvider>
