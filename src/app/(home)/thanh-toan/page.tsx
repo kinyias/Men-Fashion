@@ -10,13 +10,13 @@ import type { CheckoutFormValues } from "@/lib/validations/checkout.validator"
 import { useCartStore } from "@/lib/store/cart-store"
 import { createOrder } from "@/lib/api"
 import { useMutation } from "@tanstack/react-query"
-import { ApiError } from "@/types"
+import { ApiError, KhuyenMai } from "@/types"
 import toast from "react-hot-toast"
 
 export default function CheckoutPage() {
   const router = useRouter()
   const [isProcessing, setIsProcessing] = useState(false)
-  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null)
+  const [appliedCoupon, setAppliedCoupon] = useState<KhuyenMai | null>(null)
   const [shippingMethod, setShippingMethod] = useState<"nhanh" | "tietkiem" | "hoatoc" >("tietkiem");
   const [shippingPrices, setShippingPrices] = useState<{[key: string]: {
     price: number,
@@ -31,7 +31,16 @@ export default function CheckoutPage() {
   : shippingMethod === "nhanh"
   ? shippingPrices["SCN"]?.price
   : shippingPrices["SHT"]?.price;
-  const total = subtotal + (shipping || 0) - (appliedCoupon?.discount || 0)
+  const getDiscount = (coupon: KhuyenMai) => {
+    if (!coupon) return 0
+    if (coupon.loaikhuyenmai === "phan_tram") {
+      return coupon.giatrigiam / 100 * subtotal
+    } else if (coupon.loaikhuyenmai === "tien_mat") {
+      return coupon.giatrigiam
+    }
+    return 0
+  }
+  const total = subtotal + (shipping || 0) - (getDiscount(appliedCoupon!))
 
   const createOrderMutation = useMutation({
     mutationFn: createOrder,

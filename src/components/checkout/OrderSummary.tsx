@@ -7,86 +7,64 @@ import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { CheckCircle2, X, Tag, Percent, Truck, Search } from "lucide-react"
+import { CheckCircle2, X, Tag, Percent, Search, Loader2, AlertCircle } from "lucide-react"
 import { formatCurrency } from "@/utils/currency"
 import { CartItem } from "@/lib/store/cart-store"
-
-interface Coupon {
-  code: string
-  name: string
-  type: "percentage" | "fixed" | "shipping"
-  value: number
-  icon: React.ElementType
-}
+import { KhuyenMai } from "@/types"
+import { useQuery } from "@tanstack/react-query"
+import { getCoupons } from "@/lib/api"
+import { useDebounce } from "@/hooks/use-debounce"
 
 interface OrderSummaryProps {
   cartItems: CartItem[]
   subtotal: number
   shipping: number
   total: number
-  appliedCoupon: { code: string; discount: number } | null
-  onSetAppliedCoupon: (coupon: { code: string; discount: number } | null) => void
+  appliedCoupon: KhuyenMai | null
+  onSetAppliedCoupon: (coupon: KhuyenMai | null) => void
 }
 
-// Danh sách mã giảm giá mẫu
-const availableCoupons: Coupon[] = [
-  {
-    code: "WELCOME10",
-    name: "Ưu đãi chào mừng",
-    type: "percentage",
-    value: 10,
-    icon: Percent,
-  },
-  {
-    code: "SAVE20",
-    name: "Giảm giá mùa xuân",
-    type: "percentage",
-    value: 20,
-    icon: Percent,
-  },
-  {
-    code: "FREESHIP",
-    name: "Miễn phí vận chuyển",
-    type: "shipping",
-    value: 100,
-    icon: Truck,
-  },
-  {
-    code: "SUMMER15",
-    name: "Ưu đãi mùa hè",
-    type: "percentage",
-    value: 15,
-    icon: Percent,
-  },
-  {
-    code: "FLAT25",
-    name: "Giảm giá cố định",
-    type: "fixed",
-    value: 25,
-    icon: Tag,
-  },
-]
 
 export function OrderSummary({ cartItems, subtotal, shipping, total, appliedCoupon, onSetAppliedCoupon }: OrderSummaryProps) {
   const [couponCode, setCouponCode] = useState("")
   const [isApplying, setIsApplying] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const [filteredCoupons, setFilteredCoupons] = useState<Coupon[]>([])
+  const [filteredCoupons, setFilteredCoupons] = useState<KhuyenMai[]>([])
   const suggestionRef = useRef<HTMLDivElement>(null)
+  
+  // Add debounced coupon code
+  const debouncedCouponCode = useDebounce(couponCode, 300)
 
+  // Fetch active coupons with debounced search
+  const { data: couponsData, isLoading } = useQuery({
+    queryKey: ["coupons", { active: "true", search: debouncedCouponCode }],
+    queryFn: () => getCoupons({
+      page: 1,
+      limit: 10,
+      search: debouncedCouponCode,
+      active: "true"
+    }),
+    // staleTime: Infinity,
+  })
+  
+  // Update filtered coupons when coupons data is loaded
   useEffect(() => {
-    if (couponCode.trim() === "") {
-      setFilteredCoupons(availableCoupons)
-    } else {
-      const filtered = availableCoupons.filter(
-        (coupon) =>
-          coupon.code.toLowerCase().includes(couponCode.toLowerCase()) ||
-          coupon.name.toLowerCase().includes(couponCode.toLowerCase()),
-      )
-      setFilteredCoupons(filtered)
+    if (couponsData?.data) {
+      setFilteredCoupons(couponsData.data);
     }
-  }, [couponCode])
+  }, [couponsData]);
+
+  // Update filtered coupons when search input changes or when coupons data is loaded
+  useEffect(() => {
+    if (couponsData?.data) {
+      const filtered = couponsData.data.filter(coupon => 
+        coupon.ten.toLowerCase().includes(couponCode.toLowerCase()) || 
+        coupon.ma.toString().includes(couponCode)
+      );
+      setFilteredCoupons(filtered);
+    }
+  }, [couponCode, couponsData]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -111,27 +89,26 @@ export function OrderSummary({ cartItems, subtotal, shipping, total, appliedCoup
     setError(null)
     setShowSuggestions(false)
 
-    setTimeout(() => {
-      const foundCoupon = availableCoupons.find((coupon) => coupon.code.toUpperCase() === code.toUpperCase())
+    // Find coupon in our fetched data
+    const foundCoupon = couponsData?.data.find(
+      (coupon) => coupon.ma.toString() === code.toString() || coupon.ten.toLowerCase() === code.toLowerCase()
+    )
 
-      if (foundCoupon) {
-        let discountAmount = 0
-
-        if (foundCoupon.type === "percentage") {
-          discountAmount = subtotal * (foundCoupon.value / 100)
-        } else if (foundCoupon.type === "fixed") {
-          discountAmount = Math.min(foundCoupon.value, subtotal)
-        } else if (foundCoupon.type === "shipping") {
-          discountAmount = shipping
-        }
-
-        onSetAppliedCoupon({ code: foundCoupon.code, discount: discountAmount })
-      } else {
-        setError("Mã giảm giá không hợp lệ hoặc đã hết hạn")
+    if (foundCoupon) {
+      // Check if order meets minimum value requirement
+      if (subtotal < foundCoupon.giatridonhang) {
+        setError(`Đơn hàng cần tối thiểu ${formatCurrency(foundCoupon.giatridonhang)} để áp dụng mã này`)
+        setIsApplying(false)
+        return
       }
 
-      setIsApplying(false)
-    }, 800)
+      // Apply the coupon
+      onSetAppliedCoupon(foundCoupon)
+    } else {
+      setError("Mã giảm giá không hợp lệ hoặc đã hết hạn")
+    }
+
+    setIsApplying(false)
   }
 
   const removeCoupon = () => {
@@ -140,20 +117,38 @@ export function OrderSummary({ cartItems, subtotal, shipping, total, appliedCoup
     setError(null)
   }
 
-  const selectCoupon = (coupon: Coupon) => {
-    setCouponCode(coupon.code)
-    handleApplyCoupon(coupon.code)
+  const selectCoupon = (coupon: KhuyenMai) => {
+    // Kiểm tra giá trị đơn hàng tối thiểu trước khi chọn
+    if (subtotal < coupon.giatridonhang) {
+      setError(`Đơn hàng cần tối thiểu ${formatCurrency(coupon.giatridonhang)} để áp dụng mã này`)
+      return
+    }
+    
+    setCouponCode(coupon.ten)
+    handleApplyCoupon(coupon.ten)
   }
 
-  const formatDiscount = (coupon: Coupon) => {
-    if (coupon.type === "percentage") {
-      return `${coupon.value}% giảm`
-    } else if (coupon.type === "fixed") {
-      return `Giảm $${coupon.value.toFixed(2)}`
-    } else if (coupon.type === "shipping") {
-      return "Miễn phí vận chuyển"
+  const formatDiscount = (coupon: KhuyenMai) => {
+    if (coupon.loaikhuyenmai === "phan_tram") {
+      return `${coupon.giatrigiam}% giảm`
+    } else if (coupon.loaikhuyenmai === "tien_mat") {
+      return `Giảm ${formatCurrency(coupon.giatrigiam)}`
     }
     return ""
+  }
+
+  const getDiscount = (coupon: KhuyenMai) => {
+    if (coupon.loaikhuyenmai === "phan_tram") {
+      return coupon.giatrigiam / 100 * subtotal
+    } else if (coupon.loaikhuyenmai === "tien_mat") {
+      return coupon.giatrigiam
+    }
+    return 0
+  }
+
+  // Kiểm tra xem coupon có đạt điều kiện giá trị tối thiểu không
+  const isCouponEligible = (coupon: KhuyenMai) => {
+    return subtotal >= coupon.giatridonhang
   }
 
   return (
@@ -198,11 +193,9 @@ export function OrderSummary({ cartItems, subtotal, shipping, total, appliedCoup
               <div className="flex items-center">
                 <CheckCircle2 className="h-4 w-4 text-primary mr-2" />
                 <div>
-                  <p className="text-sm font-medium">{appliedCoupon.code}</p>
+                  <p className="text-sm font-medium">{appliedCoupon.ten}</p>
                   <p className="text-xs text-muted-foreground">
-                    {appliedCoupon.discount === shipping
-                      ? "Áp dụng miễn phí vận chuyển"
-                      : `Đã giảm ${formatCurrency(appliedCoupon.discount)}`}
+                    {`Đã giảm ${formatCurrency(getDiscount(appliedCoupon))}`}
                   </p>
                 </div>
               </div>
@@ -235,23 +228,44 @@ export function OrderSummary({ cartItems, subtotal, shipping, total, appliedCoup
                   ref={suggestionRef}
                   className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-md max-h-60 overflow-auto"
                 >
-                  {filteredCoupons.length > 0 ? (
-                    filteredCoupons.map((coupon) => (
-                      <div
-                        key={coupon.code}
-                        className="flex items-center p-2 hover:bg-muted cursor-pointer"
-                        onClick={() => selectCoupon(coupon)}
-                      >
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                          <coupon.icon className="h-4 w-4 text-primary" />
+                  {isLoading ? (
+                    <div className="p-4 text-center">
+                      <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">Đang tải mã giảm giá...</p>
+                    </div>
+                  ) : filteredCoupons.length > 0 ? (
+                    filteredCoupons.map((coupon) => {
+                      const eligible = isCouponEligible(coupon);
+                      return (
+                        <div
+                          key={coupon.ma}
+                          className={`flex items-center p-2 ${eligible ? 'hover:bg-muted cursor-pointer' : 'opacity-60 bg-muted/20'}`}
+                          onClick={() => eligible && selectCoupon(coupon)}
+                        >
+                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mr-3">
+                            {
+                              !eligible ? (
+                                <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                              ) : coupon.loaikhuyenmai === "phan_tram" ? (
+                                <Percent className="h-4 w-4 text-primary" />
+                              ) : (
+                                <Tag className="h-4 w-4 text-primary" />
+                              )
+                            }
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={`font-medium text-sm ${!eligible ? 'text-muted-foreground' : ''}`}>{coupon.ten}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {coupon.giatridonhang > 0 && `Đơn tối thiểu: ${formatCurrency(coupon.giatridonhang)}`}
+                              {!eligible && coupon.giatridonhang > 0 && ` (Chưa đạt)`}
+                            </p>
+                          </div>
+                          <div className={`text-sm font-medium ${eligible ? 'text-primary' : 'text-muted-foreground'}`}>
+                            {formatDiscount(coupon)}
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm">{coupon.code}</p>
-                          <p className="text-xs text-muted-foreground">{coupon.name}</p>
-                        </div>
-                        <div className="text-sm font-medium text-primary">{formatDiscount(coupon)}</div>
-                      </div>
-                    ))
+                      );
+                    })
                   ) : (
                     <div className="p-2 text-sm text-muted-foreground text-center">Không tìm thấy mã phù hợp</div>
                   )}
@@ -277,7 +291,7 @@ export function OrderSummary({ cartItems, subtotal, shipping, total, appliedCoup
           {appliedCoupon && (
             <div className="flex justify-between text-sm text-primary">
               <span>Giảm giá</span>
-              <span>-{formatCurrency(appliedCoupon.discount)}</span>
+              <span>-{formatCurrency(getDiscount(appliedCoupon))}</span>
             </div>
           )}
 
