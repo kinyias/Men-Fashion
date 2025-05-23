@@ -4,6 +4,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import ProductCard from "./ProductCard"
 import { getProductsWithVariant } from "@/lib/api/api-products"
 import { SanPhamQueryParams } from "@/types"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function FeatureProduct() {
   const { data: featuredProducts, isLoading } = useQuery({
@@ -19,10 +20,6 @@ export function FeatureProduct() {
     }
   })
 
-  if (isLoading) {
-    return <div>Loading...</div>
-  }
-
   return (
     <Carousel
       opts={{
@@ -32,11 +29,25 @@ export function FeatureProduct() {
       className="w-full"
     >
       <CarouselContent className="-ml-2 md:-ml-4">
-        {featuredProducts?.data.map((product) => (
-          <CarouselItem key={product.ma} className="pl-2 md:pl-4 sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-            <ProductCard product={product} />
-          </CarouselItem>
-        ))}
+        {isLoading ? (
+          // Skeleton loading placeholders
+          Array.from({ length: 4 }).map((_, index) => (
+            <CarouselItem key={`skeleton-${index}`} className="pl-2 md:pl-4 sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+              <div className="space-y-2">
+                <Skeleton className="aspect-square w-full h-64" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-4 w-1/4" />
+              </div>
+            </CarouselItem>
+          ))
+        ) : (
+          featuredProducts?.data.map((product) => (
+            <CarouselItem key={product.ma} className="pl-2 md:pl-4 sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+              <ProductCard product={product} />
+            </CarouselItem>
+          ))
+        )}
       </CarouselContent>
 
       {/* Navigation controls - styled differently for mobile and desktop */}
