@@ -109,6 +109,8 @@ export function OrdersTable({ searchQuery, statusFilter }: OrdersTableProps) {
         return "default"
       case TrangThaiDonHang.DA_GIAO_HANG:
         return "default"
+      case TrangThaiDonHang.DA_HUY:
+        return "destructive"
       default:
         return "outline"
     }
@@ -125,6 +127,8 @@ export function OrdersTable({ searchQuery, statusFilter }: OrdersTableProps) {
         return "Đang Giao Hàng"
       case TrangThaiDonHang.DA_GIAO_HANG:
         return "Đã Giao Hàng"
+      case TrangThaiDonHang.DA_HUY:
+        return "Đã Hủy"
       default:
         return status
     }
@@ -198,7 +202,7 @@ export function OrdersTable({ searchQuery, statusFilter }: OrdersTableProps) {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
-                  <Link href={`/orders/${order.ma}`}>
+                  <Link href={`/admin/orders/${order.ma}`}>
                     <Eye className="mr-2 h-4 w-4" />
                     Xem chi tiết
                   </Link>
@@ -274,10 +278,6 @@ export function OrdersTable({ searchQuery, statusFilter }: OrdersTableProps) {
                       <TableRow
                         key={row.id}
                         data-state={row.getIsSelected() && "selected"}
-                        className="cursor-pointer"
-                        onClick={() => {
-                          window.location.href = `/orders/${row.original.ma}`
-                        }}
                       >
                         {row.getVisibleCells().map((cell) => (
                           <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>

@@ -28,7 +28,7 @@ export default function HeaderDashboard() {
   const pathname = usePathname();
   const breadcrumbTitles = findBreadcrumb(pathname);
   return (
-    <div className="border-b">
+    <div className="border-b print:hidden">
       <div className="flex h-16 items-center px-4">
         <SidebarTrigger className="mr-2" />
         <div className="flex items-center gap-2 font-semibold">

@@ -1,26 +1,135 @@
-    "use client"
+"use client"
 
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
-import { Package, Truck, CreditCard, MapPin, FileText, Clock, CheckCircle2, AlertCircle } from "lucide-react"
-import type { Order } from "@/components/orders/OrderManagement"
+import { Package, Truck, CreditCard, MapPin, Clock, Printer, CheckCircle, XCircle, ArrowRight } from "lucide-react"
 import Image from "next/image"
+import { ChiTietDonHang, DonHang } from "@/types"
+import { formatCurrency } from "@/utils/currency"
+import { cn } from "@/lib/utils"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { updateOrderStatus, cancelOrder } from "@/lib/api/api-orders"
+import toast from "react-hot-toast"
 
-interface OrderDetailsProps {
-  order: Order
-}
+const shippingSteps = [
+  {
+    value: "da_dat",
+    label: "Đã Đặt",
+    icon: Package,
+    description: "Đơn hàng đã được đặt",
+  },
+  {
+    value: "dang_xu_ly",
+    label: "Đang Xử Lý",
+    icon: Clock,
+    description: "Đang chuẩn bị hàng",
+  },
+  {
+    value: "dang_giao_hang",
+    label: "Đang Giao Hàng",
+    icon: Truck,
+    description: "Đang trên đường giao",
+  },
+  {
+    value: "da_giao_hang",
+    label: "Đã Giao Hàng",
+    icon: CheckCircle,
+    description: "Giao hàng thành công",
+  },
+]
 
-export function OrderDetails({ order }: OrderDetailsProps) {
-  const [status, setStatus] = useState<string>(order.status)
-  const [notes, setNotes] = useState(order.notes || "")
+export function OrderDetails({ order }: {order: DonHang}) {
+  const [status, setStatus] = useState<string>(order.trangthai)
+  const [notes, setNotes] = useState(order.ghichu || "")
+  const queryClient = useQueryClient()
+  
+  // Update order status mutation
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: number; status: string }) => {
+      return updateOrderStatus(id, status)
+    },
+    onSuccess: (data) => {
+      // Update local state
+      setStatus(data.trangthai)
+      // Invalidate and refetch order data
+      queryClient.invalidateQueries({ queryKey: ['order', order.ma] })
+      toast.success("Trạng thái đơn hàng đã được cập nhật")
+    },
+    onError: (error) => {
+      toast.error("Không thể cập nhật trạng thái đơn hàng")
+      console.error("Error updating order status:", error)
+    }
+  })
+  
+  // Cancel order mutation
+  const cancelOrderMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: number; reason?: string }) => {
+      return cancelOrder(id, reason)
+    },
+    onSuccess: (data) => {
+      // Update local state
+      setStatus(data.trangthai)
+      // Invalidate and refetch order data
+      queryClient.invalidateQueries({ queryKey: ['order', order.ma] })
+      toast.success("Đơn hàng đã được hủy")
+    },
+    onError: (error) => {
+      toast.error("Không thể hủy đơn hàng")
+      console.error("Error cancelling order:", error)
+    }
+  })
+  
+  // Save notes mutation
+  const saveNotesMutation = useMutation({
+    mutationFn: () => {
+
+      return new Promise<DonHang>((resolve) => {
+        setTimeout(() => resolve(order), 500)
+      })
+    },
+    onSuccess: () => {
+      toast.success("Ghi chú đã được lưu")
+    },
+    onError: () => {
+      toast.error("Không thể lưu ghi chú")
+    }
+  })
+  
+  const getCurrentStepIndex = () => {
+    if (status === "da_huy") return -1
+    return shippingSteps.findIndex((step) => step.value === status)
+  }
+
+  const currentStepIndex = getCurrentStepIndex()
+  const isCancelled = status === "da_huy"
+
+  const handleNextStep = () => {
+    if (isCancelled) return
+
+    const nextIndex = currentStepIndex + 1
+    if (nextIndex < shippingSteps.length) {
+      const nextStatus = shippingSteps[nextIndex].value
+      updateStatusMutation.mutate({ id: order.ma, status: nextStatus })
+    }
+  }
+  
+  const handleCancelOrder = () => {
+    if (confirm("Bạn có chắc chắn muốn hủy đơn hàng này không?")) {
+      cancelOrderMutation.mutate({ id: order.ma, reason: notes })
+    }
+  }
+  
+  const handleSaveNotes = () => {
+    // saveNotesMutation.mutate({ id: order.ma, notes })
+  }
+
+  const canAdvance = !isCancelled && currentStepIndex < shippingSteps.length - 1
 
   // Định dạng ngày tháng
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | Date) => {
     const date = new Date(dateString)
     return new Intl.DateTimeFormat("vi-VN", {
       year: "numeric",
@@ -31,149 +140,83 @@ export function OrderDetails({ order }: OrderDetailsProps) {
     }).format(date)
   }
 
-  // Định dạng tiền tệ
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-      maximumFractionDigits: 0,
-    }).format(amount * 23000) // Chuyển đổi USD sang VND với tỷ giá ước tính
-  }
 
 
-  // Biểu tượng trạng thái
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "pending":
-        return <Clock className="h-4 w-4 text-muted-foreground" />
-      case "processing":
-        return <Package className="h-4 w-4 text-secondary-foreground" />
-      case "shipped":
-        return <Truck className="h-4 w-4 text-primary" />
-      case "delivered":
-        return <CheckCircle2 className="h-4 w-4 text-green-500" />
-      case "cancelled":
-        return <AlertCircle className="h-4 w-4 text-destructive" />
-      default:
-        return <Clock className="h-4 w-4" />
-    }
-  }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Đơn Hàng {order.orderNumber}</CardTitle>
-        <CardDescription>Đặt vào ngày {formatDate(order.date)}</CardDescription>
+        <CardTitle>Đơn Hàng #{order.ma}</CardTitle>
+        <CardDescription>Đặt vào ngày {formatDate(order.ngaydat)}</CardDescription>
       </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="items">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="items">Sản Phẩm</TabsTrigger>
-            <TabsTrigger value="shipping">Vận Chuyển</TabsTrigger>
-            <TabsTrigger value="payment">Thanh Toán</TabsTrigger>
-            <TabsTrigger value="notes">Ghi Chú</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="items" className="space-y-4 pt-4">
-            <div className="space-y-4">
-              {order.items.map((item) => (
-                <div key={item.id} className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-md overflow-hidden flex-shrink-0">
-                    <Image
-                      src={item.image || "/placeholder.svg"}
-                      alt={item.name}
-                      width={48}
-                      height={48}
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{item.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {formatCurrency(item.price)} × {item.quantity}
-                    </p>
-                  </div>
-                  <div className="text-right">{formatCurrency(item.price * item.quantity)}</div>
+      <CardContent className="space-y-8">
+        {/* Sản Phẩm Section */}
+        <div>
+          <h2 className="text-lg font-semibold mb-4">Sản Phẩm</h2>
+          <div className="space-y-4">
+            {order.chiTietDonHangs.map((item: ChiTietDonHang) => (
+              <div key={item.ma} className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-md overflow-hidden flex-shrink-0">
+                  <Image
+                    src={item.sanPham.hinhanh || "/placeholder.svg"}
+                    alt={item.sanPham.ten}
+                    width={48}
+                    height={48}
+                    className="object-cover"
+                  />
                 </div>
-              ))}
-            </div>
-
-            <Separator className="my-4" />
-
-            <div className="space-y-1.5">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Tạm tính</span>
-                <span>{formatCurrency(order.total * 0.85)}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{item.sanPham.ten}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {item.bienThe?.mauSac?.ten} / {item.bienThe?.kichCo?.ten}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatCurrency(item.dongia)} × {item.soluong}
+                  </p>
+                </div>
+                <div className="text-right">{formatCurrency(item.dongia * item.soluong)}</div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Thuế</span>
-                <span>{formatCurrency(order.total * 0.15)}</span>
-              </div>
-              <div className="flex justify-between font-medium">
-                <span>Tổng cộng</span>
-                <span>{formatCurrency(order.total)}</span>
-              </div>
+            ))}
+          </div>
+
+          <Separator className="my-4" />
+
+          <div className="space-y-1.5">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Tạm tính</span>
+              <span>{formatCurrency(order.tamtinh)}</span>
             </div>
-          </TabsContent>
-
-          <TabsContent value="shipping" className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                Địa Chỉ Giao Hàng
-              </h3>
-              <div className="text-sm">
-                <p>{order.customer.name}</p>
-                <p>{order.shippingAddress.line1}</p>
-                {order.shippingAddress.line2 && <p>{order.shippingAddress.line2}</p>}
-                <p>
-                  {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.postalCode}
-                </p>
-                <p>{order.shippingAddress.country}</p>
-              </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Phí giao hàng</span>
+              <span>{formatCurrency(order.phigiaohang)}</span>
             </div>
-
-            <Separator />
-
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium flex items-center gap-2">
-                <Truck className="h-4 w-4" />
-                Trạng Thái Vận Chuyển
-              </h3>
-              <div className="flex items-center gap-2">
-                {getStatusIcon(status)}
-                <Select value={status} onValueChange={setStatus}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Chọn trạng thái" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">Chờ Xử Lý</SelectItem>
-                    <SelectItem value="processing">Đang Xử Lý</SelectItem>
-                    <SelectItem value="shipped">Đã Gửi</SelectItem>
-                    <SelectItem value="delivered">Đã Giao</SelectItem>
-                    <SelectItem value="cancelled">Đã Hủy</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            {order.giamgia && (
+                 <div className="flex justify-between">
+                 <span className="text-muted-foreground">Giảm giá</span>
+                 <span>{formatCurrency(order.giamgia)}</span>
+               </div>
+              )}
+            <div className="flex justify-between font-medium">
+              <span>Tổng cộng</span>
+              <span>{formatCurrency(order.tonggia)}</span>
             </div>
+          </div>
+        </div>
 
-            <div className="pt-2">
-              <Button className="w-full">Cập Nhật Trạng Thái Vận Chuyển</Button>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="payment" className="space-y-4 pt-4">
+        <Separator />
+        {/* Thanh Toán Section */}
+        <div>
+          <h2 className="text-lg font-semibold mb-4">Thanh Toán</h2>
+          <div className="space-y-6">
             <div className="space-y-2">
               <h3 className="text-sm font-medium flex items-center gap-2">
                 <CreditCard className="h-4 w-4" />
                 Phương Thức Thanh Toán
               </h3>
               <p className="text-sm">
-                {order.paymentMethod === "Credit Card"
-                  ? "Thẻ Tín Dụng"
-                  : order.paymentMethod === "PayPal"
-                    ? "PayPal"
-                    : order.paymentMethod}
+                {order.thanhToans.phuongthuc === "cod"
+                  ? "Thanh toán khi nhận hàng (COD)"
+                  : "Thanh toán qua MoMo"}
               </p>
             </div>
 
@@ -182,46 +225,194 @@ export function OrderDetails({ order }: OrderDetailsProps) {
             <div className="space-y-2">
               <h3 className="text-sm font-medium flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                Địa Chỉ Thanh Toán
+                Thông Tin Thanh Toán
               </h3>
               <div className="text-sm">
-                <p>{order.customer.name}</p>
-                <p>{order.billingAddress.line1}</p>
-                {order.billingAddress.line2 && <p>{order.billingAddress.line2}</p>}
-                <p>
-                  {order.billingAddress.city}, {order.billingAddress.state} {order.billingAddress.postalCode}
-                </p>
-                <p>{order.billingAddress.country}</p>
+                <p>Trạng thái: {order.thanhToans.trangthai ? "Đã thanh toán" : "Chưa thanh toán"}</p>
+                {order.thanhToans.ngaythanhtoan && order.thanhToans.trangthai && (
+                  <p>Ngày thanh toán: {formatDate(order.thanhToans.ngaythanhtoan)}</p>
+                )}
               </div>
             </div>
 
+          </div>
+        </div>
+
+        <Separator />
+        {/* Vận Chuyển Section */}
+        <div>
+          <h2 className="text-lg font-semibold mb-4">Vận Chuyển</h2>
+          <div className="space-y-6 p-6 bg-white rounded-lg border">
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium flex items-center gap-2">
+                <Truck className="h-4 w-4" />
+                Trạng Thái Vận Chuyển
+              </h3>
+            </div>
+
+            {/* Normal shipping steps */}
+            {!isCancelled && (
+              <div className="space-y-4">
+                {shippingSteps.map((step, index) => {
+                  const Icon = step.icon
+                  const isCompleted = index < currentStepIndex
+                  const isCurrent = index === currentStepIndex
+                  const isUpcoming = index > currentStepIndex
+
+                  return (
+                    <div key={step.value} className="relative">
+                      {/* Connecting line */}
+                      {index < shippingSteps.length - 1 && (
+                        <div
+                          className={cn(
+                            "absolute left-6 top-12 w-0.5 h-8 transition-colors",
+                            isCompleted ? "bg-green-500" : "bg-gray-200",
+                          )}
+                        />
+                      )}
+
+                      <Button
+                        variant={isCurrent ? "secondary" : isCompleted ? "secondary" : "outline"}
+                        className={cn(
+                          "w-full justify-start h-auto p-4 transition-all cursor-default",
+                          isCurrent && "ring-2 ring-blue-500 ring-offset-2",
+                          isCompleted && "bg-green-50 border-green-200",
+                          isUpcoming && "opacity-60",
+                        )}
+                        asChild
+                      >
+                        <div>
+                          <div className="flex items-center gap-4 w-full">
+                            <div
+                              className={cn(
+                                "flex items-center justify-center w-12 h-12 rounded-full transition-colors",
+                                isCurrent && "bg-blue-500 text-white",
+                                isCompleted && "bg-green-500 text-white",
+                                isUpcoming && "bg-gray-200 text-gray-500",
+                              )}
+                            >
+                              <Icon className="h-5 w-5" />
+                            </div>
+                            <div className="flex-1 text-left">
+                              <div
+                                className={cn("font-medium", isCurrent && "text-blue-700", isCompleted && "text-green-700")}
+                              >
+                                {step.label}
+                              </div>
+                              <div className="text-sm text-gray-500 mt-1">{step.description}</div>
+                            </div>
+                            {isCompleted && <CheckCircle className="h-5 w-5 text-green-500" />}
+                          </div>
+                        </div>
+                      </Button>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Cancelled status */}
+            {isCancelled && (
+              <div className="space-y-4">
+                <Button variant="destructive" className="w-full justify-start h-auto p-4 cursor-not-allowed" disabled>
+                  <div className="flex items-center gap-4 w-full">
+                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-500 text-white">
+                      <XCircle className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <div className="font-medium text-white">Đã hủy</div>
+                      <div className="text-sm text-red-100 mt-1">Đơn hàng đã hủy</div>
+                    </div>
+                  </div>
+                </Button>
+              </div>
+            )}
+
+            {/* Cancel/Restore buttons */}
+            <div className="flex gap-2 pt-4 border-t">
+              {!isCancelled  && (
+                <>
+                  {canAdvance && (
+                    <Button 
+                      onClick={handleNextStep} 
+                      className="flex-1"
+                      disabled={updateStatusMutation.isPending}
+                    >
+                      {updateStatusMutation.isPending ? (
+                        "Đang cập nhật..."
+                      ) : (
+                        <>
+                          <ArrowRight className="h-4 w-4 mr-2" />
+                          Bước Tiếp Theo
+                        </>
+                      )}
+                    </Button>
+                  )}
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleCancelOrder}
+                    className={canAdvance ? "flex-1" : "w-full"}
+                    disabled={cancelOrderMutation.isPending || currentStepIndex === shippingSteps.length - 1}
+                  >
+                    {cancelOrderMutation.isPending ? (
+                      "Đang hủy..."
+                    ) : (
+                      <>
+                        <XCircle className="h-4 w-4 mr-2" />
+                        Hủy Đơn Hàng
+                      </>
+                    )}
+                  </Button>
+                </>
+              )}
+            </div>
+
+            {/* Current status display */}
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="text-sm text-gray-600">Trạng thái hiện tại:</div>
+              <div className="font-medium">
+                {isCancelled ?'Đã hủy' : shippingSteps.find((step) => step.value === status)?.label}
+              </div>
+              {!isCancelled && canAdvance && (
+                <div className="text-sm text-blue-600 mt-1">Bước tiếp theo: {shippingSteps[currentStepIndex + 1]?.label}</div>
+              )}
+              {!isCancelled && !canAdvance && currentStepIndex === shippingSteps.length - 1 && (
+                <div className="text-sm text-green-600 mt-1">Đơn hàng đã hoàn thành</div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Ghi Chú Section */}
+        <div>
+          <h2 className="text-lg font-semibold mb-4">Ghi Chú</h2>
+          <div className="space-y-2">
+            <Textarea
+              placeholder="Thêm ghi chú về đơn hàng này..."
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={6}
+            />
             <div className="pt-2">
-              <Button variant="outline" className="w-full flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                Tạo Hóa Đơn
+              <Button 
+                className="w-full" 
+                onClick={handleSaveNotes}
+                disabled={saveNotesMutation.isPending}
+              >
+                {saveNotesMutation.isPending ? "Đang lưu..." : "Lưu Ghi Chú"}
               </Button>
             </div>
-          </TabsContent>
-
-          <TabsContent value="notes" className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">Ghi Chú Đơn Hàng</h3>
-              <Textarea
-                placeholder="Thêm ghi chú về đơn hàng này..."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={6}
-              />
-            </div>
-
-            <div className="pt-2">
-              <Button className="w-full">Lưu Ghi Chú</Button>
-            </div>
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
       </CardContent>
       <CardFooter className="flex justify-between border-t pt-4">
-        <Button variant="outline">In Đơn Hàng</Button>
+        <Button variant="outline" onClick={() => window.print()}>
+          <Printer className="mr-2 h-4 w-4" />
+          In Đơn Hàng
+        </Button>
         <Button>Gửi Email Cho Khách Hàng</Button>
       </CardFooter>
     </Card>

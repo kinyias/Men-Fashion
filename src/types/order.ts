@@ -20,13 +20,14 @@ export interface DonHang {
   ngayhuy?: Date;
   sdt: string;
   trangthai: TrangThaiDonHang;
+  phigiaohang: number;
   ghichu?: string;
   manguoidung: number;
   maKhuyenMai?: number;
   nguoiDung?: User;
   khuyenMai?: KhuyenMai;
   chiTietDonHangs: ChiTietDonHang[];
-  thanhToans: ThanhToan[];
+  thanhToans: ThanhToan;
   paymentUrl?: string;
 }
 
@@ -61,7 +62,8 @@ export enum TrangThaiDonHang {
   DA_DAT = 'da_dat',
   DANG_XU_LY = 'dang_xu_ly',
   DANG_GIAO_HANG = 'dang_giao_hang',
-  DA_GIAO_HANG = 'da_giao_hang'
+  DA_GIAO_HANG = 'da_giao_hang',
+  DA_HUY = 'da_huy'
 }
 
 export interface DonHangResponse {
