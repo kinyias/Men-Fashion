@@ -148,7 +148,7 @@ export function OrdersTable({ searchQuery, statusFilter }: OrdersTableProps) {
         const order = row.original
         return (
           <div>
-            <div className="font-medium">{`${order.ho} ${order.ten}`}</div>
+            <div className="font-medium">{`${order.ten}`}</div>
             <div className="text-sm text-muted-foreground">{order.email}</div>
           </div>
         )

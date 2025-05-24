@@ -6,7 +6,6 @@ import { User } from "./user";
 export interface DonHang {
   ma: number;
   ngaydat: Date;
-  ho: string;
   ten: string;
   email?: string;
   giamgia?: number;

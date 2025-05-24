@@ -106,7 +106,7 @@ export const PrintOrdersList = forwardRef<HTMLDivElement, PrintOrdersListProps>(
                   <td className="border border-gray-300 px-3 py-2 font-medium">{order.ma}</td>
                   <td className="border border-gray-300 px-3 py-2">
                     <div>
-                      <div className="font-medium">{order.ho} {order.ten}</div>
+                      <div className="font-medium"> {order.ten}</div>
                       <div className="text-xs text-gray-600">{order.email || 'N/A'}</div>
                     </div>
                   </td>

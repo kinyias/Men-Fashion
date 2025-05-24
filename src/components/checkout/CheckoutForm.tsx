@@ -41,7 +41,6 @@ export function CheckoutForm({ onSubmit, total, isProcessing, shippingPrices, on
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       shipping: {
-        ho: "",
         ten: "",
         email: "",
         sdt: "",
@@ -158,18 +157,8 @@ export function CheckoutForm({ onSubmit, total, isProcessing, shippingPrices, on
             <div className="space-y-6">
               <h2 className="text-xl font-semibold">Thông tin giao hàng</h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="shipping.ho"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Họ</FormLabel>
-                      <FormControl><Input {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <div className="grid grid-cols-1 gap-4">
+            
                 <FormField
                   control={form.control}
                   name="shipping.ten"

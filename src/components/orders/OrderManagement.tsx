@@ -5,11 +5,29 @@ import { OrdersTable } from "@/components/orders/OrderTable"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search } from "lucide-react"
+import { Search, Download } from "lucide-react"
+import { ExportDialog } from "./ExportDialog"
+import { useQuery } from "@tanstack/react-query"
+import { getOrders } from "@/lib/api"
+import { TrangThaiDonHang } from "@/types"
 
 export function OrdersManagement() {
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
+  const [exportDialogOpen, setExportDialogOpen] = useState(false)
+  
+  // Fetch all orders for export
+  const { data } = useQuery({
+    queryKey: ['orders-export'],
+    queryFn: () => getOrders({ 
+      page: 1, 
+      limit: 1000, // Get a large number of orders for export
+    }),
+    enabled: exportDialogOpen, // Only fetch when dialog is open
+    staleTime: 5 * 60 * 1000,
+  });
+  
+  const allOrders = data?.data || []
 
   return (
     <div className="space-x-4">
@@ -23,7 +41,7 @@ export function OrdersManagement() {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Tìm kiếm danh mục..."
+              placeholder="Tìm kiếm đơn hàng..."
               className="pl-8 w-full"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -35,20 +53,34 @@ export function OrdersManagement() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất Cả</SelectItem>
-              <SelectItem value="pending">Chờ Xử Lý</SelectItem>
-              <SelectItem value="processing">Đang Xử Lý</SelectItem>
-              <SelectItem value="shipped">Đã Gửi</SelectItem>
-              <SelectItem value="delivered">Đã Giao</SelectItem>
-              <SelectItem value="cancelled">Đã Hủy</SelectItem>
+              <SelectItem value={TrangThaiDonHang.DA_DAT}>Đã Đặt</SelectItem>
+              <SelectItem value={TrangThaiDonHang.DANG_XU_LY}>Đang Xử Lý</SelectItem>
+              <SelectItem value={TrangThaiDonHang.DANG_GIAO_HANG}>Đang Giao Hàng</SelectItem>
+              <SelectItem value={TrangThaiDonHang.DA_GIAO_HANG}>Đã Giao</SelectItem>
+              <SelectItem value={TrangThaiDonHang.DA_HUY}>Đã Hủy</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline">Xuất Dữ Liệu</Button>
+          <Button 
+            variant="outline" 
+            className="gap-1"
+            onClick={() => setExportDialogOpen(true)}
+          >
+            <Download className="h-4 w-4" />
+            Xuất Dữ Liệu
+          </Button>
         </div>
         </div>
       <div className="w-full">
         <OrdersTable searchQuery={searchQuery} statusFilter={statusFilter} />
       </div>
       </div>
+      
+      {/* Export Dialog */}
+      <ExportDialog 
+        isOpen={exportDialogOpen} 
+        onClose={() => setExportDialogOpen(false)} 
+        orders={allOrders}
+      />
     </div>
   )
 }

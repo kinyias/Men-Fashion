@@ -72,7 +72,7 @@ export const PrintOrder = forwardRef<HTMLDivElement, PrintOrderProps>(({ order }
           <h3 className="text-lg font-semibold mb-3 text-gray-800">Thông Tin Khách Hàng</h3>
           <div className="space-y-1">
             <p>
-              <span className="font-medium">Tên:</span> {order.ho} {order.ten}
+              <span className="font-medium">Tên:</span>{order.ten}
             </p>
             <p>
               <span className="font-medium">Email:</span> {order.email || 'N/A'}
@@ -86,7 +86,7 @@ export const PrintOrder = forwardRef<HTMLDivElement, PrintOrderProps>(({ order }
         <div>
           <h3 className="text-lg font-semibold mb-3 text-gray-800">Địa Chỉ Giao Hàng</h3>
           <div className="space-y-1 text-sm">
-            <p>{order.ho} {order.ten}</p>
+            <p>{order.ten}</p>
             <p>{order.diachi}</p>
             <p>
               {order.phuong}, {order.quan}, {order.thanhpho}
