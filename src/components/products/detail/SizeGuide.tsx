@@ -36,9 +36,9 @@ import {
             </DialogDescription>
           </DialogHeader>
   
-          <Tabs defaultValue="inches">
+          <Tabs defaultValue="cm">
             <TabsList>
-              <TabsTrigger value="inches">Inch</TabsTrigger>
+              {/* <TabsTrigger value="inches">Inch</TabsTrigger> */}
               <TabsTrigger value="cm">Centimet</TabsTrigger>
             </TabsList>
   

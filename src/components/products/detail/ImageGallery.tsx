@@ -54,7 +54,7 @@ export function ImageGallery({ images}: {images: HinhAnhMauSac[]}) {
   return (
     <div className="flex flex-col-reverse md:flex-row gap-4">
       {/* Thumbnails - Vertical on the left */}
-      <div className="relative flex flex-row md:flex-col gap-2 overflow-y-auto max-h-[500px] hide-scrollbar w-full md:w-30" ref={thumbnailsRef}>
+      <div className="relative flex flex-row md:flex-col gap-2 overflow-y-auto h-full hide-scrollbar w-full md:w-35" ref={thumbnailsRef}>
         {displayImages.map((image, index) => (
           <div
             key={index}
