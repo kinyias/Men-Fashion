@@ -116,10 +116,10 @@ export function SearchSidebar({ isOpen, onClose, products }: SearchSidebarProps)
       >
         <div className="container mx-auto p-4 md:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">Search Products</h2>
+            <h2 className="text-xl font-bold">Tìm kiếm sản phẩm</h2>
             <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
               <X className="h-5 w-5" />
-              <span className="sr-only">Close</span>
+              <span className="sr-only">Đóng</span>
             </Button>
           </div>
 
@@ -129,7 +129,7 @@ export function SearchSidebar({ isOpen, onClose, products }: SearchSidebarProps)
             <Input
               ref={inputRef}
               type="search"
-              placeholder="Search for products, categories..."
+              placeholder="Tìm kiếm sản phẩm, danh mục..."
               className="pl-10 py-6 text-lg"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -145,10 +145,10 @@ export function SearchSidebar({ isOpen, onClose, products }: SearchSidebarProps)
               <div className="mb-4">
                 <p className="text-sm text-muted-foreground">
                   {isSearching
-                    ? "Searching..."
+                    ? "Đang tìm kiếm..."
                     : searchResults.length === 0
-                      ? "No results found"
-                      : `Found ${searchResults.length} results for "${debouncedSearchQuery}"`}
+                      ? "Không tìm thấy kết quả"
+                      : `Tìm thấy ${searchResults.length} kết quả cho "${debouncedSearchQuery}"`}
                 </p>
               </div>
             )}
@@ -183,9 +183,9 @@ export function SearchSidebar({ isOpen, onClose, products }: SearchSidebarProps)
             {/* Popular Searches - shown when no query */}
             {!debouncedSearchQuery.trim() && (
               <div>
-                <h3 className="font-medium mb-3">Popular Searches</h3>
+                <h3 className="font-medium mb-3">Tìm kiếm phổ biến</h3>
                 <div className="flex flex-wrap gap-2">
-                  {["Shirts", "Casual", "Dress Shirts", "T-Shirts", "Accessories", "Shoes", "Outerwear", "Sale"].map(
+                  {["Áo sơ mi", "Quần âu", "Áo thun", "Váy", "Giày", "Phụ kiện", "Sale"].map(
                     (term) => (
                       <Button
                         key={term}
@@ -205,5 +205,5 @@ export function SearchSidebar({ isOpen, onClose, products }: SearchSidebarProps)
         </div>
       </div>
     </>
-  )
+  );
 }

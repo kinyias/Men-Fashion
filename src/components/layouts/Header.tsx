@@ -199,7 +199,7 @@ export default function Header() {
     },
   ...categoriesData?.data.map(category => ({
     name: category.ten,
-    href: `/category/${category.ma}`,
+    href: `/danh-muc/${category.ma}`,
     hasDropdown: true,
     subcategories: subCategoriesData?.data
       .filter(sub => sub.madanhmuc === category.ma)
