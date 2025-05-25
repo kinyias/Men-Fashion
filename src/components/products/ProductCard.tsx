@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import { BienThe, MauSac, SanPhamWithRating } from '@/types';
 import { useCartStore } from '@/lib/store/cart-store';
 import Link from 'next/link';
+import { toSlug } from '@/utils/slug';
 
 interface SizeWithAvailability{ ma: number; ten: string, available: boolean }
 export default function ProductCard({ product }: { product: SanPhamWithRating }) {
@@ -77,7 +78,7 @@ export default function ProductCard({ product }: { product: SanPhamWithRating })
     <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg pt-0">
       <div className="aspect-square relative overflow-hidden bg-muted/30">
       <Link
-      href={`/san-pham/${product.ma}`}>
+      href={`/san-pham/${toSlug(product.ten)}-${product.ma}`}>
      
         <Image
           src={getMainImage()}
