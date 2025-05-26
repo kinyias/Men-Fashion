@@ -52,3 +52,8 @@ export const getFeaturedSubCategories = async (): Promise<LoaiSanPhamResponse> =
   const response = await api.get(`/api/loaisanpham?${params.toString()}`);
   return response.data;
 };
+
+export const getSubCategoriesByCategory = async (categoryId: number): Promise<LoaiSanPham[]> => {
+  const response = await api.get(`/api/loaisanpham/by-danhmuc/${categoryId}`);
+  return response.data.data;
+};

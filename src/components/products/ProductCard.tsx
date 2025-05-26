@@ -138,7 +138,7 @@ export default function ProductCard({ product }: { product: SanPhamWithRating })
         </div>
       </div>
 
-      <CardContent className="p-4">
+      <CardContent className="p-4 pt-0">
         <div className="space-y-2">
           {uniqueColors.length > 0 && (
             <div className="flex gap-1">

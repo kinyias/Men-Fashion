@@ -294,7 +294,10 @@ export default function Header() {
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
                   <div className='absolute left-0 top-5 z-50 w-full h-full'></div>
+                  <Link
+                  href={item.href}>
                   {item.name}
+                  </Link>
                   {item.hasDropdown && <ChevronDown className="ml-1 h-4 w-4 transition-transform duration-200" />}
                   <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform"></span>
                 </button>
@@ -337,7 +340,7 @@ export default function Header() {
               onClick={toggleCart}
             >
               <ShoppingBag className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+              <span className="absolute -top-0 -right-0 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
                 {itemCount() || 0}
               </span>
             </Button>

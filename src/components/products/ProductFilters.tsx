@@ -9,7 +9,6 @@ import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { ChevronDown, ChevronUp, X } from "lucide-react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { SanPham } from "@/types"
 import { getBrands } from "@/lib/api/api-brands"
 import { getColors } from "@/lib/api/api-colors"
 import { getSizes } from "@/lib/api/api-sizes"
@@ -22,7 +21,6 @@ interface FilterState {
   selectedColors: string[]
   selectedSizes: string[]
   selectedBrands: string[]
-  selectedCategories: string[]
 }
 
 
@@ -31,7 +29,6 @@ interface ProductFiltersProps {
   onFiltersChange: (filters: Partial<FilterState>) => void
   onClearAll: () => void
   hasActiveFilters: boolean
-  products: SanPham[]
   onFilterApply?: () => void
 }
 
@@ -40,8 +37,6 @@ export function ProductFilters({
   onFiltersChange,
   onClearAll,
   hasActiveFilters,
-  products,
-  onFilterApply,
 }: ProductFiltersProps) {
   const [openSections, setOpenSections] = useState({
     price: true,
@@ -72,15 +67,6 @@ export function ProductFilters({
     queryFn: () => getSizes({ page: 1, limit: 100 }),
   })
   const sizes = sizesData?.data || []
-
-  // Extract unique categories from products with null check
-  const uniqueCategories = Array.from(
-    new Set(
-      products
-        .map((p) => p.danhMuc?.ten)
-        .filter((category): category is string => category !== undefined && category !== null)
-    )
-  ).sort()
 
   // Sort sizes with custom logic
   const sortedSizes = [...sizes].sort((a, b) => {
@@ -113,12 +99,6 @@ export function ProductFilters({
     onFiltersChange({ selectedBrands: newBrands })
   }
 
-  const handleCategoryChange = (category: string, checked: boolean) => {
-    const newCategories = checked
-      ? [...filters.selectedCategories, category]
-      : filters.selectedCategories.filter((c) => c !== category)
-    onFiltersChange({ selectedCategories: newCategories })
-  }
 
   const removeFilter = (type: string, value: string) => {
     switch (type) {
@@ -130,9 +110,6 @@ export function ProductFilters({
         break
       case "brand":
         handleBrandChange(value, false)
-        break
-      case "category":
-        handleCategoryChange(value, false)
         break
     }
   }
@@ -152,11 +129,6 @@ export function ProductFilters({
       type: "brand",
       value: brandId,
       label: brands.find((b) => b.ma.toString() === brandId)?.ten || brandId,
-    })),
-    ...filters.selectedCategories.map((category) => ({
-      type: "category",
-      value: category,
-      label: category,
     })),
   ]
 
@@ -217,30 +189,6 @@ export function ProductFilters({
 
       <Separator />
 
-      {/* Categories */}
-      <Collapsible open={openSections.categories} onOpenChange={() => toggleSection("categories")}>
-        <CollapsibleTrigger className="flex items-center justify-between w-full">
-          <h3 className="font-medium">Loại sản phẩm</h3>
-          {openSections.categories ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-3 pt-4">
-          {uniqueCategories.map((category) => (
-            <div key={category} className="flex items-center space-x-2">
-              <Checkbox
-                id={`category-${category}`}
-                checked={filters.selectedCategories.includes(category)}
-                onCheckedChange={(checked) => handleCategoryChange(category, checked as boolean)}
-              />
-              <Label htmlFor={`category-${category}`} className="text-sm cursor-pointer">
-                {category}
-              </Label>
-            </div>
-          ))}
-        </CollapsibleContent>
-      </Collapsible>
-
-      <Separator />
-
       {/* Brands */}
       <Collapsible open={openSections.brands} onOpenChange={() => toggleSection("brands")}>
         <CollapsibleTrigger className="flex items-center justify-between w-full">
@@ -249,7 +197,7 @@ export function ProductFilters({
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-3 pt-4">
           {brandsLoading ? (
-            <div className="text-sm text-muted-foreground">Loading brands...</div>
+            <div className="text-sm text-muted-foreground">Đang tải thương hiệu...</div>
           ) : (
             brands.map((brand) => (
               <div key={brand.ma} className="flex items-center space-x-2">
@@ -278,7 +226,7 @@ export function ProductFilters({
         <CollapsibleContent className="space-y-3 pt-4">
           <div className="grid grid-cols-2 gap-3">
             {colorsLoading ? (
-              <div className="text-sm text-muted-foreground">Loading colors...</div>
+              <div className="text-sm text-muted-foreground">Đang tải màu sắc...</div>
             ) : (
               colors.map((color) => (
                 <div key={color.ma} className="flex items-center space-x-2">
@@ -312,7 +260,7 @@ export function ProductFilters({
         <CollapsibleContent className="space-y-3 pt-4">
           <div className="grid grid-cols-3 gap-2">
             {sizesLoading ? (
-              <div className="text-sm text-muted-foreground">Loading sizes...</div>
+              <div className="text-sm text-muted-foreground">Đang tải kích cỡ...</div>
             ) : (
               sortedSizes.map((size) => (
                 <div key={size.ma} className="flex items-center space-x-2">
@@ -331,12 +279,6 @@ export function ProductFilters({
         </CollapsibleContent>
       </Collapsible>
 
-      {/* Special Offers and Mobile Apply Button remain the same */}
-      {onFilterApply && (
-        <Button onClick={onFilterApply} className="w-full lg:hidden">
-          Apply Filters
-        </Button>
-      )}
     </div>
   )
 }

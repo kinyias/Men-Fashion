@@ -124,3 +124,14 @@ export interface CreateSanPhamData {
     masp: number,
   }[];
 }
+
+
+export interface AdvancedSearchParams extends Omit<SanPhamQueryParams, 'madanhmuc' | 'maloaisanpham' | 'mathuonghieu'> {
+  madanhmuc?: number[];
+  maloaisanpham?: number[];
+  mathuonghieu?: number[];
+  mamausac?: number[];
+  makichco?: number[];
+  minPrice?: number;
+  maxPrice?: number;
+}
