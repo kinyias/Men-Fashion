@@ -75,7 +75,7 @@ export default function ChiTietSanPhamPage() {
         </div>
       )
     }
-
+    console.log(product)
     if(isError || !product) {
       return (
         <div className="container px-4 py-16 mx-auto">

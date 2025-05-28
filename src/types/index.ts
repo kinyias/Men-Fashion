@@ -8,3 +8,4 @@ export * from './colors';
 export * from './product';
 export * from './order';
 export * from './coupons';
+export * from './review';

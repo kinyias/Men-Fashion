@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Heart, Minus, Plus, ShoppingCart,  Truck } from "lucide-react"
+import { Minus, Plus, ShoppingCart,  Star,  StarHalf,  Truck } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -11,10 +11,11 @@ import { SizeGuide } from "./SizeGuide"
 import { useCartStore } from "@/lib/store/cart-store"
 import { formatCurrency } from "@/utils/currency"
 import toast from "react-hot-toast"
-import { BienThe, MauSac, SanPham } from "@/types"
+import { BienThe, MauSac, SanPhamWithRating } from "@/types"
+import { ReviewsSection } from "./ReviewSection"
 interface SizeWithAvailability{ ma: number; ten: string, available: boolean }
 interface MauSacWithAvailability extends MauSac{ available: boolean }
-export default function ProductDetail({product}:{product: SanPham}) {
+export default function ProductDetail({product}:{product: SanPhamWithRating}) {
     // Get unique colors from variants
   const uniqueColors = (product.bienThes || []).reduce((acc, variant) => {
     if (variant.mauSac?.ma !== undefined && !acc.some(c => c.ma === variant.mauSac!.ma)) {
@@ -112,17 +113,32 @@ const getMainImage = () => {
               <h1 className="text-3xl font-bold tracking-tight">{product.ten}</h1>
 
               {/* Ratings */}
-              {/* <div className="flex items-center mt-2 space-x-1">
+              <div className="flex items-center mt-2 space-x-1">
+                {product._count?.danhGias > 0 ? 
+               (<>
                 <div className="flex text-amber-400">
-                  {[...Array(Math.floor(product.rating))].map((_, i) => (
+                  {[...Array(Math.floor(product.danhGia_trungbinh))].map((_, i) => (
                     <Star key={i} className="w-4 h-4 fill-current" />
                   ))}
-                  {product.rating % 1 !== 0 && <StarHalf className="w-4 h-4 fill-current" />}
+                  {product.danhGia_trungbinh % 1 !== 0 && <StarHalf className="w-4 h-4 fill-current" />}
                 </div>
                 <span className="text-sm text-muted-foreground">
-                  {product.rating} ({product.reviewCount} reviews)
+                  {product.danhGia_trungbinh} ({product._count.danhGias} đánh giá)
                 </span>
-              </div> */}
+                </>) : (
+                 <>
+                  <div className="flex text-gray-300">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-current" />
+                  ))}
+                </div>
+                <span className="text-sm text-muted-foreground">
+                  {product.danhGia_trungbinh} ({product._count.danhGias} đánh giá)
+                </span>
+                </>
+                )
+                }
+              </div>
             </div>
 
             {/* Price */}
@@ -226,9 +242,7 @@ const getMainImage = () => {
                 <Button variant="secondary" size="lg">
                   Mua ngay
                 </Button>
-                <Button variant="outline" size="icon" className="w-12 h-12">
-                  <Heart className="w-5 h-5" />
-                </Button>
+               
               </div>
             </div>
 
@@ -264,6 +278,7 @@ const getMainImage = () => {
           <TabsList className="w-full justify-start">
             <TabsTrigger value="description">Mô tả</TabsTrigger>
             <TabsTrigger value="shipping">Giao hàng</TabsTrigger>
+            <TabsTrigger value="reviews">Đánh giá ({product._count.danhGias})</TabsTrigger>
           </TabsList>
           <TabsContent value="description" className="mt-4">
             <div className="space-y-4">
@@ -280,6 +295,13 @@ const getMainImage = () => {
             
               </div>
             </div>
+          </TabsContent>
+          <TabsContent value="reviews" className="mt-4">
+            <ReviewsSection
+              productId={product.ma}
+              averageRating={product.danhGia_trungbinh}
+              totalReviews={product._count?.danhGias || 0}
+            />
           </TabsContent>
         </Tabs>
       </div>

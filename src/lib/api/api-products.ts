@@ -1,5 +1,5 @@
 import api from '@/lib/axios-client';
-import { SanPham, SanPhamQueryParams, SanPhamResponse, CreateSanPhamData, SanPhamWithRatingResonse, AdvancedSearchParams } from '@/types/product';
+import { SanPham, SanPhamQueryParams, SanPhamResponse, CreateSanPhamData, SanPhamWithRatingResonse, AdvancedSearchParams, SanPhamWithRating } from '@/types/product';
 
 export const getProducts = async (
   queryParams: SanPhamQueryParams
@@ -39,7 +39,7 @@ export const getProductsWithVariant = async (
   return response.data;
 };
 
-export const getProductById = async (id: number): Promise<SanPham> => {
+export const getProductById = async (id: number): Promise<SanPhamWithRating> => {
   const response = await api.get(`/api/sanpham/${id}`);
   return response.data;
 };

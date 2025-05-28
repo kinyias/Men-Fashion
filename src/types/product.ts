@@ -30,8 +30,7 @@ export interface SanPham {
     ten: string;
   };
   bienThes: BienThe[];
-  _count?: {
-    bienThes: number;
+  _count: {
     danhGias: number;
   };
   hinhAnhMauSacs?: Record<number, HinhAnhMauSac[]>;
