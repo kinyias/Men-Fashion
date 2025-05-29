@@ -3,6 +3,7 @@
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useEffect, useState } from "react"
 
 // Update the type to accept string instead of a union type
 interface SearchHeaderProps {
@@ -14,6 +15,7 @@ interface SearchHeaderProps {
 }
 
 export function SearchHeader({ searchQuery, onSearchChange, resultCount, sortBy, onSortChange }: SearchHeaderProps) {
+  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery)
   const sortOptions = [
     { value: "ten-asc", label: "Tên: A-Z" },
     { value: "ten-desc", label: "Tên: Z-A" },
@@ -22,7 +24,21 @@ export function SearchHeader({ searchQuery, onSearchChange, resultCount, sortBy,
     { value: "noibat-desc", label: "Nổi bật" },
     { value: "danhgia-desc", label: "Đánh giá cao nhất" }
   ]
+ // Debounce effect
+ useEffect(() => {
+  const timer = setTimeout(() => {
+    onSearchChange(localSearchQuery)
+  }, 500) // 500ms delay
 
+  return () => {
+    clearTimeout(timer)
+  }
+}, [localSearchQuery, onSearchChange])
+
+// Sync with parent when searchQuery changes externally
+useEffect(() => {
+  setLocalSearchQuery(searchQuery)
+}, [searchQuery])
   return (
     <div className="mb-6 space-y-4">
       <div className="relative max-w-2xl">
@@ -31,15 +47,15 @@ export function SearchHeader({ searchQuery, onSearchChange, resultCount, sortBy,
           type="search"
           placeholder="Tìm kiếm sản phẩm..."
           className="pl-10 py-6 text-lg"
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
+          value={localSearchQuery}
+          onChange={(e) => setLocalSearchQuery(e.target.value)}
         />
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">
-            {searchQuery ? `Kết quả tìm kiếm cho "${searchQuery}"` : "Tất cả sản phẩm"}
+          {localSearchQuery ? `Kết quả tìm kiếm cho "${localSearchQuery}"` : "Tất cả sản phẩm"}
           </h1>
           <p className="text-muted-foreground">
             {resultCount} {resultCount === 1 ? "sản phẩm" : "sản phẩm"}
