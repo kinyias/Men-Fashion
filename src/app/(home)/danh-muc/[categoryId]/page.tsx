@@ -61,27 +61,32 @@ export default function CategoryPage() {
   
   // Update URL when filters or pagination change
   useEffect(() => {
-    const params = new URLSearchParams();
-    
-    // Add search query
-    if (filters.searchQuery) params.set('search', filters.searchQuery);
-    
-    // Add filter arrays
-    if (filters.selectedColors.length > 0) params.set('colors', filters.selectedColors.join(','));
-    if (filters.selectedSizes.length > 0) params.set('sizes', filters.selectedSizes.join(','));
-    if (filters.selectedBrands.length > 0) params.set('brands', filters.selectedBrands.join(','));
-    
-    // Add price range if not default
-    if (filters.priceRange[0] > 0) params.set('minPrice', filters.priceRange[0].toString());
-    if (filters.priceRange[1] < 10000000) params.set('maxPrice', filters.priceRange[1].toString());
-    
-    // Add sort and pagination
-    params.set('sort', sortBy);
-    params.set('page', pagination.page.toString());
-    params.set('limit', pagination.limit.toString());
-    
-    // Update URL without refreshing the page
-    router.push(`/danh-muc/${categoryId}?${params.toString()}`, { scroll: false });
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams();
+      
+      // Add search query
+      if (filters.searchQuery) params.set('search', filters.searchQuery);
+      
+      // Add filter arrays
+      if (filters.selectedColors.length > 0) params.set('colors', filters.selectedColors.join(','));
+      if (filters.selectedSizes.length > 0) params.set('sizes', filters.selectedSizes.join(','));
+      if (filters.selectedBrands.length > 0) params.set('brands', filters.selectedBrands.join(','));
+      
+      // Add price range if not default
+      if (filters.priceRange[0] > 0) params.set('minPrice', filters.priceRange[0].toString());
+      if (filters.priceRange[1] < 10000000) params.set('maxPrice', filters.priceRange[1].toString());
+      
+      // Add sort and pagination
+      params.set('sort', sortBy);
+      params.set('page', pagination.page.toString());
+      params.set('limit', pagination.limit.toString());
+      
+      // Update URL without refreshing the page
+      router.push(`/danh-muc/${categoryId}?${params.toString()}`, { scroll: false });
+    }, 500) // 500ms delay
+    return () => {
+      clearTimeout(timer)
+    }
   }, [filters, sortBy, pagination, categoryId, router]);
   
   // Use React Query to fetch products with advanced search

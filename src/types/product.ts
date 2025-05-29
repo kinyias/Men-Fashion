@@ -133,4 +133,10 @@ export interface AdvancedSearchParams extends Omit<SanPhamQueryParams, 'madanhmu
   makichco?: number[];
   minPrice?: number;
   maxPrice?: number;
+  page: number,
+  limit: number,
+  search: string,
+  sortBy: string,
+  sortOrder: 'asc' | 'desc',
+  trangthai: true
 }
