@@ -14,6 +14,7 @@ import { getCategories, getSubCategories } from "@/lib/api"
 import { useCartStore } from "@/lib/store/cart-store"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SearchSidebar } from "./SearchSideBar"
+import { toSlug } from "@/utils/slug"
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -52,7 +53,7 @@ export default function Header() {
       .filter(sub => sub.madanhmuc === category.ma)
       .map(sub => ({
         name: sub.ten,
-        href: `/sub-category/${sub.ma}`
+        href: `/danh-muc/${toSlug(category.ten)}-${category.ma}/${toSlug(sub.ten)}-${sub.ma}`
       })) || []
   })) || []
 ]
