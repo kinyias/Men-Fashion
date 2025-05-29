@@ -1,101 +1,93 @@
-"use client"
+'use client';
 
-import { useState, useEffect, useRef } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { X, SearchIcon, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { useDebounce } from "@/hooks/use-debounce"
-
-interface Color {
-  id: string
-  name: string
-  hex: string
-}
-
-interface Product {
-  name: string
-  category: string
-  subcategory?: string
-  price: number
-  image: string
-  rating?: number
-  colors: Color[]
-}
+import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { X, SearchIcon, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useDebounce } from '@/hooks/use-debounce';
+import { formatCurrency } from '@/utils/currency';
+import { advancedSearchProducts } from '@/lib/api/api-products';
+import { useQuery } from '@tanstack/react-query';
 
 interface SearchSidebarProps {
-  isOpen: boolean
-  onClose: () => void
-  products: Product[]
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export function SearchSidebar({ isOpen, onClose, products }: SearchSidebarProps) {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isSearching, setIsSearching] = useState(false)
-  const [searchResults, setSearchResults] = useState<Product[]>([])
-  const inputRef = useRef<HTMLInputElement>(null)
+export function SearchSidebar({ isOpen, onClose }: SearchSidebarProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+  const debouncedSearchQuery = useDebounce(searchQuery, 1000);
 
-  // Use our debounce hook to delay the search
-  const debouncedSearchQuery = useDebounce(searchQuery, 300)
+  // Use our custom hook for searching
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: ['products', 'search', debouncedSearchQuery],
+    queryFn: () =>
+      advancedSearchProducts({
+        page: 1,
+        limit: 5, // Limit to 5 results for quick search
+        search: debouncedSearchQuery,
+        sortBy: 'ma',
+        sortOrder: 'desc',
+        trangthai: true, // Only show active products
+      }),
+    enabled: debouncedSearchQuery.length >= 1, // Only search when query is at least 2 characters
+  });
+  const searchResults = data?.data || [];
+  const isSearching = isLoading || isFetching;
 
   // Focus the input when the sidebar opens
   useEffect(() => {
     if (isOpen && inputRef.current) {
       setTimeout(() => {
-        inputRef.current?.focus()
-      }, 100)
+        inputRef.current?.focus();
+      }, 100);
     }
-  }, [isOpen])
-
-  // Search products when the debounced query changes
-  useEffect(() => {
-    if (!debouncedSearchQuery.trim()) {
-      setSearchResults([])
-      setIsSearching(false)
-      return
-    }
-
-    setIsSearching(true)
-
-    // Simulate a slight delay as if we're fetching data
-    const timer = setTimeout(() => {
-      const results = products.filter(
-        (product) =>
-          product.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-          product.category.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) ||
-          (product.subcategory && product.subcategory.toLowerCase().includes(debouncedSearchQuery.toLowerCase())),
-      )
-      setSearchResults(results)
-      setIsSearching(false)
-    }, 300)
-
-    return () => clearTimeout(timer)
-  }, [debouncedSearchQuery, products])
-
-  // Handle escape key to close the sidebar
-  useEffect(() => {
-    const handleEscKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
-        onClose()
-      }
-    }
-
-    window.addEventListener("keydown", handleEscKey)
-    return () => window.removeEventListener("keydown", handleEscKey)
-  }, [isOpen, onClose])
+  }, [isOpen]);
 
   // Prevent body scrolling when sidebar is open
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden"
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = ""
+      document.body.style.overflow = '';
     }
     return () => {
-      document.body.style.overflow = ""
-    }
-  }, [isOpen])
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  // Handle escape key to close the sidebar
+  useEffect(() => {
+    const handleEscKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscKey);
+    return () => window.removeEventListener('keydown', handleEscKey);
+  }, [isOpen, onClose]);
+
+  // Function to highlight matching text
+  const highlightText = (text: string, query: string) => {
+    if (!query.trim()) return text;
+
+    const regex = new RegExp(`(${query.trim()})`, 'gi');
+    const parts = text.split(regex);
+
+    return parts.map((part, i) =>
+      regex.test(part) ? (
+        <mark key={i} className="bg-yellow-200 rounded-sm">
+          {part}
+        </mark>
+      ) : (
+        part
+      )
+    );
+  };
 
   return (
     <>
@@ -111,13 +103,18 @@ export function SearchSidebar({ isOpen, onClose, products }: SearchSidebarProps)
       {/* Search Sidebar */}
       <div
         className={`fixed top-0 left-0 right-0 bg-background z-50 transform transition-transform duration-300 ease-in-out ${
-          isOpen ? "translate-y-0" : "-translate-y-full"
+          isOpen ? 'translate-y-0' : '-translate-y-full'
         }`}
       >
         <div className="container mx-auto p-4 md:p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold">Tìm kiếm sản phẩm</h2>
-            <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="rounded-full"
+            >
               <X className="h-5 w-5" />
               <span className="sr-only">Đóng</span>
             </Button>
@@ -141,42 +138,58 @@ export function SearchSidebar({ isOpen, onClose, products }: SearchSidebarProps)
 
           {/* Search Results */}
           <div className="max-h-[60vh] overflow-y-auto">
-            {debouncedSearchQuery.trim() !== "" && (
-              <div className="mb-4">
-                <p className="text-sm text-muted-foreground">
-                  {isSearching
-                    ? "Đang tìm kiếm..."
-                    : searchResults.length === 0
-                      ? "Không tìm thấy kết quả"
-                      : `Tìm thấy ${searchResults.length} kết quả cho "${debouncedSearchQuery}"`}
-                </p>
-              </div>
-            )}
 
             {searchResults.length > 0 && (
               <div className="space-y-3">
-                {searchResults.map((product, index) => (
+                {searchResults.map((product) => (
                   <Link
-                    key={`${product.name}-${index}`}
-                    href="#"
+                    key={product.ma}
+                    href={`/products/${product.ma}`}
                     className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors"
                     onClick={onClose}
                   >
                     <div className="h-16 w-16 flex-shrink-0 rounded-md overflow-hidden bg-muted">
                       <Image
-                        src={product.image || "/placeholder.svg"}
-                        alt={product.name}
+                        src={product.hinhanh || '/placeholder.svg'}
+                        alt={product.ten}
                         width={64}
                         height={64}
                         className="h-full w-full object-cover"
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-medium truncate">{product.name}</h3>
-                      <p className="font-bold text-sm">${product.price.toFixed(2)}</p>
+                      <h3 className="font-medium">
+                        {highlightText(product.ten, debouncedSearchQuery)}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {product.danhMuc?.ten &&
+                          highlightText(
+                            product.danhMuc.ten,
+                            debouncedSearchQuery
+                          )}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <p className="font-bold text-sm">
+                          {formatCurrency(product.giaban)}
+                        </p>
+                        {product.giagiam && (
+                          <p className="text-sm text-muted-foreground line-through">
+                            {formatCurrency(product.giagiam)}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </Link>
                 ))}
+                <Link
+                  href={`/tim-kiem?q=${encodeURIComponent(
+                    debouncedSearchQuery
+                  )}`}
+                  className="block text-center py-3 text-sm text-primary hover:text-primary/80 font-medium"
+                  onClick={onClose}
+                >
+                  Xem tất cả kết quả
+                </Link>
               </div>
             )}
 
@@ -185,19 +198,25 @@ export function SearchSidebar({ isOpen, onClose, products }: SearchSidebarProps)
               <div>
                 <h3 className="font-medium mb-3">Tìm kiếm phổ biến</h3>
                 <div className="flex flex-wrap gap-2">
-                  {["Áo sơ mi", "Quần âu", "Áo thun", "Váy", "Giày", "Phụ kiện", "Sale"].map(
-                    (term) => (
-                      <Button
-                        key={term}
-                        variant="outline"
-                        size="sm"
-                        className="rounded-full"
-                        onClick={() => setSearchQuery(term)}
-                      >
-                        {term}
-                      </Button>
-                    ),
-                  )}
+                  {[
+                    'Áo sơ mi',
+                    'Quần âu',
+                    'Áo thun',
+                    'Váy',
+                    'Giày',
+                    'Phụ kiện',
+                    'Sale',
+                  ].map((term) => (
+                    <Button
+                      key={term}
+                      variant="outline"
+                      size="sm"
+                      className="rounded-full"
+                      onClick={() => setSearchQuery(term)}
+                    >
+                      {term}
+                    </Button>
+                  ))}
                 </div>
               </div>
             )}

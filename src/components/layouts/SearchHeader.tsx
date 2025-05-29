@@ -14,7 +14,7 @@ interface SearchHeaderProps {
   onSortChange: (sort: string) => void
 }
 
-export function SearchHeader({ searchQuery, onSearchChange, resultCount, sortBy, onSortChange }: SearchHeaderProps) {
+export function SearchHeader({ onSearchChange, resultCount, sortBy, onSortChange }: SearchHeaderProps) {
   const [localSearchQuery, setLocalSearchQuery] = useState("")
   const sortOptions = [
     { value: "ten-asc", label: "Tên: A-Z" },
