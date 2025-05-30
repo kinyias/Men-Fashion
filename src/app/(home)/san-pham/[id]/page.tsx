@@ -9,7 +9,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function ChiTietSanPhamPage() {
     const params = useParams<{ id: string }>();
     const productId =  Number(params?.id?.split('-').pop());
-    
     const { data: product, isLoading, isError } = useQuery({
       queryKey: ['product', productId],
       queryFn: () => getProductById(productId!),

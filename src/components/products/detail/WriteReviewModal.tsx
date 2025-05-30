@@ -23,7 +23,7 @@ interface WriteReviewModalProps {
 }
 
 export function WriteReviewModal({ productId, onClose }: WriteReviewModalProps) {
-  const [images, setImages] = useState<string[]>([])
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [dragActive, setDragActive] = useState(false)
   const { user } = useAuth()
   const queryClient = useQueryClient()
@@ -68,24 +68,51 @@ export function WriteReviewModal({ productId, onClose }: WriteReviewModalProps) 
     const reviewData: DanhGiaFormValues = {
       sosao: data.sosao,
       binhluan: data.binhluan,
-      hinhAnh: images.length > 0 ? images[0] : undefined, // Currently only supporting one image
+      hinhAnh: imageUrl || undefined, // Use the single image URL
     }
     
     // Submit using mutation
     mutate(reviewData)
   }
 
-  const handleImageUpload = (files: FileList | null) => {
-    if (!files) return
-
-    Array.from(files).forEach((file) => {
-      const imageUrl = URL.createObjectURL(file)
-      setImages((prev) => [...prev, imageUrl])
-    })
+  const handleImageUpload = async (files: FileList | null) => {
+    if (!files || files.length === 0) return
+  
+    try {
+      // Show loading state
+      toast.loading('Đang tải ảnh lên...')
+  
+      // Only upload the first file
+      const file = files[0]
+      const formData = new FormData()
+      formData.append('file', file)
+  
+      // Upload to Imgur API
+      const response = await fetch('/api/imgur', {
+        method: 'POST',
+        body: formData,
+      })
+  
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Không thể tải ảnh lên')
+      }
+  
+      const data = await response.json()
+      
+      // Set the single image URL
+      setImageUrl(data.url)
+      toast.dismiss()
+      toast.success('Tải ảnh lên thành công')
+    } catch (error) {
+      toast.dismiss()
+      toast.error('Không thể tải ảnh lên: ' + (error instanceof Error ? error.message : 'Lỗi không xác định'))
+      console.error('Error uploading image:', error)
+    }
   }
 
-  const removeImage = (index: number) => {
-    setImages((prev) => prev.filter((_, i) => i !== index))
+  const removeImage = () => {
+    setImageUrl(null)
   }
 
   const renderStarRating = (value: number, onChange: (rating: number) => void) => {
@@ -150,54 +177,50 @@ export function WriteReviewModal({ productId, onClose }: WriteReviewModalProps) 
             {/* Photo Upload */}
             <div>
               <Label>Thêm ảnh (Tùy chọn)</Label>
-              <div
-                className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                  dragActive ? "border-primary bg-primary/5" : "border-gray-300"
-                }`}
-                onDragEnter={() => setDragActive(true)}
-                onDragLeave={() => setDragActive(false)}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => {
-                  e.preventDefault()
-                  setDragActive(false)
-                  handleImageUpload(e.dataTransfer.files)
-                }}
-              >
-                <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                <p className="text-sm text-gray-600">Kéo thả ảnh hoặc click để tìm kiếm</p>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => handleImageUpload(e.target.files)}
-                  id="photo-upload"
-                />
-                <Label htmlFor="photo-upload" className="cursor-pointer">
-                  <Button type="button" variant="outline" className="mt-2">
-                    Chọn file
-                  </Button>
-                </Label>
-              </div>
-
-              {images.length > 0 && (
-                <div className="flex gap-2 mt-4 flex-wrap">
-                  {images.map((image, index) => (
-                    <div key={index} className="relative">
-                      <Image
-                        src={image || "/placeholder.svg"}
-                        alt={`Upload ${index + 1}`}
-                        className="w-20 h-20 object-cover rounded"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
+              {!imageUrl ? (
+                <div
+                  className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                    dragActive ? "border-primary bg-primary/5" : "border-gray-300"
+                  }`}
+                  onDragEnter={() => setDragActive(true)}
+                  onDragLeave={() => setDragActive(false)}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    setDragActive(false)
+                    handleImageUpload(e.dataTransfer.files)
+                  }}
+                >
+                  <Label htmlFor="photo-upload" className="cursor-pointer justify-center">
+                  <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                  <p className="text-sm text-gray-600">Kéo thả ảnh hoặc click để tìm kiếm</p>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/gif,image/png,image/apng,image/tiff"
+                    className="hidden"
+                    onChange={(e) => handleImageUpload(e.target.files)}
+                    id="photo-upload"
+                  />
+                  </Label>
+                </div>
+              ) : (
+                <div className="mt-4">
+                  <div className="relative inline-block">
+                    <Image
+                      src={imageUrl}
+                      alt="Uploaded image"
+                      width={200}
+                      height={200}
+                      className="object-cover rounded"
+                    />
+                    <button
+                      type="button"
+                      onClick={removeImage}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
