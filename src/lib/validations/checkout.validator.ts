@@ -2,7 +2,6 @@ import * as z from "zod"
 
 // Shipping information schema to match DonHang model
 export const shippingSchema = z.object({
-  ho: z.string().min(2, "Họ phải có ít nhất 2 ký tự"),
   ten: z.string().min(2, "Tên phải có ít nhất 2 ký tự"),
   email: z.string().email("Vui lòng nhập email hợp lệ").optional(),
   sdt: z

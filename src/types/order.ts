@@ -86,7 +86,6 @@ export interface DonHangQueryParams {
 }
 
 export interface DonHangFormValues {
-  ho: string;
   ten: string;
   email?: string;
   diachi: string;
