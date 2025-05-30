@@ -79,7 +79,7 @@ export function CategoryNavigation() {
                         <h3 className="text-lg font-bold text-white mb-1">{subcategory.ten}</h3>
                         <p className="text-xs text-white/90 mb-2">{subcategory.mota}</p>
                         <div className="flex items-center text-white">
-                          <span className="text-xs font-medium">Shop Now</span>
+                          <span className="text-xs font-medium">Xem ngay</span>
                           <ArrowRight className="ml-1 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                         </div>
                       </div>

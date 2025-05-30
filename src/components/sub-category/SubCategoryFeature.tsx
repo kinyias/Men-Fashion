@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { getFeaturedSubCategories } from "@/lib/api/api-sub-categories"
 import { Skeleton } from "@/components/ui/skeleton"
+import { toSlug } from "@/utils/slug"
 
 export default function SubCategoryFeature() {
   const { data: featuredCategories, isLoading } = useQuery({
@@ -38,7 +39,7 @@ export default function SubCategoryFeature() {
         ) : (
           featuredCategories?.data.map((category) => (
             <CarouselItem key={category.ma} className="pl-2 md:pl-4 sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
-              <Link href={`/products?subcategory=${category.ma}`} className="group relative overflow-hidden rounded-xl block">
+              <Link href={`/danh-muc/${toSlug(category?.danhMuc?.ten || "")}-${category?.danhMuc?.ma}/${toSlug(category.ten)}-${category.ma}`} className="group relative overflow-hidden rounded-xl block">
                 <div className="w-full overflow-hidden rounded-xl">
                   <Image
                     src={category.hinhanh || "/placeholder.svg"}

@@ -55,7 +55,13 @@ export default function Header() {
         name: sub.ten,
         href: `/danh-muc/${toSlug(category.ten)}-${category.ma}/${toSlug(sub.ten)}-${sub.ma}`
       })) || []
-  })) || []
+  })) || [],
+  {
+    name: "Tin tức",
+    href: "#",
+    hasDropdown: false,
+    subcategories: []
+  },
 ]
 
   // Close mobile menu when screen size changes to desktop
