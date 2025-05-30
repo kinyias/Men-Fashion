@@ -325,10 +325,10 @@ const DropZoneContent: React.FC<{ maxSize: number }> = ({ maxSize }) => (
 
     <div className="tiptap-image-upload-content">
       <span className="tiptap-image-upload-text">
-        <em>Click to upload</em> or drag and drop
+        <em>Nhấn để tải lên</em> hoặc kéo thả
       </span>
       <span className="tiptap-image-upload-subtext">
-        Maximum file size {maxSize / 1024 / 1024}MB.
+        Kích thước tối đa {maxSize / 1024 / 1024}MB.
       </span>
     </div>
   </>

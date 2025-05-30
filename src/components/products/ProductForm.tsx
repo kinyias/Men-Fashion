@@ -687,7 +687,7 @@ export default function ProductForm({product}:{product: SanPham}) {
                   <FormItem className="md:col-span-2">
                     <FormLabel>Mô tả sản phẩm</FormLabel>
                     <FormControl>
-                    <div className="border">
+                    <div className="border overflow-x-auto max-w-full">
                      
                       <SimpleEditor 
                          

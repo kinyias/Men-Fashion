@@ -106,16 +106,16 @@ export const ImageUploadButton = React.forwardRef<
         data-active-state={isActive ? 'on' : 'off'}
         role="button"
         tabIndex={-1}
-        aria-label="Add image"
+        aria-label="Thêm ảnh"
         aria-pressed={isActive}
-        tooltip="Add image"
+        tooltip="Thêm ảnh"
         onClick={handleClick}
         {...buttonProps}
       >
         {children || (
           <>
             <ImagePlusIcon className="tiptap-button-icon" />
-            {text && <span className="tiptap-button-text">{text}</span>}
+            {text && <span className="tiptap-button-text">Thêm</span>}
           </>
         )}
       </Button>
