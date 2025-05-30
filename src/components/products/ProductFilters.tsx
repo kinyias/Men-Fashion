@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
@@ -46,7 +46,7 @@ export function ProductFilters({
     sizes: true,
     special: true,
   })
-
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000])
   // Fetch brands using react-query
   const { data: brandsData, isLoading: brandsLoading } = useQuery({
     queryKey: ['brands'],
@@ -68,6 +68,12 @@ export function ProductFilters({
   })
   const sizes = sizesData?.data || []
 
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      onFiltersChange({ priceRange })
+    }, 500)
+    return () => clearTimeout(timeout)
+  }, [priceRange])
   // Sort sizes with custom logic
   const sortedSizes = [...sizes].sort((a, b) => {
     const aNum = Number.parseInt(a.ten)
@@ -172,8 +178,8 @@ export function ProductFilters({
         <CollapsibleContent className="space-y-4 pt-4">
           <div className="px-2">
             <Slider
-              value={filters.priceRange}
-              onValueChange={(value) => onFiltersChange({ priceRange: value as [number, number] })}
+              value={priceRange}
+              onValueChange={(value) => setPriceRange(value as [number, number])}
               max={10000000}
               min={0}
               step={1000}
@@ -181,8 +187,8 @@ export function ProductFilters({
             />
           </div>
           <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>{formatCurrency(filters.priceRange[0])}</span>
-            <span>{formatCurrency(filters.priceRange[1])}</span>
+            <span>{formatCurrency(priceRange[0])}</span>
+            <span>{formatCurrency(priceRange[1])}</span>
           </div>
         </CollapsibleContent>
       </Collapsible>

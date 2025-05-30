@@ -21,7 +21,6 @@ export function SearchHeader({ onSearchChange, resultCount, sortBy, onSortChange
     { value: "ten-desc", label: "Tên: Z-A" },
     { value: "giaban-asc", label: "Giá: Thấp đến Cao" },
     { value: "giaban-desc", label: "Giá: Cao đến Thấp" },
-    { value: "noibat-desc", label: "Nổi bật" },
     { value: "danhgia-desc", label: "Đánh giá cao nhất" }
   ]
  // Debounce effect
