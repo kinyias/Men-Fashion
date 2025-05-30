@@ -323,24 +323,25 @@ export default function ProductForm({product}:{product: SanPham}) {
   }
 
   // Function to add image to a color
-  const addImageToColor = (colorId: number, imageUrl: string) => {
-    setSelectedColors(
-      selectedColors.map((color) => {
-        if (color.ma === colorId) {
-          const newImages = [...color.hinhAnhs]
-          newImages.push({
-            ma: 0,
-            hinhAnh: imageUrl,
-            anhChinh: newImages.length === 0, // First image is primary
-            mamausac: color.ma,
-            masp: 0, // Will be set after product creation
-          })
-          return { ...color, hinhAnhs: newImages }
-        }
-        return color
-      }),
-    )
-  }
+  // const addImageToColor = (colorId: number, imageUrl: string) => {
+  //   setSelectedColors(
+  //     selectedColors.map((color) => {
+  //       if (color.ma === colorId) {
+  //         const newImages = [...color.hinhAnhs]
+  //         newImages.push({
+  //           ma: -Math.floor(Math.random() * 10000),
+  //           hinhAnh: imageUrl,
+  //           anhChinh: newImages.length === 0, // First image is primary
+  //           mamausac: color.ma,
+  //           masp: 0, // Will be set after product creation
+  //         })
+  //         return { ...color, hinhAnhs: newImages }
+  //       }
+  //       return color
+  //     }),
+  //   )
+
+  // }
 
   // Function to remove image from a color
   const removeImageFromColor = (colorId: number, imageId: number) => {
@@ -395,18 +396,13 @@ export default function ProductForm({product}:{product: SanPham}) {
     setUploadProgress(0)
     
     try {
+      const totalFiles = files.length
+      let completedFiles = 0
+      
+      // Upload files sequentially to maintain state consistency
+      const uploadedUrls = []
+      
       for (const file of Array.from(files)) {
-        // Simulate progress updates
-        const progressInterval = setInterval(() => {
-          setUploadProgress(prev => {
-            if (prev >= 90) {
-              clearInterval(progressInterval)
-              return prev
-            }
-            return prev + 10
-          })
-        }, 200)
-        
         const formData = new FormData()
         formData.append('file', file)
         
@@ -415,16 +411,23 @@ export default function ProductForm({product}:{product: SanPham}) {
           body: formData,
         })
         
-        clearInterval(progressInterval)
-        
         if (!response.ok) {
           throw new Error('Failed to upload image')
         }
         
-        setUploadProgress(100)
         const data = await response.json()
-        addImageToColor(colorId, data.secure_url)
+        uploadedUrls.push(data.secure_url)
+        
+        // Update progress based on completed files
+        completedFiles++
+        setUploadProgress((completedFiles / totalFiles) * 100)
       }
+      
+      // Add all images to color at once
+      addMultipleImagesToColor(colorId, uploadedUrls)
+      
+      // Ensure progress reaches 100% at the end
+      setUploadProgress(100)
     } catch (error) {
       console.error('Error uploading image:', error)
       toast.error('Lỗi khi tải ảnh lên')
@@ -432,6 +435,31 @@ export default function ProductForm({product}:{product: SanPham}) {
       setIsUploading(false)
       setUploadProgress(0)
     }
+  }
+  
+  // New function to add multiple images at once
+  const addMultipleImagesToColor = (colorId: number, imageUrls: string[]) => {
+    setSelectedColors(
+      selectedColors.map((color) => {
+        if (color.ma === colorId) {
+          const newImages = [...color.hinhAnhs]
+          
+          // Add each new image
+          imageUrls.forEach(imageUrl => {
+            newImages.push({
+              ma: -Math.floor(Math.random() * 10000),
+              hinhAnh: imageUrl,
+              anhChinh: newImages.length === 0, // First image is primary
+              mamausac: color.ma,
+              masp: 0, // Will be set after product creation
+            })
+          })
+          
+          return { ...color, hinhAnhs: newImages }
+        }
+        return color
+      }),
+    )
   }
   const handleImageDelete = (image: string) => {
     const imageKey = image.substring(image.lastIndexOf('/') + 1);
@@ -807,7 +835,6 @@ export default function ProductForm({product}:{product: SanPham}) {
           setSelectedColorIds={setSelectedColorIds}
           onAddColors={addSelectedColors}
           onRemoveColor={removeColor}
-          onAddImageToColor={addImageToColor}
           onRemoveImageFromColor={removeImageFromColor}
           onSetPrimaryImage={setPrimaryImage}
           onHandleImageUpload={handleImageUpload}

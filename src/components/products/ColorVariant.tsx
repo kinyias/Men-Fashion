@@ -19,7 +19,6 @@ interface ColorVariantProps {
   setSelectedColorIds: (ids: number[]) => void
   onAddColors: () => void
   onRemoveColor: (colorId: number) => void
-  onAddImageToColor: (colorId: number, imageUrl: string) => void
   onRemoveImageFromColor: (colorId: number, imageId: number) => void
   onSetPrimaryImage: (colorId: number, imageId: number) => void
   onHandleImageUpload: (colorId: number, files: FileList | null) => void
@@ -166,9 +165,9 @@ export function ColorVariant({
 
                   {color.hinhAnhs.length > 0 && (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                      {color.hinhAnhs.map((image) => (
+                      {color.hinhAnhs.map((image, index) => (
                         <div
-                          key={image.ma}
+                          key={index}
                           className={`relative group border rounded-md p-1 ${
                             image.anhChinh ? "ring-2 ring-primary" : "hover:bg-muted/50"
                           }`}
