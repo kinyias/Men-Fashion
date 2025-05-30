@@ -49,7 +49,7 @@ export function SizeTable() {
     page: 1,
     limit: 5,
     sortBy: 'ma',
-    sortOrder: 'asc',
+    sortOrder: 'desc',
     search: "",
   })
   

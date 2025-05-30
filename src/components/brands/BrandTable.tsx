@@ -49,7 +49,7 @@ export function BrandTable() {
     page: 1,
     limit: 5,
     sortBy: 'ma',
-    sortOrder: 'asc',
+    sortOrder: 'desc',
     search: "",
   })
   
@@ -287,7 +287,7 @@ export function BrandTable() {
             />
           </div>
           <Button asChild>
-            <Link href="/admin/categories/create">
+            <Link href="/admin/brands/create">
               <PlusCircle className="mr-2 h-4 w-4" />
               Thêm thương hiệu
             </Link>

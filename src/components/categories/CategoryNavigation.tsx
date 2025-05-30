@@ -8,6 +8,7 @@ import { LoaiSanPham } from "@/types/sub-category"
 import { useQuery } from "@tanstack/react-query"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { getCategoryById,getSubCategoriesByCategory } from "@/lib/api"
+import { toSlug } from "@/utils/slug"
 
 export function CategoryNavigation() {
   const params = useParams()
@@ -31,7 +32,7 @@ export function CategoryNavigation() {
 
 
   const handleSubcategorySelect = (subcategoryId: number) => {
-    router.push(`/danh-muc/${categoryId}/loai-san-pham/${subcategoryId}`)
+    router.push(`/danh-muc/${toSlug(category?.ten || '')}-${categoryId}/${toSlug(subcategories?.find(sub => sub.ma === subcategoryId)?.ten || '')}-${subcategoryId}`)
   }
 
   // If loading, show a loading state

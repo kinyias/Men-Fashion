@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal, Eye, EyeOff, Search, PlusCircle, Loader2, ChevronLeft, ChevronRight } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, Eye, EyeOff, Search, PlusCircle, Loader2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
@@ -53,7 +53,7 @@ export function SubCategoryTable() {
     page: 1,
     limit: 5,
     sortBy: 'ma',
-    sortOrder: 'asc',
+    sortOrder: 'desc',
     search: "",
   })
   
@@ -439,31 +439,13 @@ export function SubCategoryTable() {
               </select>
             </div>
             <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setQueryParams(prev => ({ ...prev, page: prev.page! - 1 }));
-                }}
-                disabled={pagination.page <= 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
+              
               <EllipsisPagination 
                 currentPage={queryParams.page}
                 totalPages={pagination.totalPages}
                 onPageChange={(page) => setQueryParams(prev => ({...prev, page }))}
               />
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => {
-                  setQueryParams(prev => ({ ...prev, page: prev.page! + 1 }));
-                }}
-                disabled={pagination.page >= pagination.totalPages}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+             
             </div>
           </div>
         </>
