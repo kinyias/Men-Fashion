@@ -12,7 +12,7 @@ import { useCartStore } from "@/lib/store/cart-store"
 import { formatCurrency } from "@/utils/currency"
 import toast from "react-hot-toast"
 import { BienThe, MauSac, SanPhamWithRating } from "@/types"
-import { ReviewsSection } from "./ReviewSection"
+import { ReviewsSection } from "../../reviews/ReviewSection"
 interface SizeWithAvailability{ ma: number; ten: string, available: boolean }
 interface MauSacWithAvailability extends MauSac{ available: boolean }
 export default function ProductDetail({product}:{product: SanPhamWithRating}) {

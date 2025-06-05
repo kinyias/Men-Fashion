@@ -4,6 +4,7 @@ import {
   DanhGiaFormValues,
   DanhGiaQueryParams,
   DanhGiaResponse,
+  DanhGiaAdminQueryParams,
 } from '@/types';
 
 export const getReviews = async (
@@ -52,5 +53,21 @@ export const deleteManyReviews = async (
   ids: number[]
 ): Promise<{ message: string }> => {
   const response = await api.delete('/api/danhgia/bulk', { data: { ids } });
+  return response.data;
+};
+
+export const getAdminReviews = async (
+  queryParams: DanhGiaAdminQueryParams
+): Promise<DanhGiaResponse> => {
+  const params = new URLSearchParams();
+  params.append('page', queryParams.page.toString());
+  params.append('limit', queryParams.limit.toString());
+  params.append('sortBy', queryParams.sortBy || 'ngaydang');
+  params.append('sortOrder', queryParams.sortOrder || 'desc');
+  if (queryParams.search) params.append('search', queryParams.search);
+  if (queryParams.rating !== undefined)
+    params.append('rating', queryParams.rating.toString());
+
+  const response = await api.get(`/api/danhgia/admin?${params.toString()}`);
   return response.data;
 };

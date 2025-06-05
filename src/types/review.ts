@@ -42,3 +42,12 @@ export interface DanhGiaQueryParams {
   search?: string;
   masp?: number;
 }
+
+export interface DanhGiaAdminQueryParams {
+  page: number;
+  limit: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  search?: string;
+  rating?: number;
+}
