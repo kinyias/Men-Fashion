@@ -81,7 +81,7 @@ export  function MobileMenu({ isOpen, onClose, navigationItems }: MobileMenuProp
                 </div>
                 <div className="mt-4 flex gap-2">
                   <Button asChild variant="outline" size="sm" className="flex-1">
-                    <Link href="/account">Tài khoản</Link>
+                    <Link href="/tai-khoan">Tài khoản</Link>
                   </Button>
                   <Button variant="outline" size="sm" className="flex-none bg-red-600" onClick={logout}>
                     <LogOut className="h-4 w-4 text-white" />

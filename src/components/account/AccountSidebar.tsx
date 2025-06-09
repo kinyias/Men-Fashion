@@ -1,96 +1,99 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { User, Package, MapPin, CreditCard, Settings, Shield, Heart, Star, Menu, X } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  User,
+  Package,
+  Settings,
+  Shield,
+  Star,
+  Menu,
+  X,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 interface AccountSidebarProps {
-  activeSection: string
-  onSectionChange: (section: string) => void
+  activeSection: string;
+  onSectionChange: (section: string) => void;
 }
 
 const navigationItems = [
   {
-    id: "profile",
-    label: "Profile",
+    id: 'profile',
+    label: 'Tài khoản',
     icon: User,
-    description: "Personal information",
+    description: 'Thông tin tài khoản',
+    href: '/tai-khoan',
   },
   {
-    id: "orders",
-    label: "Order History",
+    id: 'orders',
+    label: 'Lịch sử đơn hàng',
     icon: Package,
-    description: "Track your orders",
-    badge: "3",
+    description: 'Theo dõi đơn hàng',
+    badge: '3',
+    href: '/tai-khoan/don-hang',
   },
   {
-    id: "addresses",
-    label: "Address Book",
-    icon: MapPin,
-    description: "Manage addresses",
-  },
-  {
-    id: "payments",
-    label: "Payment Methods",
-    icon: CreditCard,
-    description: "Cards & billing",
-  },
-  {
-    id: "wishlist",
-    label: "Wishlist",
-    icon: Heart,
-    description: "Saved items",
-    badge: "12",
-  },
-  {
-    id: "loyalty",
-    label: "Loyalty Program",
+    id: 'loyalty',
+    label: 'Chương trình thành viên',
     icon: Star,
-    description: "Points & rewards",
+    description: 'Điểm & thưởng',
+    href: '/tai-khoan/chuong-trinh-thanh-vien',
   },
   {
-    id: "preferences",
-    label: "Preferences",
+    id: 'preferences',
+    label: 'Cài đặt',
     icon: Settings,
-    description: "Notifications & more",
+    description: 'Thông báo & thêm',
+    href: '/tai-khoan/cai-dat',
   },
   {
-    id: "security",
-    label: "Security",
+    id: 'security',
+    label: 'Bảo mật',
     icon: Shield,
-    description: "Password & privacy",
+    description: 'Mật khẩu & quyền riêng tư',
+    href: '/tai-khoan/bao-mat',
   },
-]
+];
 
-export function AccountSidebar({ activeSection, onSectionChange }: AccountSidebarProps) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+export function AccountSidebar({
+  activeSection,
+  onSectionChange,
+}: AccountSidebarProps) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const SidebarContent = () => (
     <Card className="p-6">
       <div className="space-y-2">
         <h2 className="text-lg font-semibold">Account Settings</h2>
-        <p className="text-sm text-muted-foreground">Manage your account and preferences</p>
+        <p className="text-sm text-muted-foreground">
+          Manage your account and preferences
+        </p>
       </div>
 
       <nav className="mt-6 space-y-1">
         {navigationItems.map((item) => {
-          const Icon = item.icon
-          const isActive = activeSection === item.id
+          const Icon = item.icon;
+          const isActive = activeSection === item.id;
 
           return (
+            <Link
+            href={item.href}
+            key={item.id}
+            >
             <Button
-              key={item.id}
-              variant={isActive ? "secondary" : "ghost"}
+              variant={isActive ? 'secondary' : 'ghost'}
               className={cn(
-                "w-full justify-start h-auto p-3 text-left",
-                isActive && "bg-primary/10 text-primary border-primary/20",
+                'w-full justify-start h-auto p-3 text-left',
+                isActive && 'bg-primary/10 text-primary border-primary/20'
               )}
               onClick={() => {
-                onSectionChange(item.id)
-                setIsMobileMenuOpen(false)
+                onSectionChange(item.id);
+                setIsMobileMenuOpen(false);
               }}
             >
               <div className="flex items-center gap-3 w-full">
@@ -104,15 +107,18 @@ export function AccountSidebar({ activeSection, onSectionChange }: AccountSideba
                       </Badge>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {item.description}
+                  </p>
                 </div>
               </div>
             </Button>
-          )
+            </Link>
+          );
         })}
       </nav>
     </Card>
-  )
+   );
 
   return (
     <>
@@ -123,7 +129,11 @@ export function AccountSidebar({ activeSection, onSectionChange }: AccountSideba
 
       {/* Mobile Menu Button */}
       <div className="lg:hidden mb-6">
-        <Button variant="outline" onClick={() => setIsMobileMenuOpen(true)} className="w-full justify-start">
+        <Button
+          variant="outline"
+          onClick={() => setIsMobileMenuOpen(true)}
+          className="w-full justify-start"
+        >
           <Menu className="h-4 w-4 mr-2" />
           Account Menu
         </Button>
@@ -136,7 +146,11 @@ export function AccountSidebar({ activeSection, onSectionChange }: AccountSideba
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold">Account Menu</h2>
-                <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
                   <X className="h-4 w-4" />
                 </Button>
               </div>
@@ -146,5 +160,5 @@ export function AccountSidebar({ activeSection, onSectionChange }: AccountSideba
         </div>
       )}
     </>
-  )
+  );
 }

@@ -81,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAuthTokens(data.tokens);
       setUser(data.user);
       toast.success('Đăng nhập thành công');
-      router.push('/dashboard');
+      router.push('/tai-khoan');
       setLoading(false);
     } catch (error: any) {
       const message = error.response?.data?.message || 'Đăng nhập thất bại';

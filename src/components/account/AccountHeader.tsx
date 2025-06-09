@@ -2,6 +2,7 @@
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Star, Crown, Gift } from "lucide-react"
+import { useAuth } from "@/context/auth-provider"
 
 // Mock user data
 const userData = {
@@ -16,6 +17,8 @@ const userData = {
 }
 
 export function AccountHeader() {
+  const { user } = useAuth();
+  if(!user) return null;
   return (
     <div className="bg-gradient-to-r from-primary/5 to-primary/10 border-b">
       <div className="container mx-auto px-4 py-8">
@@ -25,9 +28,9 @@ export function AccountHeader() {
             <div className="flex items-center gap-4">
             
               <div>
-                <h1 className="text-2xl font-bold">{userData.name}</h1>
-                <p className="text-muted-foreground">{userData.email}</p>
-                <p className="text-sm text-muted-foreground">Member since {userData.memberSince}</p>
+                <h1 className="text-2xl font-bold">{user.ten}</h1>
+                <p className="text-muted-foreground">{user.email}</p>
+                <p className="text-sm text-muted-foreground">Gia nhập từ {user.ngay_tao}</p>
               </div>
             </div>
 
@@ -41,8 +44,8 @@ export function AccountHeader() {
                     {userData.loyaltyTier}
                   </Badge>
                 </div>
-                <p className="text-sm font-medium">{userData.loyaltyPoints} Points</p>
-                <p className="text-xs text-muted-foreground">Loyalty Program</p>
+                <p className="text-sm font-medium">{userData.loyaltyPoints} Điểm</p>
+                <p className="text-xs text-muted-foreground">Chương trình thành viên</p>
               </div>
 
               {/* Total Orders */}
@@ -51,8 +54,8 @@ export function AccountHeader() {
                   <Gift className="h-4 w-4 text-blue-600" />
                   <span className="text-lg font-bold text-blue-800">{userData.totalOrders}</span>
                 </div>
-                <p className="text-sm font-medium">Total Orders</p>
-                <p className="text-xs text-muted-foreground">All time</p>
+                <p className="text-sm font-medium">Tổng đơn hàng</p>
+                <p className="text-xs text-muted-foreground">Tất cả thời gian</p>
               </div>
 
               {/* Total Spent */}
@@ -61,8 +64,8 @@ export function AccountHeader() {
                   <Star className="h-4 w-4 text-green-600" />
                   <span className="text-lg font-bold text-green-800">${userData.totalSpent.toFixed(2)}</span>
                 </div>
-                <p className="text-sm font-medium">Total Spent</p>
-                <p className="text-xs text-muted-foreground">Lifetime value</p>
+                <p className="text-sm font-medium">Tổng tiền</p>
+                <p className="text-xs text-muted-foreground">Tất cả thời gian</p>
               </div>
             </div>
           </div>
