@@ -35,6 +35,7 @@ import { TrangThaiDonHang } from '@/types';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
+import { formatCurrency } from '@/utils/currency';
 
 const statusConfig = {
   da_dat: {
@@ -72,7 +73,6 @@ export function OrderHistory() {
   );
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
-
   // Fetch orders using react-query
   const {
     data: ordersData,
@@ -86,8 +86,8 @@ export function OrderHistory() {
         limit,
         trangthai: statusFilter === 'all' ? undefined : statusFilter,
       }),
-  });
-
+    });
+    
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -187,12 +187,10 @@ export function OrderHistory() {
             </div>
             <div className="text-center p-4 bg-yellow-50 rounded-lg">
               <div className="text-2xl font-bold text-yellow-600">
-                {new Intl.NumberFormat('vi-VN', {
-                  style: 'currency',
-                  currency: 'VND',
-                }).format(
+       
+                {formatCurrency(
                   ordersData?.data.reduce(
-                    (sum, order) => sum + order.tonggia,
+                    (sum, order) => sum + Number(order.tonggia),
                     0
                   ) || 0
                 )}

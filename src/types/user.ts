@@ -5,7 +5,8 @@ export interface User {
   ten: string | null;
   so_dien_thoai: string | null;
   vai_tro: 'khanh_hang' | 'admin';
-  ma_xac_minh: boolean;
+  ma_xac_minh: string;
+  xac_thuc_email: boolean;
   ngay_tao: string;
   ngay_cap_nhat: string;
 }

@@ -29,11 +29,19 @@ export const userProfileSchema = z.object({
     .nullable(),
 });
 
-export const changePasswordSchema = z.object({
-  currentPassword: z.string().min(1, {
-    message: 'Mật khẩu hiện tại không được để trống',
-  }),
-  newPassword: z.string().min(8, {
-    message: 'Mật khẩu mới phải có ít nhất 8 ký tự',
-  }),
-});
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, {
+      message: 'Mật khẩu hiện tại không được để trống',
+    }),
+    newPassword: z.string().min(8, {
+      message: 'Mật khẩu mới phải có ít nhất 8 ký tự',
+    }),
+    confirmPassword: z.string().min(1, {
+      message: 'Xác nhận mật khẩu không được để trống',
+    }),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Mật khẩu xác nhận không khớp',
+    path: ['confirmPassword'],
+  });

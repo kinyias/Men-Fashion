@@ -4,22 +4,10 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import {
-  User,
-  Package,
-  Settings,
-  Shield,
-  Star,
-  Menu,
-  X,
-} from 'lucide-react';
+import { User, Package, Settings, Shield, Star, Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-
-interface AccountSidebarProps {
-  activeSection: string;
-  onSectionChange: (section: string) => void;
-}
+import { usePathname } from 'next/navigation';
 
 const navigationItems = [
   {
@@ -60,11 +48,9 @@ const navigationItems = [
   },
 ];
 
-export function AccountSidebar({
-  activeSection,
-  onSectionChange,
-}: AccountSidebarProps) {
+export function AccountSidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   const SidebarContent = () => (
     <Card className="p-6">
@@ -78,47 +64,41 @@ export function AccountSidebar({
       <nav className="mt-6 space-y-1">
         {navigationItems.map((item) => {
           const Icon = item.icon;
-          const isActive = activeSection === item.id;
+          const isActive = pathname === item.href;
 
           return (
-            <Link
-            href={item.href}
-            key={item.id}
-            >
-            <Button
-              variant={isActive ? 'secondary' : 'ghost'}
-              className={cn(
-                'w-full justify-start h-auto p-3 text-left',
-                isActive && 'bg-primary/10 text-primary border-primary/20'
-              )}
-              onClick={() => {
-                onSectionChange(item.id);
-                setIsMobileMenuOpen(false);
-              }}
-            >
-              <div className="flex items-center gap-3 w-full">
-                <Icon className="h-4 w-4 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">{item.label}</span>
-                    {item.badge && (
-                      <Badge variant="secondary" className="ml-2">
-                        {item.badge}
-                      </Badge>
-                    )}
+            <Link href={item.href} key={item.id}>
+              <Button
+                variant={isActive ? 'secondary' : 'ghost'}
+                className={cn(
+                  'w-full justify-start h-auto p-3 text-left',
+                  isActive && 'bg-primary/10 text-primary border-primary/20'
+                )}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <div className="flex items-center gap-3 w-full">
+                  <Icon className="h-4 w-4 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">{item.label}</span>
+                      {item.badge && (
+                        <Badge variant="secondary" className="ml-2">
+                          {item.badge}
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {item.description}
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {item.description}
-                  </p>
                 </div>
-              </div>
-            </Button>
+              </Button>
             </Link>
           );
         })}
       </nav>
     </Card>
-   );
+  );
 
   return (
     <>

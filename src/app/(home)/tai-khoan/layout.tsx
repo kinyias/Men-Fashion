@@ -1,4 +1,3 @@
-'use client'
 import { AccountSidebar } from '@/components/account/AccountSidebar';
 import { AccountHeader } from '@/components/account/AccountHeader';
 import React from 'react';
@@ -16,13 +15,7 @@ export default function TaiKhoanLayout({
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar Navigation */}
           <div className="lg:col-span-1">
-            <AccountSidebar
-              activeSection="profile" // or whichever section is currently active
-              onSectionChange={(section) => {
-                // Handle the section change, e.g., update state or navigate
-                console.log(section)
-              }}
-            />
+            <AccountSidebar />
           </div>
 
           {/* Main Content */}
