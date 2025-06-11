@@ -1,7 +1,7 @@
-import { MauSac } from "./colors";
-import { KhuyenMai } from "./coupons";
-import { KichCo } from "./sizes";
-import { User } from "./user";
+import { MauSac } from './colors';
+import { KhuyenMai } from './coupons';
+import { KichCo } from './sizes';
+import { User } from './user';
 
 export interface DonHang {
   ma: number;
@@ -56,13 +56,12 @@ export interface ThanhToan {
   madh: number;
 }
 
-
 export enum TrangThaiDonHang {
   DA_DAT = 'da_dat',
   DANG_XU_LY = 'dang_xu_ly',
   DANG_GIAO_HANG = 'dang_giao_hang',
   DA_GIAO_HANG = 'da_giao_hang',
-  DA_HUY = 'da_huy'
+  DA_HUY = 'da_huy',
 }
 
 export interface DonHangResponse {
@@ -83,6 +82,8 @@ export interface DonHangQueryParams {
   startDate?: string;
   endDate?: string;
   manguoidung?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface DonHangFormValues {
@@ -98,7 +99,7 @@ export interface DonHangFormValues {
   tamtinh: number;
   tonggia: number;
   phigiaohang: number;
-  phuongthucgiaohang:string;
+  phuongthucgiaohang: string;
   chiTietDonHangs: {
     masp: number;
     mabienthe: number;
