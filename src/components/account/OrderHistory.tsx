@@ -32,11 +32,10 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { getMyOrders } from '@/lib/api/api-orders';
 import { TrangThaiDonHang } from '@/types';
-import { format } from 'date-fns';
-import { vi } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
 import { formatCurrency } from '@/utils/currency';
 import EllipsisPagination from '../ui/EllipsisPagination';
+import { formatDate } from '@/utils/formatTime';
 
 const statusConfig = {
   da_dat: {
@@ -69,7 +68,9 @@ const statusConfig = {
 export function OrderHistory() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<TrangThaiDonHang | 'all'>('all');
+  const [statusFilter, setStatusFilter] = useState<TrangThaiDonHang | 'all'>(
+    'all'
+  );
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
 
@@ -185,7 +186,6 @@ export function OrderHistory() {
             </div>
             <div className="text-center p-4 bg-yellow-50 rounded-lg">
               <div className="text-2xl font-bold text-yellow-600">
-       
                 {formatCurrency(
                   ordersData?.data.reduce(
                     (sum, order) => sum + Number(order.tonggia),
@@ -228,14 +228,34 @@ export function OrderHistory() {
                 <CardContent className="p-6">
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
+                      <div className="relative h-16 w-16 rounded-lg overflow-hidden border">
+                        <img
+                          src={
+                            order.chiTietDonHangs[0]?.sanPham.hinhanh ||
+                            '/placeholder.svg'
+                          }
+                          alt={order.chiTietDonHangs[0]?.sanPham.ten}
+                          className="object-cover w-full h-full"
+                        />
+                      </div>
                       <div>
                         <h3 className="font-semibold text-lg">#{order.ma}</h3>
                         <p className="text-sm text-muted-foreground">
-                          Đặt ngày{' '}
-                          {format(new Date(order.ngaydat), 'dd/MM/yyyy', {
-                            locale: vi,
-                          })}
+                          Đặt ngày {formatDate(order.ngaydat)}
                         </p>
+                        <div className="mt-1">
+                          <p className="text-sm font-medium line-clamp-1">
+                            {order.chiTietDonHangs[0]?.sanPham.ten}
+                            {order.chiTietDonHangs.length > 1 &&
+                              ` và ${
+                                order.chiTietDonHangs.length - 1
+                              } sản phẩm khác`}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {order.chiTietDonHangs[0]?.bienThe.mauSac.ten} -{' '}
+                            {order.chiTietDonHangs[0]?.bienThe.kichCo.ten}
+                          </p>
+                        </div>
                       </div>
 
                       <Badge className={statusConfig[order.trangthai].color}>
@@ -247,10 +267,7 @@ export function OrderHistory() {
                     <div className="flex items-center gap-4">
                       <div className="text-right">
                         <p className="font-semibold">
-                          {new Intl.NumberFormat('vi-VN', {
-                            style: 'currency',
-                            currency: 'VND',
-                          }).format(order.tonggia)}
+                          {formatCurrency(order.tonggia)}
                         </p>
                         <p className="text-sm text-muted-foreground">
                           {order.chiTietDonHangs.length} sản phẩm
@@ -271,35 +288,37 @@ export function OrderHistory() {
 
         {/* Pagination */}
         {/* Replace the existing pagination with this */}
-        {ordersData && ordersData.pagination && ordersData.pagination.totalPages > 1 && (
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <p className="text-sm font-medium">Số hàng mỗi trang</p>
-              <select
-                value={limit}
-                onChange={(e) => {
-                  const newLimit = Number(e.target.value);
-                  setLimit(newLimit);
-                  setPage(1);
-                }}
-                className="h-8 w-[70px] rounded-md border border-input bg-background px-2 py-1 text-sm"
-              >
-                {[5, 10, 20, 30, 50].map((pageSize) => (
-                  <option key={pageSize} value={pageSize}>
-                    {pageSize}
-                  </option>
-                ))}
-              </select>
+        {ordersData &&
+          ordersData.pagination &&
+          ordersData.pagination.totalPages > 1 && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-medium">Số hàng mỗi trang</p>
+                <select
+                  value={limit}
+                  onChange={(e) => {
+                    const newLimit = Number(e.target.value);
+                    setLimit(newLimit);
+                    setPage(1);
+                  }}
+                  className="h-8 w-[70px] rounded-md border border-input bg-background px-2 py-1 text-sm"
+                >
+                  {[5, 10, 20, 30, 50].map((pageSize) => (
+                    <option key={pageSize} value={pageSize}>
+                      {pageSize}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center space-x-2">
+                <EllipsisPagination
+                  currentPage={page}
+                  totalPages={ordersData.pagination.totalPages}
+                  onPageChange={(newPage) => setPage(newPage)}
+                />
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <EllipsisPagination
-                currentPage={page}
-                totalPages={ordersData.pagination.totalPages}
-                onPageChange={(newPage) => setPage(newPage)}
-              />
-            </div>
-          </div>
-        )}
+          )}
       </div>
     </div>
   );
