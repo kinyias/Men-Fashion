@@ -10,6 +10,7 @@ import { useDebounce } from '@/hooks/use-debounce';
 import { formatCurrency } from '@/utils/currency';
 import { advancedSearchProducts } from '@/lib/api/api-products';
 import { useQuery } from '@tanstack/react-query';
+import { toSlug } from '@/utils/slug';
 
 interface SearchSidebarProps {
   isOpen: boolean;
@@ -144,7 +145,7 @@ export function SearchSidebar({ isOpen, onClose }: SearchSidebarProps) {
                 {searchResults.map((product) => (
                   <Link
                     key={product.ma}
-                    href={`/products/${product.ma}`}
+                    href={`/san-pham/${toSlug(product.ten)}-${product.ma}`}
                     className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors"
                     onClick={onClose}
                   >
@@ -202,7 +203,6 @@ export function SearchSidebar({ isOpen, onClose }: SearchSidebarProps) {
                     'Áo sơ mi',
                     'Quần âu',
                     'Áo thun',
-                    'Váy',
                     'Giày',
                     'Phụ kiện',
                     'Sale',
