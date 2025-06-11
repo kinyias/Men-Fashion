@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { User, Package, Settings, Shield, Star, Menu, X } from 'lucide-react';
+import { User, Package, Settings, Shield, Star, Menu, X, Tag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -22,8 +21,14 @@ const navigationItems = [
     label: 'Lịch sử đơn hàng',
     icon: Package,
     description: 'Theo dõi đơn hàng',
-    badge: '3',
     href: '/tai-khoan/don-hang',
+  },
+  {
+    id: 'coupon',
+    label: 'Mã giảm giá',
+    icon: Tag,
+    description: 'Mã giảm giá',
+    href: '/tai-khoan/khuyen-mai',
   },
   {
     id: 'loyalty',
@@ -81,11 +86,7 @@ export function AccountSidebar() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{item.label}</span>
-                      {item.badge && (
-                        <Badge variant="secondary" className="ml-2">
-                          {item.badge}
-                        </Badge>
-                      )}
+                      
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {item.description}

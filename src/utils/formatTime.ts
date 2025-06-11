@@ -1,3 +1,5 @@
+import { format } from "date-fns";
+import { vi } from 'date-fns/locale';
 export function formatHoursToDays(hours: number): string {
     const days = hours / 24.0;
     
@@ -15,4 +17,7 @@ export function formatHoursToDays(hours: number): string {
     
 
     return `${days}day`;
+}
+export function formatDate(date: string | Date){
+    return format(date, 'dd/MM/yyyy', { locale: vi })
 }

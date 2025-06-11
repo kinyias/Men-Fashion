@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,14 +18,26 @@ import {
   MapPin,
   CreditCard,
   Phone,
-  Mail
+  Mail,
+  AlertCircle,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import { getOrderWithOrderItemsById } from '@/lib/api/api-orders';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getOrderWithOrderItemsById, cancelOrder } from '@/lib/api/api-orders';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import toast from 'react-hot-toast';
+import type { ApiError } from '@/types';
 
 const statusConfig = {
   da_dat: {
@@ -60,9 +73,12 @@ const statusConfig = {
 };
 
 export default function OrderDetailPage() {
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
   const params = useParams<{ id: string }>();
   const orderId = params?.id;
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const {
     data: order,
@@ -72,6 +88,28 @@ export default function OrderDetailPage() {
     queryKey: ['order', orderId],
     queryFn: () => getOrderWithOrderItemsById(Number(orderId)),
   });
+
+  const cancelOrderMutation = useMutation({
+    mutationFn: ({ id, reason }: { id: number; reason?: string }) =>
+      cancelOrder(id, reason),
+    onSuccess: (data) => {
+      queryClient.setQueryData(['order', orderId], data);
+      toast.success('Đơn hàng đã được hủy thành công');
+      setCancelDialogOpen(false);
+      setCancelReason('');
+    },
+    onError: (error: ApiError) => {
+      console.error('Error cancelling order:', error);
+      toast.error(error.response?.data?.message || 'Không thể hủy đơn hàng');
+    },
+  });
+
+  const handleCancelOrder = () => {
+    cancelOrderMutation.mutate({
+      id: Number(orderId),
+      reason: cancelReason,
+    });
+  };
 
   if (isLoading) {
     return (
@@ -338,8 +376,17 @@ export default function OrderDetailPage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 {order.trangthai === 'da_dat' && (
-                  <Button className="w-full" variant="destructive">
-                    <XCircle className="h-4 w-4 mr-2" />
+                  <Button
+                    className="w-full"
+                    variant="destructive"
+                    onClick={() => setCancelDialogOpen(true)}
+                    disabled={cancelOrderMutation.isPending}
+                  >
+                    {cancelOrderMutation.isPending ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    ) : (
+                      <XCircle className="h-4 w-4 mr-2" />
+                    )}
                     Hủy đơn hàng
                   </Button>
                 )}
@@ -374,6 +421,58 @@ export default function OrderDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Add the cancel dialog */}
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-destructive" />
+              Xác nhận hủy đơn hàng
+            </DialogTitle>
+            <DialogDescription>
+              Bạn có chắc chắn muốn hủy đơn hàng này? Hành động này không thể
+              hoàn tác.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="cancelReason" className="text-sm font-medium">
+                Lý do hủy đơn (không bắt buộc)
+              </label>
+              <Textarea
+                id="cancelReason"
+                placeholder="Nhập lý do hủy đơn hàng..."
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setCancelDialogOpen(false);
+                setCancelReason('');
+              }}
+            >
+              Hủy bỏ
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancelOrder}
+              disabled={cancelOrderMutation.isPending}
+            >
+              {cancelOrderMutation.isPending ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              ) : (
+                <XCircle className="h-4 w-4 mr-2" />
+              )}
+              Xác nhận hủy
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

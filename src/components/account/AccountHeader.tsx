@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Star, Crown, Gift } from "lucide-react"
 import { useAuth } from "@/context/auth-provider"
+import { formatDate } from "@/utils/formatTime"
 
 // Mock user data
 const userData = {
@@ -30,7 +31,7 @@ export function AccountHeader() {
               <div>
                 <h1 className="text-2xl font-bold">{user.ten}</h1>
                 <p className="text-muted-foreground">{user.email}</p>
-                <p className="text-sm text-muted-foreground">Gia nhập từ {user.ngay_tao}</p>
+                <p className="text-sm text-muted-foreground">Gia nhập từ {formatDate(user.ngay_tao)}</p>
               </div>
             </div>
 
