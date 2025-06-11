@@ -36,6 +36,7 @@ import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
 import { formatCurrency } from '@/utils/currency';
+import EllipsisPagination from '../ui/EllipsisPagination';
 
 const statusConfig = {
   da_dat: {
@@ -68,26 +69,23 @@ const statusConfig = {
 export function OrderHistory() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<TrangThaiDonHang | 'all'>(
-    'all'
-  );
-  const [currentPage, setCurrentPage] = useState(1);
-  const limit = 10;
-  // Fetch orders using react-query
+  const [statusFilter, setStatusFilter] = useState<TrangThaiDonHang | 'all'>('all');
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(5);
+
   const {
     data: ordersData,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['orders', currentPage, statusFilter],
+    queryKey: ['orders', page, limit, statusFilter],
     queryFn: () =>
       getMyOrders({
-        page: currentPage,
+        page,
         limit,
         trangthai: statusFilter === 'all' ? undefined : statusFilter,
       }),
-    });
-    
+  });
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -272,28 +270,34 @@ export function OrderHistory() {
         )}
 
         {/* Pagination */}
-        {ordersData && ordersData.pagination.totalPages > 1 && (
-          <div className="flex justify-center gap-2 mt-6">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-            >
-              Trước
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                setCurrentPage((prev) =>
-                  Math.min(ordersData.pagination.totalPages, prev + 1)
-                )
-              }
-              disabled={currentPage === ordersData.pagination.totalPages}
-            >
-              Sau
-            </Button>
+        {/* Replace the existing pagination with this */}
+        {ordersData && ordersData.pagination && ordersData.pagination.totalPages > 1 && (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium">Số hàng mỗi trang</p>
+              <select
+                value={limit}
+                onChange={(e) => {
+                  const newLimit = Number(e.target.value);
+                  setLimit(newLimit);
+                  setPage(1);
+                }}
+                className="h-8 w-[70px] rounded-md border border-input bg-background px-2 py-1 text-sm"
+              >
+                {[5, 10, 20, 30, 50].map((pageSize) => (
+                  <option key={pageSize} value={pageSize}>
+                    {pageSize}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center space-x-2">
+              <EllipsisPagination
+                currentPage={page}
+                totalPages={ordersData.pagination.totalPages}
+                onPageChange={(newPage) => setPage(newPage)}
+              />
+            </div>
           </div>
         )}
       </div>

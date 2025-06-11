@@ -33,13 +33,14 @@ import type { KhuyenMai } from '@/types';
 import { LoaiKhuyenMai } from '@/lib/validations/coupons.validator';
 import { formatCurrency } from '@/utils/currency';
 import { formatDate } from '@/utils/formatTime';
+import EllipsisPagination from '../ui/EllipsisPagination';
 
 export function CouponsSection() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [loaikhuyenmai, setLoaikhuyenmai] = useState('');
+  const [loaikhuyenmai, setLoaikhuyenmai] = useState('all');
   const [sortBy, setSortBy] = useState('ngayketthuc');
-  const [page] = useState(1);
-  const limit = 10;
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(6);
 
   const {
     data: couponsData,
@@ -278,6 +279,36 @@ export function CouponsSection() {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+      {/* Add this before the closing div of the component */}
+      {couponsData && couponsData.pagination && couponsData.pagination.totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium">Số hàng mỗi trang</p>
+            <select
+              value={limit}
+              onChange={(e) => {
+                const newLimit = Number(e.target.value);
+                setLimit(newLimit);
+                setPage(1);
+              }}
+              className="h-8 w-[70px] rounded-md border border-input bg-background px-2 py-1 text-sm"
+            >
+              {[5, 10, 20, 30, 50].map((pageSize) => (
+                <option key={pageSize} value={pageSize}>
+                  {pageSize}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center space-x-2">
+            <EllipsisPagination
+              currentPage={page}
+              totalPages={couponsData.pagination.totalPages}
+              onPageChange={(newPage) => setPage(newPage)}
+            />
+          </div>
         </div>
       )}
     </div>

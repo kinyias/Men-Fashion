@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { User, Package, Settings, Shield, Star, Menu, X, Tag } from 'lucide-react';
+import { User, Package, Menu, X, Tag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -30,27 +30,27 @@ const navigationItems = [
     description: 'Mã giảm giá',
     href: '/tai-khoan/khuyen-mai',
   },
-  {
-    id: 'loyalty',
-    label: 'Chương trình thành viên',
-    icon: Star,
-    description: 'Điểm & thưởng',
-    href: '/tai-khoan/chuong-trinh-thanh-vien',
-  },
-  {
-    id: 'preferences',
-    label: 'Cài đặt',
-    icon: Settings,
-    description: 'Thông báo & thêm',
-    href: '/tai-khoan/cai-dat',
-  },
-  {
-    id: 'security',
-    label: 'Bảo mật',
-    icon: Shield,
-    description: 'Mật khẩu & quyền riêng tư',
-    href: '/tai-khoan/bao-mat',
-  },
+  // {
+  //   id: 'loyalty',
+  //   label: 'Chương trình thành viên',
+  //   icon: Star,
+  //   description: 'Điểm & thưởng',
+  //   href: '/tai-khoan/chuong-trinh-thanh-vien',
+  // },
+  // {
+  //   id: 'preferences',
+  //   label: 'Cài đặt',
+  //   icon: Settings,
+  //   description: 'Thông báo & thêm',
+  //   href: '/tai-khoan/cai-dat',
+  // },
+  // {
+  //   id: 'security',
+  //   label: 'Bảo mật',
+  //   icon: Shield,
+  //   description: 'Mật khẩu & quyền riêng tư',
+  //   href: '/tai-khoan/bao-mat',
+  // },
 ];
 
 export function AccountSidebar() {
@@ -60,9 +60,9 @@ export function AccountSidebar() {
   const SidebarContent = () => (
     <Card className="p-6">
       <div className="space-y-2">
-        <h2 className="text-lg font-semibold">Account Settings</h2>
+        <h2 className="text-lg font-semibold">Cài đặt tài khoản</h2>
         <p className="text-sm text-muted-foreground">
-          Manage your account and preferences
+          Quản lý thông tin cá nhân và đơn hàng của bạn
         </p>
       </div>
 
@@ -116,7 +116,7 @@ export function AccountSidebar() {
           className="w-full justify-start"
         >
           <Menu className="h-4 w-4 mr-2" />
-          Account Menu
+          Tài khoản
         </Button>
       </div>
 
@@ -126,7 +126,7 @@ export function AccountSidebar() {
           <div className="fixed inset-y-0 left-0 w-80 bg-background border-r shadow-lg">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold">Account Menu</h2>
+                <h2 className="text-lg font-semibold">Tài khoản</h2>
                 <Button
                   variant="ghost"
                   size="icon"

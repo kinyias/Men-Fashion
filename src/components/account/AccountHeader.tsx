@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Star, Crown, Gift } from "lucide-react"
 import { useAuth } from "@/context/auth-provider"
 import { formatDate } from "@/utils/formatTime"
+import { formatCurrency } from "@/utils/currency"
 
 // Mock user data
 const userData = {
@@ -14,7 +15,7 @@ const userData = {
   loyaltyTier: "Gold",
   loyaltyPoints: 2450,
   totalOrders: 24,
-  totalSpent: 3240.5,
+  totalSpent: 324000,
 }
 
 export function AccountHeader() {
@@ -63,7 +64,7 @@ export function AccountHeader() {
               <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
                 <div className="flex items-center justify-center gap-1 mb-1">
                   <Star className="h-4 w-4 text-green-600" />
-                  <span className="text-lg font-bold text-green-800">${userData.totalSpent.toFixed(2)}</span>
+                  <span className="text-lg font-bold text-green-800">{formatCurrency(userData.totalSpent)}</span>
                 </div>
                 <p className="text-sm font-medium">Tổng tiền</p>
                 <p className="text-xs text-muted-foreground">Tất cả thời gian</p>
