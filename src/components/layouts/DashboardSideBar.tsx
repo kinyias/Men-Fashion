@@ -84,16 +84,6 @@ export const navItems: NavItem[] = [
     ],
   },
   {
-    title: 'Khuyến mãi',
-    href: '/admin/coupons',
-    icon: CirclePercent,
-  },
-  {
-    title: 'Đánh giá',
-    href: '/admin/reviews',
-    icon: Star,
-  },
-  {
     title: 'Tin tức',
     href: '/admin/blogs',
     icon: FileText,
@@ -102,6 +92,16 @@ export const navItems: NavItem[] = [
       { title: 'Danh sách tin tức', href: '/admin/blogs'},
       { title: 'Thêm tin tức', href: '/admin/blogs/create' },
     ],
+  },
+  {
+    title: 'Khuyến mãi',
+    href: '/admin/coupons',
+    icon: CirclePercent,
+  },
+  {
+    title: 'Đánh giá',
+    href: '/admin/reviews',
+    icon: Star,
   },
   {
     title: 'Khách hàng',

@@ -9,5 +9,5 @@ export const genreFormSchema = z.object({
     .max(100, {
       message: 'Tên loại tin không thể có nhiều hơn 100 kí tự.',
     }),
-  trangthai: z.boolean().default(true),
+  trangthai: z.boolean(),
 });
