@@ -1,6 +1,6 @@
 'use client';
 
-import { Award, CirclePercent, Star, Tags } from 'lucide-react';
+import { Award, CirclePercent, FileText, Star, Tags } from 'lucide-react';
 import {
     ChevronDown,
     Home,
@@ -92,6 +92,16 @@ export const navItems: NavItem[] = [
     title: 'Đánh giá',
     href: '/admin/reviews',
     icon: Star,
+  },
+  {
+    title: 'Tin tức',
+    href: '/admin/blogs',
+    icon: FileText,
+    submenu: [
+      { title: 'Loại tin', href: '/admin/genre'},
+      { title: 'Danh sách tin tức', href: '/admin/blogs'},
+      { title: 'Thêm tin tức', href: '/admin/blogs/create' },
+    ],
   },
   {
     title: 'Khách hàng',
