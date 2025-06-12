@@ -20,6 +20,7 @@ import {
   Phone,
   Mail,
   AlertCircle,
+  Star,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
@@ -37,7 +38,9 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import toast from 'react-hot-toast';
-import type { ApiError } from '@/types';
+import type { ApiError, DonHang } from '@/types';
+import { formatCurrency } from '@/utils/currency';
+import { WriteReviewModal } from '@/components/reviews/WriteReviewModal';
 
 const statusConfig = {
   da_dat: {
@@ -79,7 +82,7 @@ export default function OrderDetailPage() {
   const orderId = params?.id;
   const router = useRouter();
   const queryClient = useQueryClient();
-
+  const [showWriteReview, setShowWriteReview] = useState(false)
   const {
     data: order,
     isLoading,
@@ -92,8 +95,15 @@ export default function OrderDetailPage() {
   const cancelOrderMutation = useMutation({
     mutationFn: ({ id, reason }: { id: number; reason?: string }) =>
       cancelOrder(id, reason),
-    onSuccess: (data) => {
-      queryClient.setQueryData(['order', orderId], data);
+    onSuccess: () => {
+      queryClient.setQueryData(['order', orderId], (oldData: DonHang) => ({
+        ...oldData,
+        trangthai: 'da_huy',
+        ngayhuy: new Date().toISOString(),
+      }));
+
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+
       toast.success('Đơn hàng đã được hủy thành công');
       setCancelDialogOpen(false);
       setCancelReason('');
@@ -216,9 +226,10 @@ export default function OrderDetailPage() {
               <CardContent>
                 <div className="space-y-4">
                   {order.chiTietDonHangs.map((item) => (
+                    <div key={item.ma} className="flex flex-col">
+
                     <div
-                      key={item.ma}
-                      className="flex items-center gap-4 p-4 border rounded-lg"
+                      className="flex flex-wrap items-center gap-4 p-4 border rounded-lg"
                     >
                       <Image
                         src={item.sanPham.hinhanh}
@@ -239,15 +250,27 @@ export default function OrderDetailPage() {
                         </p>
                       </div>
 
-                      <div className="text-right">
+                      <div className="text-right w-full">
                         <p className="font-medium">
-                          {new Intl.NumberFormat('vi-VN', {
-                            style: 'currency',
-                            currency: 'VND',
-                          }).format(item.dongia)}
+                          {formatCurrency(item.dongia)}
                         </p>
                       </div>
                     </div>
+                    {order.trangthai === 'da_giao_hang' && (
+                  <Button onClick={() => setShowWriteReview(true)} className="w-full" variant="default">
+                    <Star className="h-4 w-4 mr-2" />
+                    Đánh giá sản phẩm
+                  </Button>
+                )}
+                 {/* Write Review Modal */}
+                  {showWriteReview && (
+                    <WriteReviewModal
+                      productId={item.sanPham.ma}
+                      onClose={() => setShowWriteReview(false)}
+                    />
+                  )}
+                    </div>
+                    
                   ))}
                 </div>
               </CardContent>
@@ -276,30 +299,21 @@ export default function OrderDetailPage() {
                     <span>Giảm giá</span>
                     <span className="text-red-500">
                       -
-                      {new Intl.NumberFormat('vi-VN', {
-                        style: 'currency',
-                        currency: 'VND',
-                      }).format(order.giamgia)}
+                      {formatCurrency(order.giamgia)}
                     </span>
                   </div>
                 )}
                 <div className="flex justify-between">
                   <span>Phí vận chuyển</span>
                   <span>
-                    {new Intl.NumberFormat('vi-VN', {
-                      style: 'currency',
-                      currency: 'VND',
-                    }).format(order.phigiaohang)}
+                    {formatCurrency(order.phigiaohang)}
                   </span>
                 </div>
                 <Separator />
                 <div className="flex justify-between font-semibold text-lg">
                   <span>Tổng cộng</span>
                   <span>
-                    {new Intl.NumberFormat('vi-VN', {
-                      style: 'currency',
-                      currency: 'VND',
-                    }).format(order.tonggia)}
+                    {formatCurrency(order.tonggia)}
                   </span>
                 </div>
               </CardContent>
@@ -473,6 +487,7 @@ export default function OrderDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+     
     </div>
   );
 }

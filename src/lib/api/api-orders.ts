@@ -34,7 +34,6 @@ export const getMyOrders = async (
   params.append('page', queryParams.page.toString());
   params.append('limit', queryParams.limit.toString());
   if (queryParams.trangthai) params.append('trangthai', queryParams.trangthai);
-
   const response = await api.get(`/api/donhang/user/me?${params.toString()}`);
   return response.data;
 };

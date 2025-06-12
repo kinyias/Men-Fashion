@@ -52,7 +52,7 @@ export default function CheckoutPage() {
       } else {
         router.push(`/thanh-toan/xac-nhan/${data.ma}`)
       }
-      router.push(`/thanh-toan/xac-nhan/${data.ma}`)
+      // router.push(`/thanh-toan/xac-nhan/${data.ma}`)
       setIsProcessing(true)
     },
     onError: (error: ApiError) => {

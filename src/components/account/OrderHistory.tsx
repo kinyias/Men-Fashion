@@ -73,7 +73,6 @@ export function OrderHistory() {
   );
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
-
   const {
     data: ordersData,
     isLoading,
