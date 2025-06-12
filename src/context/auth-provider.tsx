@@ -114,7 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       clearAuthTokens();
       setUser(null);
-      router.push('auth/login');
+      router.push('/auth/login');
       toast.success('Đăng xuất thành công');
     }
   };

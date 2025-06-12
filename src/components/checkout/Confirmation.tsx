@@ -106,7 +106,7 @@ export default function Confirmation() {
         <Link href="/">Tiếp tục mua sắm</Link>
       </Button>
       <Button variant="outline" asChild>
-        <Link href="/account/orders">
+        <Link href={"/tai-khoan/don-hang/" + orderId}>
           Xem đơn hàng <ArrowRight className="ml-1 h-4 w-4" />
         </Link>
       </Button>
