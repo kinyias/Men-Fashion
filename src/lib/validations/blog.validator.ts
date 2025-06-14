@@ -12,8 +12,8 @@ export const blogFormSchema = z.object({
   noidung: z.string().min(10, {
     message: 'Nội dung ít nhất phải có 10 kí tự',
   }),
-  hinhdaidien: z.string({
-    required_error: 'Vui lòng chọn hình đại diện',
+  hinhdaidien: z.string().min(1,{
+    message: 'Vui lòng chọn hình đại diện',
   }),
   tinhot: z.boolean(),
   trangthai: z.boolean(),

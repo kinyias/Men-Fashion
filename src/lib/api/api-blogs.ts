@@ -74,3 +74,7 @@ export const getHotBlogs = async (): Promise<BlogResponse> => {
   const response = await api.get(`/api/tintuc?${params.toString()}`);
   return response.data;
 };
+export const increaseBlogViews = async (id: number): Promise<Blog> => {
+  const response = await api.put(`/api/tintuc/${id}/views`);
+  return response.data;
+}

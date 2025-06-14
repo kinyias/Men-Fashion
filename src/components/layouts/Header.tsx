@@ -58,7 +58,7 @@ export default function Header() {
   })) || [],
   {
     name: "Tin tức",
-    href: "#",
+    href: "/tin-tuc",
     hasDropdown: false,
     subcategories: []
   },

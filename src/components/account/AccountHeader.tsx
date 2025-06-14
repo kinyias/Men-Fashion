@@ -32,7 +32,7 @@ export function AccountHeader() {
               <div>
                 <h1 className="text-2xl font-bold">{user.ten}</h1>
                 <p className="text-muted-foreground">{user.email}</p>
-                <p className="text-sm text-muted-foreground">Gia nhập từ {formatDate(user.ngay_tao)}</p>
+                <p className="text-sm text-muted-foreground">Gia nhập từ {formatDate(user.ngay_tao || new Date().toISOString())}</p>
               </div>
             </div>
 

@@ -8,3 +8,5 @@ export * from './api-orders';
 export * from './api-viettelpost';
 export * from './api-coupons';
 export * from './api-reviews';
+export * from './api-genre';
+export * from './api-blogs';

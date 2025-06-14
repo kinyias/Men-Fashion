@@ -24,7 +24,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import {
   Select,
@@ -44,6 +43,7 @@ import axios from 'axios';
 import Image from 'next/image';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '../ui/skeleton';
+import { SimpleEditor } from '../tiptap/tiptap-templates/simple/simple-editor';
 
 export default function BlogForm({ blog }: { blog?: Blog }) {
   const router = useRouter();
@@ -198,19 +198,19 @@ export default function BlogForm({ blog }: { blog?: Blog }) {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="noidung"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nội dung</FormLabel>
+                    <FormItem className="md:col-span-2">
+                     <FormLabel>Nội dung</FormLabel>
                       <FormControl>
-                        <Textarea
-                          placeholder="Nhập nội dung tin tức"
-                          className="min-h-[200px]"
-                          {...field}
-                        />
+                        <div className="border overflow-x-auto max-w-full">
+                          <SimpleEditor
+                            content={field.value || ''}
+                            onChange={field.onChange}
+                          />
+                        </div>
                       </FormControl>
                       <FormDescription>
                         Nội dung chi tiết của tin tức.

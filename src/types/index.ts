@@ -9,3 +9,5 @@ export * from './product';
 export * from './order';
 export * from './coupons';
 export * from './review';
+export * from './genre';
+export * from './blogs';

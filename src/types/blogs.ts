@@ -9,6 +9,7 @@ export interface Blog {
   noidung: string;
   ngaydang: string;
   hinhdaidien: string;
+  soluotxem: number;
   tinhot: boolean;
   trangthai: boolean;
   manguoidung: number;
