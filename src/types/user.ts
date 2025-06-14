@@ -4,7 +4,7 @@ export interface User {
   ho: string | null;
   ten: string | null;
   so_dien_thoai: string | null;
-  vai_tro: 'khanh_hang' | 'admin';
+  vai_tro: 'khach_hang' | 'admin';
   ma_xac_minh: string;
   xac_thuc_email: boolean;
   ngay_tao: string;
@@ -31,4 +31,38 @@ export interface UserProfileFormValues {
 export interface ChangePasswordFormValues {
   currentPassword: string;
   newPassword: string;
+}
+
+// Admin user management APIs
+export interface AdminUserListParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  vai_tro?: string;
+  xac_thuc_email?: boolean;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface AdminUserListResponse {
+  data: User[];
+  pagination: {
+    page: number;
+    limit: number;
+    totalItems: number;
+    totalPages: number;
+  };
+}
+
+export interface CreateUserFormValues {
+  email: string;
+  ho?: string;
+  ten?: string;
+  so_dien_thoai?: string;
+  vai_tro: 'khach_hang' | 'admin';
+  mat_khau: string;
+}
+
+export interface UpdateUserRoleFormValues {
+  vai_tro: 'khach_hang' | 'admin';
 }

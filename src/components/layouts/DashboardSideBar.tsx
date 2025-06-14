@@ -104,8 +104,8 @@ export const navItems: NavItem[] = [
     icon: Star,
   },
   {
-    title: 'Khách hàng',
-    href: '/admin/customers',
+    title: 'Tài khoản',
+    href: '/admin/users',
     icon: Users,
   }
 ];
