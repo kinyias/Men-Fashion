@@ -75,6 +75,11 @@ export const getHotBlogs = async (): Promise<BlogResponse> => {
   return response.data;
 };
 export const increaseBlogViews = async (id: number): Promise<Blog> => {
-  const response = await api.put(`/api/tintuc/${id}/views`);
+  const response = await api.patch(`/api/tintuc/${id}/views`);
   return response.data;
+}
+
+export const getRelatedBlogs = async (id: number, limit: number): Promise<Blog[]> => {
+  const response = await api.get(`/api/tintuc/${id}/related?limit=${limit}`);
+  return response.data.data;
 }

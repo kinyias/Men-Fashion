@@ -11,6 +11,7 @@ import {
 import { Blog } from '@/types';
 import { formatDate } from '@/utils/formatTime';
 import { ChevronRight } from 'lucide-react';
+import { toSlug } from '@/utils/slug';
 export default function BlogCard({ post }: { post: Blog }) {
   const htmlToText = (html: string) => {
     const doc = new DOMParser().parseFromString(html, 'text/html');
@@ -20,7 +21,7 @@ export default function BlogCard({ post }: { post: Blog }) {
     <Card
       className="overflow-hidden transition-all duration-200 hover:shadow-md pt-0"
     >
-      <Link href={`/tin-tuc/${post.ma}`}>
+      <Link href={`/tin-tuc/${toSlug(post.tieude)}-${post.ma}`}>
         <div className="aspect-[16/9] relative overflow-hidden">
           <Image
             src={post.hinhdaidien || '/placeholder.svg'}
@@ -37,7 +38,7 @@ export default function BlogCard({ post }: { post: Blog }) {
           <span>•</span>
           <span>{post.loaitin?.tenloaitin}</span>
         </div>
-        <Link href={`/tin-tuc/${post.ma}`} className="hover:underline">
+        <Link href={`/tin-tuc/${toSlug(post.tieude)}-${post.ma}`} className="hover:underline">
           <h3 className="text-xl font-bold leading-tight">{post.tieude}</h3>
         </Link>
       </CardHeader>
@@ -49,7 +50,7 @@ export default function BlogCard({ post }: { post: Blog }) {
           {post.soluotxem} lượt xem
         </div>
         <Button variant="ghost" size="sm" className="gap-1" asChild>
-          <Link href={`/tin-tuc/${post.ma}`}>
+          <Link href={`/tin-tuc/${toSlug(post.tieude)}-${post.ma}`}>
             Đọc thêm <ChevronRight className="h-3.5 w-3.5" />
           </Link>
         </Button>

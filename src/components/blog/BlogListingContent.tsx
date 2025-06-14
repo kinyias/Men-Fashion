@@ -22,7 +22,7 @@ const sortOptions = [
   { value: 'ngaydang-desc', label: 'Ngày: Cũ nhất' },
   { value: 'tieude-asc', label: 'Tên: A-Z' },
   { value: 'tieude-desc', label: 'Tên: Z-A' },
-  { value: 'soluotxem-desc', label: 'Lượt xem: Cao nhất' },
+  { value: 'soluotxem-asc', label: 'Lượt xem: Cao nhất' },
 ];
 
 export function BlogListingContent() {

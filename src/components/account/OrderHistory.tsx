@@ -36,6 +36,7 @@ import { useRouter } from 'next/navigation';
 import { formatCurrency } from '@/utils/currency';
 import EllipsisPagination from '../ui/EllipsisPagination';
 import { formatDate } from '@/utils/formatTime';
+import Image from 'next/image';
 
 const statusConfig = {
   da_dat: {
@@ -228,13 +229,15 @@ export function OrderHistory() {
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                       <div className="relative h-16 w-16 rounded-lg overflow-hidden border">
-                        <img
+                        <Image
                           src={
                             order.chiTietDonHangs[0]?.sanPham.hinhanh ||
                             '/placeholder.svg'
                           }
                           alt={order.chiTietDonHangs[0]?.sanPham.ten}
                           className="object-cover w-full h-full"
+                          width={64}
+                          height={64}
                         />
                       </div>
                       <div>
