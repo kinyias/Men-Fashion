@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Minus, Plus, ShoppingCart,  Star,  StarHalf,  Truck } from "lucide-react"
+import { Minus, Plus, ShoppingCart,  Star,  StarHalf } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -13,6 +13,7 @@ import { formatCurrency } from "@/utils/currency"
 import toast from "react-hot-toast"
 import { BienThe, MauSac, SanPhamWithRating } from "@/types"
 import { ReviewsSection } from "../../reviews/ReviewSection"
+import { MySizeAssistSidebar } from "./MySizeAssistSideBar"
 interface SizeWithAvailability{ ma: number; ten: string, available: boolean }
 interface MauSacWithAvailability extends MauSac{ available: boolean }
 export default function ProductDetail({product}:{product: SanPhamWithRating}) {
@@ -41,6 +42,7 @@ export default function ProductDetail({product}:{product: SanPhamWithRating}) {
   const [selectedColor, setSelectedColor] = useState(uniqueColors[0])
   const [selectedSize, setSelectedSize] = useState<SizeWithAvailability | null>(null)
   const [showSizeGuide, setShowSizeGuide] = useState(false)
+  const [showMySizeAssist, setShowMySizeAssist] = useState(false)
   const [quantity, setQuantity] = useState(1)
   const { addItem } = useCartStore()
   const getSelectedVariant = ():BienThe => {
@@ -183,6 +185,15 @@ const getMainImage = () => {
               <div>
                 <div className="flex items-center justify-between">
                   <h3 className="font-medium">Kích thước</h3>
+                  <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    className="text-sm text-primary hover:underline"
+                    onClick={() => setShowMySizeAssist(true)}
+                  >
+                    MySize Assist
+                  </button>
+                  <span className="text-muted-foreground">|</span>
                   <button
                     type="button"
                     className="text-sm text-primary hover:underline cursor-pointer"
@@ -190,6 +201,7 @@ const getMainImage = () => {
                   >
                     Hướng dẫn chọn size
                   </button>
+                  </div>
                 </div>
                 <div className="grid grid-cols-4 gap-2 mt-2">
                   {uniqueSizes.map((size) => (
@@ -246,18 +258,6 @@ const getMainImage = () => {
               </div>
             </div>
 
-            {/* Shipping Info */}
-            <div className="p-4 border rounded-lg bg-muted/50">
-              <div className="flex items-start space-x-2">
-                <Truck className="w-5 h-5 mt-0.5 text-primary" />
-                <div>
-                  <p className="font-medium">Miễn phí giao hàng</p>
-                  <p className="text-sm text-muted-foreground">
-                   Miễn phí giao hàng đơn hàng trên 500k.
-                  </p>
-                </div>
-              </div>
-            </div>
 
             {/* Share */}
             {/* <div className="flex items-center pt-2">
@@ -277,23 +277,11 @@ const getMainImage = () => {
         <Tabs defaultValue="description">
           <TabsList className="w-full justify-start">
             <TabsTrigger value="description">Mô tả</TabsTrigger>
-            <TabsTrigger value="shipping">Giao hàng</TabsTrigger>
             <TabsTrigger value="reviews">Đánh giá ({product._count.danhGias})</TabsTrigger>
           </TabsList>
           <TabsContent value="description" className="mt-4">
             <div className="space-y-4">
               <div dangerouslySetInnerHTML={{ __html: product.mota! }}></div>
-            </div>
-          </TabsContent>
-          <TabsContent value="shipping" className="mt-4">
-            <div className="space-y-4">
-              <div className="p-4 border rounded-md">
-                <h3 className="mb-2 font-medium">Giao hàng</h3>
-                <p>Giao hàng tiêu chuẩn: 2-4 ngày</p>
-            
-                  <p className="mt-2 text-emerald-600">Miễn phí giao hàng đơn hàng trên 500k</p>
-            
-              </div>
             </div>
           </TabsContent>
           <TabsContent value="reviews" className="mt-4">
@@ -331,7 +319,11 @@ const getMainImage = () => {
           ))}
         </div>
       </div> */}
-
+      {/* MySize Assist Sidebar */}
+      <MySizeAssistSidebar
+              isOpen={showMySizeAssist}
+              onClose={() => setShowMySizeAssist(false)}
+            />
       {/* Size Guide Modal */}
       {showSizeGuide && <SizeGuide onClose={() => setShowSizeGuide(false)} />}
     </div>
