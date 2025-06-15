@@ -13,6 +13,7 @@ export interface MonthlyRevenue {
 export interface CustomerStats {
   totalOrders: number;
   totalSpending: number;
+  totalGoing: number;
 }
 
 export interface FeaturedProduct {

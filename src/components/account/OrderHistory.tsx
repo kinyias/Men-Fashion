@@ -37,6 +37,7 @@ import { formatCurrency } from '@/utils/currency';
 import EllipsisPagination from '../ui/EllipsisPagination';
 import { formatDate } from '@/utils/formatTime';
 import Image from 'next/image';
+import { OrderSummaryStats } from './OrderSummaryStats';
 
 const statusConfig = {
   da_dat: {
@@ -115,212 +116,181 @@ export function OrderHistory() {
   });
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5" />
-            Lịch sử đơn hàng
-          </CardTitle>
-          <CardDescription>
-            Theo dõi và quản lý đơn hàng của bạn
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {/* Search and Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Tìm kiếm đơn hàng..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
+    <div className="container mx-auto px-4 py-8">
+      <h2 className="text-2xl font-bold mb-6">Lịch sử đơn hàng</h2>
 
-            <Select
-              value={statusFilter}
-              onValueChange={(value: TrangThaiDonHang | 'all') =>
-                setStatusFilter(value)
-              }
-            >
-              <SelectTrigger className="w-full sm:w-48">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Lọc theo trạng thái" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tất cả đơn hàng</SelectItem>
-                <SelectItem value="da_dat">Đã đặt</SelectItem>
-                <SelectItem value="dang_xu_ly">Đang xử lý</SelectItem>
-                <SelectItem value="dang_giao_hang">Đang giao hàng</SelectItem>
-                <SelectItem value="da_giao_hang">Đã giao hàng</SelectItem>
-                <SelectItem value="da_huy">Đã hủy</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+      <OrderSummaryStats />
 
-          {/* Order Summary Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="text-center p-4 bg-primary/5 rounded-lg">
-              <div className="text-2xl font-bold text-primary">
-                {ordersData?.pagination.totalItems || 0}
-              </div>
-              <p className="text-sm text-muted-foreground">Tổng đơn hàng</p>
-            </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">
-                {ordersData?.data.filter((o) => o.trangthai === 'da_giao_hang')
-                  .length || 0}
-              </div>
-              <p className="text-sm text-muted-foreground">Đã giao</p>
-            </div>
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">
-                {ordersData?.data.filter(
-                  (o) => o.trangthai === 'dang_giao_hang'
-                ).length || 0}
-              </div>
-              <p className="text-sm text-muted-foreground">Đang giao</p>
-            </div>
-            <div className="text-center p-4 bg-yellow-50 rounded-lg">
-              <div className="text-2xl font-bold text-yellow-600">
-                {formatCurrency(
-                  ordersData?.data.reduce(
-                    (sum, order) => sum + Number(order.tonggia),
-                    0
-                  ) || 0
-                )}
-              </div>
-              <p className="text-sm text-muted-foreground">Tổng chi tiêu</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Orders List */}
-      <div className="space-y-4">
-        {filteredOrders?.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-12">
-              <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">
-                Không tìm thấy đơn hàng
-              </h3>
-              <p className="text-muted-foreground">
-                {searchTerm || statusFilter !== 'all'
-                  ? 'Thử điều chỉnh tìm kiếm hoặc bộ lọc của bạn'
-                  : 'Bạn chưa có đơn hàng nào'}
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          filteredOrders?.map((order) => {
-            const StatusIcon = statusConfig[order.trangthai].icon;
-
-            return (
-              <Card
-                key={order.ma}
-                className="overflow-hidden cursor-pointer hover:border-primary transition-colors"
-                onClick={() => router.push(`/tai-khoan/don-hang/${order.ma}`)}
-              >
-                <CardContent className="p-6">
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="relative h-16 w-16 rounded-lg overflow-hidden border">
-                        <Image
-                          src={
-                            order.chiTietDonHangs[0]?.sanPham.hinhanh ||
-                            '/placeholder.svg'
-                          }
-                          alt={order.chiTietDonHangs[0]?.sanPham.ten}
-                          className="object-cover w-full h-full"
-                          width={64}
-                          height={64}
-                        />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg">#{order.ma}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Đặt ngày {formatDate(order.ngaydat)}
-                        </p>
-                        <div className="mt-1">
-                          <p className="text-sm font-medium line-clamp-1">
-                            {order.chiTietDonHangs[0]?.sanPham.ten}
-                            {order.chiTietDonHangs.length > 1 &&
-                              ` và ${
-                                order.chiTietDonHangs.length - 1
-                              } sản phẩm khác`}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {order.chiTietDonHangs[0]?.bienThe.mauSac.ten} -{' '}
-                            {order.chiTietDonHangs[0]?.bienThe.kichCo.ten}
-                          </p>
-                        </div>
-                      </div>
-
-                      <Badge className={statusConfig[order.trangthai].color}>
-                        <StatusIcon className="h-3 w-3 mr-1" />
-                        {statusConfig[order.trangthai].label}
-                      </Badge>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className="font-semibold">
-                          {formatCurrency(order.tonggia)}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {order.chiTietDonHangs.length} sản phẩm
-                        </p>
-                      </div>
-
-                      <Button variant="outline" size="sm">
-                        <Eye className="h-4 w-4 mr-2" />
-                        Xem chi tiết
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })
-        )}
-
-        {/* Pagination */}
-        {/* Replace the existing pagination with this */}
-        {ordersData &&
-          ordersData.pagination &&
-          ordersData.pagination.totalPages > 1 && (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <p className="text-sm font-medium">Số hàng mỗi trang</p>
-                <select
-                  value={limit}
-                  onChange={(e) => {
-                    const newLimit = Number(e.target.value);
-                    setLimit(newLimit);
-                    setPage(1);
-                  }}
-                  className="h-8 w-[70px] rounded-md border border-input bg-background px-2 py-1 text-sm"
-                >
-                  {[5, 10, 20, 30, 50].map((pageSize) => (
-                    <option key={pageSize} value={pageSize}>
-                      {pageSize}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex items-center space-x-2">
-                <EllipsisPagination
-                  currentPage={page}
-                  totalPages={ordersData.pagination.totalPages}
-                  onPageChange={(newPage) => setPage(newPage)}
+      <div className="space-y-6">
+        {/* Header */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5" />
+              Lịch sử đơn hàng
+            </CardTitle>
+            <CardDescription>
+              Theo dõi và quản lý đơn hàng của bạn
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {/* Search and Filters */}
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Tìm kiếm đơn hàng..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
                 />
               </div>
+
+              <Select
+                value={statusFilter}
+                onValueChange={(value: TrangThaiDonHang | 'all') =>
+                  setStatusFilter(value)
+                }
+              >
+                <SelectTrigger className="w-full sm:w-48">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Lọc theo trạng thái" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tất cả đơn hàng</SelectItem>
+                  <SelectItem value="da_dat">Đã đặt</SelectItem>
+                  <SelectItem value="dang_xu_ly">Đang xử lý</SelectItem>
+                  <SelectItem value="dang_giao_hang">Đang giao hàng</SelectItem>
+                  <SelectItem value="da_giao_hang">Đã giao hàng</SelectItem>
+                  <SelectItem value="da_huy">Đã hủy</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Orders List */}
+        <div className="space-y-4">
+          {filteredOrders?.length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-12">
+                <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">
+                  Không tìm thấy đơn hàng
+                </h3>
+                <p className="text-muted-foreground">
+                  {searchTerm || statusFilter !== 'all'
+                    ? 'Thử điều chỉnh tìm kiếm hoặc bộ lọc của bạn'
+                    : 'Bạn chưa có đơn hàng nào'}
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            filteredOrders?.map((order) => {
+              const StatusIcon = statusConfig[order.trangthai].icon;
+
+              return (
+                <Card
+                  key={order.ma}
+                  className="overflow-hidden cursor-pointer hover:border-primary transition-colors"
+                  onClick={() => router.push(`/tai-khoan/don-hang/${order.ma}`)}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="relative h-16 w-16 rounded-lg overflow-hidden border">
+                          <Image
+                            src={
+                              order.chiTietDonHangs[0]?.sanPham.hinhanh ||
+                              '/placeholder.svg'
+                            }
+                            alt={order.chiTietDonHangs[0]?.sanPham.ten}
+                            className="object-cover w-full h-full"
+                            width={64}
+                            height={64}
+                          />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg">#{order.ma}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Đặt ngày {formatDate(order.ngaydat)}
+                          </p>
+                          <div className="mt-1">
+                            <p className="text-sm font-medium line-clamp-1">
+                              {order.chiTietDonHangs[0]?.sanPham.ten}
+                              {order.chiTietDonHangs.length > 1 &&
+                                ` và ${
+                                  order.chiTietDonHangs.length - 1
+                                } sản phẩm khác`}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {order.chiTietDonHangs[0]?.bienThe.mauSac.ten} -{' '}
+                              {order.chiTietDonHangs[0]?.bienThe.kichCo.ten}
+                            </p>
+                          </div>
+                        </div>
+
+                        <Badge className={statusConfig[order.trangthai].color}>
+                          <StatusIcon className="h-3 w-3 mr-1" />
+                          {statusConfig[order.trangthai].label}
+                        </Badge>
+                      </div>
+
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <p className="font-semibold">
+                            {formatCurrency(order.tonggia)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {order.chiTietDonHangs.length} sản phẩm
+                          </p>
+                        </div>
+
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4 mr-2" />
+                          Xem chi tiết
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
           )}
+
+          {/* Pagination */}
+          {ordersData &&
+            ordersData.pagination &&
+            ordersData.pagination.totalPages > 1 && (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium">Số hàng mỗi trang</p>
+                  <select
+                    value={limit}
+                    onChange={(e) => {
+                      const newLimit = Number(e.target.value);
+                      setLimit(newLimit);
+                      setPage(1);
+                    }}
+                    className="h-8 w-[70px] rounded-md border border-input bg-background px-2 py-1 text-sm"
+                  >
+                    {[5, 10, 20, 30, 50].map((pageSize) => (
+                      <option key={pageSize} value={pageSize}>
+                        {pageSize}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <EllipsisPagination
+                    currentPage={page}
+                    totalPages={ordersData.pagination.totalPages}
+                    onPageChange={(newPage) => setPage(newPage)}
+                  />
+                </div>
+              </div>
+            )}
+        </div>
       </div>
     </div>
   );
