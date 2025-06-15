@@ -40,8 +40,8 @@ export default function Header() {
   const navigationItems =
   [
     {
-      name: "Hàng mới về",
-      href: "#",
+      name: "Trang chủ",
+      href: "/",
       hasDropdown: false,
       subcategories: []
     },
@@ -217,7 +217,10 @@ export default function Header() {
                     <Link href="/tai-khoan">Tài khoản</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
-                    <Link href="/settings">Cài đặt</Link>
+                    <Link href="/tai-khoan/don-hang">Đơn hàng</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/tai-khoan/khuyen-mai">Khuyến mãi</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>

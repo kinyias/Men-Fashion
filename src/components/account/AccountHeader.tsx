@@ -37,9 +37,9 @@ export function AccountHeader() {
             </div>
 
             {/* Stats and Loyalty Info */}
-            <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-4 md:ml-auto">
+            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 md:ml-auto">
               {/* Loyalty Status */}
-              <div className="text-center p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg border border-yellow-200">
+              {/* <div className="text-center p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg border border-yellow-200">
                 <div className="flex items-center justify-center gap-1 mb-1">
                   <Crown className="h-4 w-4 text-yellow-600" />
                   <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
@@ -48,7 +48,7 @@ export function AccountHeader() {
                 </div>
                 <p className="text-sm font-medium">{userData.loyaltyPoints} Điểm</p>
                 <p className="text-xs text-muted-foreground">Chương trình thành viên</p>
-              </div>
+              </div> */}
 
               {/* Total Orders */}
               <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">

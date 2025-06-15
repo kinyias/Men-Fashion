@@ -12,7 +12,7 @@ export default function HomeLayout({
   return (
     <> 
     <AuthProvider>
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col overflow-hidden">
       {/* Header */}
       <Header />
       <main className="flex-1">{children}</main>

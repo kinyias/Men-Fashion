@@ -120,18 +120,18 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link
-                  href="#"
+                  href="/"
                   className="text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  Hàng mới về
+                  Trang chủ
                 </Link>
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/tin-tuc"
                   className="text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  Bán chạy
+                  Tin tức
                 </Link>
               </li>
             </ul>

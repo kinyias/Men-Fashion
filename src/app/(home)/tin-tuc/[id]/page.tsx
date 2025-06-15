@@ -55,7 +55,7 @@ export default function BlogPostPage() {
     queryFn: () => getBlogById(blogId),
     retry: false,
   });
-  if (!blog) {
+  if (!blog && !isLoading) {
     notFound();
   }
   // Increase view count when blog is loaded

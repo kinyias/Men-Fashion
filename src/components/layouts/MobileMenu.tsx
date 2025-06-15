@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { X, ChevronDown, ChevronRight, User, LogOut, ShoppingBag, Settings } from "lucide-react"
+import { X, ChevronDown, User, LogOut, ShoppingBag, Settings } from "lucide-react"
 import { useAuth } from "@/context/auth-provider"
 
 interface NavigationItem {
@@ -19,8 +19,8 @@ interface MobileMenuProps {
   navigationItems: NavigationItem[]
 }
 const accountMenuItems = [
-  { name: "Đơn hàng", href: "/account/orders", icon: ShoppingBag },
-  { name: "Tài khoản", href: "/account/settings", icon: Settings }
+  { name: "Đơn hàng", href: "/tai-khoan/don-hang", icon: ShoppingBag },
+  { name: "Tài khoản", href: "/tai-khoan", icon: Settings }
 ]
 export  function MobileMenu({ isOpen, onClose, navigationItems }: MobileMenuProps) {
   const [expandedItems, setExpandedItems] = useState<string[]>([])
@@ -150,7 +150,7 @@ export  function MobileMenu({ isOpen, onClose, navigationItems }: MobileMenuProp
                               className="flex items-center px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
                               onClick={onClose}
                             >
-                              <ChevronRight className="h-3 w-3 mr-2" />
+                             
                               {subcategory.name}
                             </Link>
                           ))}
@@ -164,7 +164,7 @@ export  function MobileMenu({ isOpen, onClose, navigationItems }: MobileMenuProp
                       onClick={onClose}
                     >
                       {item.name}
-                      <ChevronRight className="h-4 w-4" />
+                    
                     </Link>
                   )}
                 </div>
