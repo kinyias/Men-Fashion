@@ -11,3 +11,4 @@ export * from './coupons';
 export * from './review';
 export * from './genre';
 export * from './blogs';
+export * from './address';

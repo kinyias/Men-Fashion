@@ -10,3 +10,4 @@ export * from './api-coupons';
 export * from './api-reviews';
 export * from './api-genre';
 export * from './api-blogs';
+export * from './api-address'

@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { checkoutSchema, type CheckoutFormValues } from "@/lib/validations/checkout.validator"
 import { Textarea } from "../ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { calculatePrice, getDistricts, getProvinces, getWards } from "@/lib/api"
 import toast from "react-hot-toast"
@@ -18,8 +18,10 @@ import { ViettelPostPrice, ViettelPostPriceRequest } from "@/types/viettelpost"
 import { formatCurrency } from "@/utils/currency"
 import { formatHoursToDays } from "@/utils/formatTime"
 import Image from "next/image"
+import { Address } from "@/types/address"
 
 interface CheckoutFormProps {
+  userAddresses: Address | undefined,
   onSubmit: (data: CheckoutFormValues) => void,
   total: number,
   isProcessing: boolean,
@@ -34,20 +36,21 @@ interface CheckoutFormProps {
   }}) => void,
 }
 
-export function CheckoutForm({ onSubmit, total, isProcessing, shippingPrices, onSetShippingMethod, onSetShippingPrices }: CheckoutFormProps) {
+export function CheckoutForm({ userAddresses, onSubmit, total, isProcessing, shippingPrices, onSetShippingMethod, onSetShippingPrices }: CheckoutFormProps) {
     const [selectedProvince, setSelectedProvince] = useState<number | null>(null);
     const [selectedDistrict, setSelectedDistrict] = useState<number | null>(null);
+    const hasSetInitialValues = useRef(false);
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       shipping: {
-        ten: "",
-        email: "",
-        sdt: "",
-        diachi: "",
-        thanhpho: "",
-        quan: "",
-        phuong: "",
+        ten: userAddresses?.tennguoinhan || "",
+        email: userAddresses?.email || "",
+        sdt: userAddresses?.sodienthoai || "",
+        diachi: userAddresses?.diachi || "",
+        thanhpho: userAddresses?.tinhthanh || "",
+        quan: userAddresses?.quanhuyen || "",
+        phuong: userAddresses?.phuongxa || "",
         ghichu: "",
         phuongthucgiaohang: "tietkiem",
       },
@@ -129,9 +132,46 @@ export function CheckoutForm({ onSubmit, total, isProcessing, shippingPrices, on
     enabled: !!selectedDistrict,
   });
   const isAddressComplete = form.watch('shipping.phuong') !== '';
-  
   useEffect(() => {
-    if (isAddressComplete) {
+    if (!userAddresses || !provincesData?.data || hasSetInitialValues.current) return;
+  
+    // Find province ID from name
+    const province = provincesData.data.find(
+      (p) => p.PROVINCE_NAME === userAddresses.tinhthanh
+    );
+    if (!province) return;
+  
+    // Set province
+    setSelectedProvince(province.PROVINCE_ID);
+    form.setValue('shipping.thanhpho', province.PROVINCE_ID.toString());
+  
+    // Only proceed with district if province is set and districts data is available
+    if (!districtsData?.data) return;
+  
+    const district = districtsData.data.find(
+      (d) => d.DISTRICT_NAME === userAddresses.quanhuyen
+    );
+    if (!district) return;
+  
+    // Set district
+    setSelectedDistrict(district.DISTRICT_ID);
+    form.setValue('shipping.quan', district.DISTRICT_ID.toString());
+  
+    // Only proceed with ward if district is set and wards data is available
+    if (!wardsData?.data) return;
+  
+    const ward = wardsData.data.find(
+      (w) => w.WARDS_NAME === userAddresses.phuongxa
+    );
+    if (!ward) return;
+  
+    // Set ward
+    form.setValue('shipping.phuong', ward.WARDS_ID.toString());
+  
+    hasSetInitialValues.current = true;
+  }, [userAddresses, provincesData, districtsData, wardsData, form]);
+  useEffect(() => {
+    if (isAddressComplete && selectedProvince && selectedDistrict) {
         const priceRequest: ViettelPostPriceRequest = {
           PRODUCT_WEIGHT: 500,
           PRODUCT_PRICE: total,

@@ -17,7 +17,6 @@ export function AccountHeader() {
   });
 
   if (!user) return null;
-  console.log(stats)
   return (
     <div className="bg-gradient-to-r from-primary/5 to-primary/10 border-b">
       <div className="container mx-auto px-4 py-8">

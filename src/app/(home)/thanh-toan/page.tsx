@@ -3,13 +3,13 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ChevronLeft } from "lucide-react"
+import { ChevronLeft, Loader2 } from "lucide-react"
 import { CheckoutForm } from "@/components/checkout/CheckoutForm"
 import { OrderSummary } from "@/components/checkout/OrderSummary"
 import type { CheckoutFormValues } from "@/lib/validations/checkout.validator"
 import { useCartStore } from "@/lib/store/cart-store"
-import { createOrder } from "@/lib/api"
-import { useMutation } from "@tanstack/react-query"
+import { createOrder, getAddresses } from "@/lib/api"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { ApiError, KhuyenMai } from "@/types"
 import toast from "react-hot-toast"
 
@@ -23,7 +23,10 @@ export default function CheckoutPage() {
     time: number,
   }}>({});
   const {items: cartItems, clearCart} = useCartStore()
-  
+  const { data: userAddresses, isLoading } = useQuery({
+    queryKey: ['addresses'],
+    queryFn: () => getAddresses({ macdinh: true, page: 1, limit: 1 }),
+  });
   // Calculate order totals
   const subtotal = cartItems.reduce((sum, item) => sum + item.gia * item.soLuong, 0)
   const shipping = shippingMethod === "tietkiem" 
@@ -69,6 +72,7 @@ export default function CheckoutPage() {
       ...data.shipping,
       tonggia: total,
       tamtinh: subtotal,
+      giamgia: getDiscount(appliedCoupon!),
       phigiaohang: shipping || 0,
       chiTietDonHangs: cartItems.map((item) => ({
         masp:item.ma,
@@ -82,7 +86,12 @@ export default function CheckoutPage() {
     }
     createOrderMutation.mutate(orderData)
   }
-
+  if(isLoading) {
+    return <div className="flex h-[50vh] w-full items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <span className="ml-2 text-lg font-medium">Đang tải dữ liệu...</span>
+    </div>
+  }
   return (
         <div className="container mx-auto px-4 py-8 md:py-12">
           {/* Breadcrumb */}
@@ -98,7 +107,7 @@ export default function CheckoutPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Checkout Form */}
             <div className="lg:col-span-2">
-              <CheckoutForm onSubmit={handleSubmitOrder} total={total} isProcessing={isProcessing} onSetShippingMethod={setShippingMethod} shippingPrices={shippingPrices} onSetShippingPrices={setShippingPrices}  />
+              <CheckoutForm userAddresses={userAddresses?.data[0] || undefined} onSubmit={handleSubmitOrder} total={total} isProcessing={isProcessing} onSetShippingMethod={setShippingMethod} shippingPrices={shippingPrices} onSetShippingPrices={setShippingPrices}  />
             </div>
 
             {/* Order Summary */}

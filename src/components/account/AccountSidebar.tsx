@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { User, Package, Menu, X, Tag } from 'lucide-react';
+import { User, Package, Menu, X, Tag, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -22,6 +22,13 @@ const navigationItems = [
     icon: Package,
     description: 'Theo dõi đơn hàng',
     href: '/tai-khoan/don-hang',
+  },
+  {
+    id: 'address',
+    label: 'Địa chỉ',
+    icon: MapPin,
+    description: 'Quản lý địa chỉ',
+    href: '/tai-khoan/dia-chi',
   },
   {
     id: 'coupon',
