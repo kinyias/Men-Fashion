@@ -1,7 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useSearchParams, useRouter, usePathname } from 'next/navigation';
+import {
+  useParams,
+  useSearchParams,
+  useRouter,
+  usePathname,
+} from 'next/navigation';
 import { ProductFilters } from '@/components/products/ProductFilters';
 import { ProductGrid } from '@/components/products/ProductGrid';
 import { SearchHeader } from '@/components/layouts/SearchHeader';
@@ -17,6 +22,17 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import { getCategoryById } from '@/lib/api/api-categories';
+import { getSubCategoryById } from '@/lib/api/api-sub-categories';
+import Link from 'next/link';
 
 interface FilterState {
   searchQuery: string;
@@ -31,9 +47,30 @@ export default function SubcategoryPage() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
-  const categoryId = Number(params.categoryId.split('-').pop());
-  const subcategoryId = Number(params.subcategoryId.split('-').pop());
+  const categoryId = Number(
+    typeof params.categoryId === 'string'
+      ? params.categoryId.split('-').pop()
+      : params.categoryId
+  );
+  const subcategoryId = Number(
+    typeof params.subcategoryId === 'string'
+      ? params.subcategoryId.split('-').pop()
+      : params.subcategoryId
+  );
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  // Fetch category and subcategory data for breadcrumbs
+  const { data: category } = useQuery({
+    queryKey: ['category', categoryId],
+    queryFn: () => getCategoryById(categoryId),
+    enabled: !!categoryId,
+  });
+
+  const { data: subcategory } = useQuery({
+    queryKey: ['subcategory', subcategoryId],
+    queryFn: () => getSubCategoryById(subcategoryId),
+    enabled: !!subcategoryId,
+  });
 
   // Initialize state from URL parameters
   const initializeFiltersFromURL = () => {
@@ -99,10 +136,7 @@ export default function SubcategoryPage() {
       params.set('limit', pagination.limit.toString());
 
       // Update URL without refreshing the page
-      router.push(
-        `${pathname}?${params.toString()}`,
-        { scroll: false }
-      );
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
     }, 500); // 500ms delay
     return () => {
       clearTimeout(timer);
@@ -179,6 +213,39 @@ export default function SubcategoryPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Breadcrumbs */}
+      <div className="mb-6">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/">Trang chủ</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href="/san-pham">Sản phẩm</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link href={`/danh-muc/${params.categoryId}`}>
+                  {category?.ten || 'Đang tải...'}
+                </Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>
+                {subcategory?.ten || 'Đang tải...'}
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+
       <SearchHeader
         searchQuery={filters.searchQuery}
         onSearchChange={handleSearchChange}

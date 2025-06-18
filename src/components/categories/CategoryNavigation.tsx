@@ -32,7 +32,7 @@ export function CategoryNavigation() {
 
 
   const handleSubcategorySelect = (subcategoryId: number) => {
-    router.push(`/danh-muc/${toSlug(category?.ten || '')}-${categoryId}/${toSlug(subcategories?.find(sub => sub.ma === subcategoryId)?.ten || '')}-${subcategoryId}`)
+    router.push(`/danh-muc/${categoryId}/${toSlug(subcategories?.find(sub => sub.ma === subcategoryId)?.ten || '')}-${subcategoryId}`)
   }
 
   // If loading, show a loading state
