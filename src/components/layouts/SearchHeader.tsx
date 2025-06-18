@@ -14,14 +14,14 @@ interface SearchHeaderProps {
   onSortChange: (sort: string) => void
 }
 
-export function SearchHeader({ onSearchChange, resultCount, sortBy, onSortChange }: SearchHeaderProps) {
-  const [localSearchQuery, setLocalSearchQuery] = useState("")
+export function SearchHeader({ onSearchChange, resultCount, sortBy, onSortChange, searchQuery }: SearchHeaderProps) {
+  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery)
   const sortOptions = [
-    { value: "ten-asc", label: "Tên: A-Z" },
-    { value: "ten-desc", label: "Tên: Z-A" },
+    { value: "ma-desc", label: "Mới nhất" },
+    { value: "ten-desc", label: "Tên: A-Z" },
+    { value: "ten-asc", label: "Tên: Z-A" },
     { value: "giaban-asc", label: "Giá: Thấp đến Cao" },
     { value: "giaban-desc", label: "Giá: Cao đến Thấp" },
-    { value: "danhgia-desc", label: "Đánh giá cao nhất" }
   ]
  // Debounce effect
  useEffect(() => {

@@ -50,7 +50,7 @@ export default function CategoryPage() {
     filters.priceRange[0] > 0 ||
     filters.priceRange[1] < 10000000
   
-  const [sortBy, setSortBy] = useState<string>(searchParams.get('sort') || "ten-asc");
+  const [sortBy, setSortBy] = useState<string>(searchParams.get('sort') || "ma-desc");
   const [pagination, setPagination] = useState({
     page: parseInt(searchParams.get('page') || '1'),
     limit: parseInt(searchParams.get('limit') || '12')

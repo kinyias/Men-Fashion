@@ -1,12 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  useParams,
-  useSearchParams,
-  useRouter,
-  usePathname,
-} from 'next/navigation';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { ProductFilters } from '@/components/products/ProductFilters';
 import { ProductGrid } from '@/components/products/ProductGrid';
 import { SearchHeader } from '@/components/layouts/SearchHeader';
@@ -30,8 +25,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { getCategoryById } from '@/lib/api/api-categories';
-import { getSubCategoryById } from '@/lib/api/api-sub-categories';
 import Link from 'next/link';
 
 interface FilterState {
@@ -42,35 +35,11 @@ interface FilterState {
   selectedBrands: string[];
 }
 
-export default function SubcategoryPage() {
-  const params = useParams<{ categoryId: string; subcategoryId: string }>();
-  const searchParams = useSearchParams();
+export default function SearchProducts() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
-  const categoryId = Number(
-    typeof params.categoryId === 'string'
-      ? params.categoryId.split('-').pop()
-      : params.categoryId
-  );
-  const subcategoryId = Number(
-    typeof params.subcategoryId === 'string'
-      ? params.subcategoryId.split('-').pop()
-      : params.subcategoryId
-  );
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-
-  // Fetch category and subcategory data for breadcrumbs
-  const { data: category } = useQuery({
-    queryKey: ['category', categoryId],
-    queryFn: () => getCategoryById(categoryId),
-    enabled: !!categoryId,
-  });
-
-  const { data: subcategory } = useQuery({
-    queryKey: ['subcategory', subcategoryId],
-    queryFn: () => getSubCategoryById(subcategoryId),
-    enabled: !!subcategoryId,
-  });
 
   // Initialize state from URL parameters
   const initializeFiltersFromURL = () => {
@@ -88,8 +57,9 @@ export default function SubcategoryPage() {
       ] as [number, number],
     };
   };
-
-  const [filters, setFilters] = useState<FilterState>(initializeFiltersFromURL);
+  const [filters, setFilters] = useState<FilterState>(() =>
+    initializeFiltersFromURL()
+  );
   const hasActiveFilters =
     filters.selectedColors.length > 0 ||
     filters.selectedSizes.length > 0 ||
@@ -112,9 +82,10 @@ export default function SubcategoryPage() {
   useEffect(() => {
     const timer = setTimeout(() => {
       const params = new URLSearchParams();
-
+      console.log(filters);
       // Add search query
       if (filters.searchQuery) params.set('search', filters.searchQuery);
+      console.log(params);
 
       // Add filter arrays
       if (filters.selectedColors.length > 0)
@@ -136,33 +107,36 @@ export default function SubcategoryPage() {
       params.set('limit', pagination.limit.toString());
 
       // Update URL without refreshing the page
-      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+      const newUrl = `${pathname}?${params.toString()}`;
+      if (newUrl !== window.location.href) {
+        router.push(newUrl, { scroll: false });
+      }
     }, 500); // 500ms delay
     return () => {
       clearTimeout(timer);
     };
-  }, [filters, sortBy, pagination, categoryId, subcategoryId, router]);
+  }, [filters, sortBy, pagination, router]);
 
   // Use React Query to fetch products with advanced search
   const { data, isLoading, isError } = useQuery({
     queryKey: [
-      'products',
-      categoryId,
-      subcategoryId,
+      'advanced-search-products',
+      //   categoryId,
+      //   subcategoryId,
       filters,
       sortBy,
       pagination,
     ],
     queryFn: async () => {
       // Convert string IDs to numbers for the API
-      const numericSubcategoryId = Number(subcategoryId);
+      //   const numericSubcategoryId = Number(subcategoryId);
 
       return advancedSearchProducts({
         page: pagination.page,
         limit: pagination.limit,
         search: filters.searchQuery,
         // Use arrays for multiple filters
-        maloaisanpham: [numericSubcategoryId], // Filter by subcategory instead of category
+        // maloaisanpham: [numericSubcategoryId],
         mathuonghieu:
           filters.selectedBrands.length > 0
             ? filters.selectedBrands.map((id) => Number(id))
@@ -212,6 +186,7 @@ export default function SubcategoryPage() {
   };
 
   return (
+
     <div className="container mx-auto px-4 py-8">
       {/* Breadcrumbs */}
       <div className="mb-6">
@@ -224,30 +199,14 @@ export default function SubcategoryPage() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href="/san-pham">Sản phẩm</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href={`/danh-muc/${params.categoryId}`}>
-                  {category?.ten || 'Đang tải...'}
-                </Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>
-                {subcategory?.ten || 'Đang tải...'}
-              </BreadcrumbPage>
+              <BreadcrumbPage>Sản phẩm</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
       </div>
 
       <SearchHeader
-        searchQuery={filters.searchQuery}
+        searchQuery={filters.searchQuery || searchParams.get('search') || ''}
         onSearchChange={handleSearchChange}
         resultCount={paginationData.totalItems}
         sortBy={sortBy}

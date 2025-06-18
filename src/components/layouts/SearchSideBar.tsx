@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { X, SearchIcon, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +21,7 @@ interface SearchSidebarProps {
 export function SearchSidebar({ isOpen, onClose }: SearchSidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
   const debouncedSearchQuery = useDebounce(searchQuery, 1000);
 
   // Use our custom hook for searching
@@ -71,6 +73,15 @@ export function SearchSidebar({ isOpen, onClose }: SearchSidebarProps) {
     window.addEventListener('keydown', handleEscKey);
     return () => window.removeEventListener('keydown', handleEscKey);
   }, [isOpen, onClose]);
+
+  // Handle Enter key press to navigate to search page
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      e.preventDefault();
+      router.push(`/san-pham?search=${encodeURIComponent(searchQuery.trim())}`);
+      onClose();
+    }
+  };
 
   // Function to highlight matching text
   const highlightText = (text: string, query: string) => {
@@ -131,6 +142,7 @@ export function SearchSidebar({ isOpen, onClose }: SearchSidebarProps) {
               className="pl-10 py-6 text-lg"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
             {isSearching && (
               <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground" />
@@ -139,7 +151,6 @@ export function SearchSidebar({ isOpen, onClose }: SearchSidebarProps) {
 
           {/* Search Results */}
           <div className="max-h-[60vh] overflow-y-auto">
-
             {searchResults.length > 0 && (
               <div className="space-y-3">
                 {searchResults.map((product) => (
@@ -183,7 +194,7 @@ export function SearchSidebar({ isOpen, onClose }: SearchSidebarProps) {
                   </Link>
                 ))}
                 <Link
-                  href={`/tim-kiem?q=${encodeURIComponent(
+                  href={`/san-pham?search=${encodeURIComponent(
                     debouncedSearchQuery
                   )}`}
                   className="block text-center py-3 text-sm text-primary hover:text-primary/80 font-medium"
@@ -201,11 +212,11 @@ export function SearchSidebar({ isOpen, onClose }: SearchSidebarProps) {
                 <div className="flex flex-wrap gap-2">
                   {[
                     'Áo sơ mi',
+                    'Áo polo',
                     'Quần âu',
                     'Áo thun',
                     'Giày',
                     'Phụ kiện',
-                    'Sale',
                   ].map((term) => (
                     <Button
                       key={term}
