@@ -59,7 +59,7 @@ export default function CheckoutPage() {
       setIsProcessing(true)
     },
     onError: (error: ApiError) => {
-      toast.error('Đặt hàng thất bại. Vui lòng thử lại!')
+      toast.error(`Đặt hàng thất bại. Vui lòng thử lại! ${error.response?.data?.message}`)
       console.log(error)
       setIsProcessing(false)
     },

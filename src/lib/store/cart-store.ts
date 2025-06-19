@@ -58,6 +58,7 @@ export const useCartStore = create<CartState>()(
             return { items: updatedItems }
           } else {
             // Add new item if it doesn't exist
+            toast.success(`Đã thêm ${item.ten} vào giỏ hàng`);
             return { items: [...state.items, item] }
           }
         })
