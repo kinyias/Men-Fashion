@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Minus, Plus, ShoppingCart,  Star,  StarHalf } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -14,9 +14,12 @@ import toast from "react-hot-toast"
 import { BienThe, MauSac, SanPhamWithRating } from "@/types"
 import { ReviewsSection } from "../../reviews/ReviewSection"
 import { MySizeAssistSidebar } from "./MySizeAssistSideBar"
+import { useProductSeenStore } from "@/lib/store/product-seen-store"
 interface SizeWithAvailability{ ma: number; ten: string, available: boolean }
 interface MauSacWithAvailability extends MauSac{ available: boolean }
 export default function ProductDetail({product}:{product: SanPhamWithRating}) {
+  const { addSeenProduct } = useProductSeenStore()
+
     // Get unique colors from variants
   const uniqueColors = (product.bienThes || []).reduce((acc, variant) => {
     if (variant.mauSac?.ma !== undefined && !acc.some(c => c.ma === variant.mauSac!.ma)) {
@@ -89,6 +92,9 @@ const getMainImage = () => {
     }
     return product.hinhanh || "/placeholder.svg";
   };
+  useEffect(() => {
+    addSeenProduct(product)
+  }, [product.ma, addSeenProduct])
   return (
     <div className="container px-4 py-8 mx-auto">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-12">
