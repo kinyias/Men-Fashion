@@ -60,7 +60,7 @@ export interface HinhAnhMauSac {
 // Interface for BienThe
 export interface BienThe {
   ma: number
-  gia: string
+  gia: number
   soluong: number
   masp: number
   mamausac: number

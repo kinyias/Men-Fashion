@@ -53,15 +53,18 @@ export default function ProductCard({ product }: { product: SanPhamWithRating })
       toast.error("Vui lòng chọn kích thước");
       return;
     }
+    if (getSelectedVariant().soluong === 0) {
+      toast.error("Sản phẩm đã hết hàng");
+      return;
+    }
     addItem({
       ma: product.ma,
       ten: product.ten,
-      gia: product.giagiam || product.giaban,
+      gia: getSelectedVariant().gia || product.giagiam || product.giaban,
       bienThe: getSelectedVariant(),
       soLuong: 1,
       hinhAnh: getMainImage() || "/placeholder.svg",
     })
-    toast.success(`Đã thêm ${product.ten} vào giỏ hàng`);
     setShowQuickAdd(false);
   };
   // Get the main image for the selected color or fallback to product image

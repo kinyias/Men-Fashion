@@ -1,4 +1,5 @@
 import { BienThe } from "@/types"
+import toast from "react-hot-toast"
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 
@@ -44,11 +45,16 @@ export const useCartStore = create<CartState>()(
           const existingItemIndex = state.items.findIndex(
             (i) => i.ma === item.ma && i.bienThe.mauSac.ma === item.bienThe.mauSac.ma && i.bienThe.kichCo.ma === item.bienThe.kichCo.ma,
           )
-
+          
           if (existingItemIndex >= 0) {
             // Update quantity if item exists
             const updatedItems = [...state.items]
+            if(item.bienThe.soluong < (item.soLuong + updatedItems[existingItemIndex].soLuong)) {
+              toast.error(`Số lượng sản phẩm không đủ. Chỉ còn lại ${item.bienThe.soluong} sản phẩm`)
+              return state
+            }
             updatedItems[existingItemIndex].soLuong += item.soLuong
+            toast.success(`Đã thêm ${item.ten} vào giỏ hàng`);
             return { items: updatedItems }
           } else {
             // Add new item if it doesn't exist
@@ -63,6 +69,10 @@ export const useCartStore = create<CartState>()(
         set((state) => ({
           items: state.items.map((item) => {
             if (item.ma === Number(itemId) && item.bienThe.mauSac.ma === mamausac && item.bienThe.kichCo.ma === makichco) {
+              if(item.bienThe.soluong < quantity) {
+                toast.error(`Số lượng sản phẩm không đủ. Chỉ còn lại ${item.bienThe.soluong} sản phẩm`)
+                return {...item}
+              }
               return { ...item, soLuong: quantity }
             }
             return item

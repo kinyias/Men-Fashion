@@ -43,7 +43,7 @@ export default function ProductDetail({product}:{product: SanPhamWithRating}) {
     return acc;
   }, [] as SizeWithAvailability[]);
   const [selectedColor, setSelectedColor] = useState(uniqueColors[0])
-  const [selectedSize, setSelectedSize] = useState<SizeWithAvailability | null>(null)
+  const [selectedSize, setSelectedSize] = useState<SizeWithAvailability | null>(uniqueSizes[0])
   const [showSizeGuide, setShowSizeGuide] = useState(false)
   const [showMySizeAssist, setShowMySizeAssist] = useState(false)
   const [quantity, setQuantity] = useState(1)
@@ -66,6 +66,10 @@ export default function ProductDetail({product}:{product: SanPhamWithRating}) {
         toast.error("Vui lòng chọn màu sắc")
         return
       }
+      if (getSelectedVariant().soluong < quantity) {
+        toast.error(`Số lượng sản phẩm không đủ. Chỉ còn lại ${getSelectedVariant().soluong} sản phẩm`);
+        return;
+      }
     addItem({
         ma: product.ma,
         ten: product.ten,
@@ -74,7 +78,6 @@ export default function ProductDetail({product}:{product: SanPhamWithRating}) {
         soLuong: quantity,
         hinhAnh: getMainImage() || "/placeholder.svg",
       })
-      toast.success(`Đã thêm ${product.ten} vào giỏ hàng`)
   }
   const handleQuantityChange = (delta: number) => {
     const newQuantity = quantity + delta
@@ -162,7 +165,15 @@ const getMainImage = () => {
                 <span className="text-2xl font-bold">{formatCurrency(product.giaban)}</span>
               )}
             </div>
-
+              {getSelectedVariant().soluong === 0 ? (
+                <div className="text-red-500">
+                  <p>Sản phẩm đã hết hàng</p>
+                </div>
+              ) : (
+                <div className="text-gray-400">
+                  <p>Số lượng: {getSelectedVariant().soluong}</p>
+                </div>
+              )}
             {/* Color Selection */}
             {uniqueColors.length > 0 && (
               <div>
@@ -171,7 +182,7 @@ const getMainImage = () => {
                   {uniqueColors.map((color) => (
                     <button
                       key={color.ma}
-                      className={`w-10 h-10 rounded-full border-2 transition-all ${
+                      className={`w-10 h-10 rounded-full border-2 transition-all cursor-pointer ${
                         selectedColor?.ma === color.ma
                           ? "border-primary ring-2 ring-primary ring-offset-2"
                           : "border-gray-300"
@@ -213,7 +224,7 @@ const getMainImage = () => {
                   {uniqueSizes.map((size) => (
                     <button
                       key={size.ma}
-                      className={`flex items-center justify-center h-12 border rounded-md transition-all ${
+                      className={`flex items-center justify-center h-12 border rounded-md transition-all cursor-pointer ${
                         selectedSize?.ma === size.ma
                           ? "border-primary bg-primary text-primary-foreground"
                           : "border-gray-300 hover:border-primary"
