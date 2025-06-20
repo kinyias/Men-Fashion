@@ -6,6 +6,7 @@ export interface KhuyenMai {
   loaikhuyenmai: LoaiKhuyenMai;
   giatrigiam: number;
   giatridonhang: number;
+  giamtoida: number;
   ngaybatdat: string;
   ngayketthuc: string;
 }
@@ -25,6 +26,7 @@ export interface KhuyenMaiFormValues {
   loaikhuyenmai: LoaiKhuyenMai;
   giatrigiam: number;
   giatridonhang: number;
+  giamtoida: number;
   ngaybatdat: string;
   ngayketthuc: string;
 }

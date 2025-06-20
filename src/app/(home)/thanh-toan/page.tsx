@@ -37,14 +37,14 @@ export default function CheckoutPage() {
   const getDiscount = (coupon: KhuyenMai) => {
     if (!coupon) return 0
     if (coupon.loaikhuyenmai === "phan_tram") {
-      return coupon.giatrigiam / 100 * subtotal
+      const discount = coupon.giatrigiam / 100 * subtotal;
+      return Math.min(discount, coupon.giamtoida)
     } else if (coupon.loaikhuyenmai === "tien_mat") {
       return coupon.giatrigiam
     }
     return 0
   }
   const total = subtotal + (shipping || 0) - (getDiscount(appliedCoupon!))
-
   const createOrderMutation = useMutation({
     mutationFn: createOrder,
     onSuccess: (data) => {

@@ -139,7 +139,8 @@ export function OrderSummary({ cartItems, subtotal, shipping, total, appliedCoup
 
   const getDiscount = (coupon: KhuyenMai) => {
     if (coupon.loaikhuyenmai === "phan_tram") {
-      return coupon.giatrigiam / 100 * subtotal
+      const discount = coupon.giatrigiam / 100 * subtotal;
+      return Math.min(discount, coupon.giamtoida)
     } else if (coupon.loaikhuyenmai === "tien_mat") {
       return coupon.giatrigiam
     }
@@ -258,6 +259,10 @@ export function OrderSummary({ cartItems, subtotal, shipping, total, appliedCoup
                             <p className="text-xs text-muted-foreground">
                               {coupon.giatridonhang > 0 && `Đơn tối thiểu: ${formatCurrency(coupon.giatridonhang)}`}
                               {!eligible && coupon.giatridonhang > 0 && ` (Chưa đạt)`}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {coupon.giamtoida > 0 && `Giảm tối đa: ${formatCurrency(coupon.giamtoida)}`}
+                              
                             </p>
                           </div>
                           <div className={`text-sm font-medium ${eligible ? 'text-primary' : 'text-muted-foreground'}`}>

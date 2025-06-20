@@ -21,6 +21,7 @@ import { couponsSchema, LoaiKhuyenMai } from "@/lib/validations/coupons.validato
 import { KhuyenMai, KhuyenMaiFormValues } from "@/types"
 import { createCoupon, updateCoupon } from "@/lib/api/api-coupons"
 import { formatNumber, parseCurrency } from "@/utils/currency"
+import { useEffect } from "react"
 
 interface CouponsFormProps {
   coupon?: KhuyenMai
@@ -37,9 +38,10 @@ export default function CouponsForm({ coupon }: CouponsFormProps) {
     resolver: zodResolver(couponsSchema),
     defaultValues: {
       ten: coupon?.ten || "",
-      loaikhuyenmai: coupon?.loaikhuyenmai || LoaiKhuyenMai.PHAN_TRAM,
+      loaikhuyenmai: coupon?.loaikhuyenmai || LoaiKhuyenMai.SO_TIEN_CO_DINH,
       giatrigiam: coupon?.giatrigiam || 0,
       giatridonhang: coupon?.giatridonhang || 0,
+      giamtoida: coupon?.giamtoida || 0,
       ngaybatdat: coupon?.ngaybatdat ? new Date(coupon.ngaybatdat) : undefined,
       ngayketthuc: coupon?.ngayketthuc ? new Date(coupon.ngayketthuc) : undefined,
     },
@@ -95,7 +97,14 @@ export default function CouponsForm({ coupon }: CouponsFormProps) {
       toast.error('Đã xảy ra lỗi. Vui lòng thử lại sau.')
     }
   }
-
+  const loaikhuyenmai = form.watch("loaikhuyenmai");
+  const giatrigiam = form.watch("giatrigiam");
+  
+  useEffect(() => {
+    if (loaikhuyenmai === LoaiKhuyenMai.SO_TIEN_CO_DINH) {
+      form.setValue("giamtoida", giatrigiam || 0);
+    }
+  }, [loaikhuyenmai, giatrigiam, form]);
   return (
     <Card>
       <CardHeader>
@@ -123,7 +132,7 @@ export default function CouponsForm({ coupon }: CouponsFormProps) {
                 </FormItem>
               )}
             />
-
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={form.control}
               name="loaikhuyenmai"
@@ -137,8 +146,8 @@ export default function CouponsForm({ coupon }: CouponsFormProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value={LoaiKhuyenMai.PHAN_TRAM}>Giảm theo phần trăm</SelectItem>
                       <SelectItem value={LoaiKhuyenMai.SO_TIEN_CO_DINH}>Giảm số tiền cố định</SelectItem>
+                      <SelectItem value={LoaiKhuyenMai.PHAN_TRAM}>Giảm theo phần trăm</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormDescription>Chọn hình thức giảm giá.</FormDescription>
@@ -146,6 +155,30 @@ export default function CouponsForm({ coupon }: CouponsFormProps) {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="giamtoida"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Giá trị giảm tối đa</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="text" 
+                      placeholder="1000000"
+                      value={formatNumber(Number(field.value))}
+                      onChange={(e) => field.onChange(parseCurrency(e.target.value))}
+                      disabled={loaikhuyenmai === LoaiKhuyenMai.SO_TIEN_CO_DINH}
+                      className={loaikhuyenmai === LoaiKhuyenMai.SO_TIEN_CO_DINH ? "bg-gray-100 cursor-not-allowed" : ""}
+                    />
+                  </FormControl>
+                  <FormDescription>  {loaikhuyenmai === LoaiKhuyenMai.SO_TIEN_CO_DINH
+          ? "Tự động bằng giá trị giảm khi giảm theo số tiền cố định."
+          : "Giá trị giảm tối đa (VNĐ)."}</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField

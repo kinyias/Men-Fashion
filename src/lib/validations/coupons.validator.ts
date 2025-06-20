@@ -19,6 +19,9 @@ export enum LoaiKhuyenMai {
       giatridonhang: z.coerce.number().positive({
         message: "Giá trị đơn hàng phải là số dương.",
       }),
+      giamtoida: z.coerce.number().positive({
+        message: "Giá trị giảm tối đa phải là số dương.",
+      }),
       ngaybatdat: z.date({
         required_error: "Vui lòng chọn ngày bắt đầu.",
       }),
