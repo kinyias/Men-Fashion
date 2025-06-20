@@ -264,10 +264,15 @@ export function CouponsSection() {
                       Giá trị đơn tối thiểu:
                     </span>
                     <span>
-                      {new Intl.NumberFormat('vi-VN', {
-                        style: 'currency',
-                        currency: 'VND',
-                      }).format(coupon.giatridonhang)}
+                      {formatCurrency(coupon.giatridonhang)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">
+                      Giá trị giảm tối đa:
+                    </span>
+                    <span>
+                      {formatCurrency(coupon.giamtoida)}
                     </span>
                   </div>
                 </div>
