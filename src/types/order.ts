@@ -4,7 +4,7 @@ import { KichCo } from './sizes';
 import { User } from './user';
 
 export interface DonHang {
-  ma: number;
+  ma: string;
   ngaydat: Date;
   ten: string;
   email?: string;

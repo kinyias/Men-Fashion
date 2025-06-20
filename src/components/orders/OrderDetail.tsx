@@ -48,7 +48,7 @@ export function OrderDetails({ order }: {order: DonHang}) {
   
   // Update order status mutation
   const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: number; status: string }) => {
+    mutationFn: ({ id, status }: { id: string; status: string }) => {
       return updateOrderStatus(id, status)
     },
     onSuccess: (data) => {
@@ -66,7 +66,7 @@ export function OrderDetails({ order }: {order: DonHang}) {
   
   // Cancel order mutation
   const cancelOrderMutation = useMutation({
-    mutationFn: ({ id, reason }: { id: number; reason?: string }) => {
+    mutationFn: ({ id, reason }: { id: string; reason?: string }) => {
       return cancelOrder(id, reason)
     },
     onSuccess: (data) => {
