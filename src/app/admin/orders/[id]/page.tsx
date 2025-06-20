@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 
 export default function OrderDetailPage() {
   const params = useParams();
-  const orderId = Number(params.id);
+  const orderId = params.id as string;
   const printRef = useRef<HTMLDivElement>(null)
   // Fetch order data with order items
   const { data: order, isLoading: isLoadingOrder, isError } = useQuery({

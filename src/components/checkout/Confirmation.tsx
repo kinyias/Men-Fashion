@@ -11,10 +11,10 @@ import { getOrderById } from '@/lib/api'
 
 export default function Confirmation() {
     const params = useParams();
-    const orderId = Number(params.id);
+    const orderId = params.id as string;
     const { data: order, isLoading, isError } = useQuery({
         queryKey: ['order-confirmation', orderId],
-        queryFn: () => getOrderById(orderId!),
+        queryFn: () => getOrderById(orderId),
         retry: false,
     })
 

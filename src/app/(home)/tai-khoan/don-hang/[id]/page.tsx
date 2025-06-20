@@ -89,11 +89,11 @@ export default function OrderDetailPage() {
     isError,
   } = useQuery({
     queryKey: ['order', orderId],
-    queryFn: () => getOrderWithOrderItemsById(Number(orderId)),
+    queryFn: () => getOrderWithOrderItemsById(orderId),
   });
 
   const cancelOrderMutation = useMutation({
-    mutationFn: ({ id, reason }: { id: number; reason?: string }) =>
+    mutationFn: ({ id, reason }: { id: string; reason?: string }) =>
       cancelOrder(id, reason),
     onSuccess: () => {
       queryClient.setQueryData(['order', orderId], (oldData: DonHang) => ({
@@ -116,7 +116,7 @@ export default function OrderDetailPage() {
 
   const handleCancelOrder = () => {
     cancelOrderMutation.mutate({
-      id: Number(orderId),
+      id: orderId,
       reason: cancelReason,
     });
   };

@@ -17,12 +17,12 @@ export const getOrders = async (
   return response.data;
 };
 
-export const getOrderWithOrderItemsById = async (id: number): Promise<DonHang> => {
+export const getOrderWithOrderItemsById = async (id: string): Promise<DonHang> => {
   const response = await api.get(`/api/donhang/${id}`);
   return response.data;
 };
 
-export const getOrderById = async (id: number): Promise<DonHang> => {
+export const getOrderById = async (id: string): Promise<DonHang> => {
   const response = await api.get(`/api/donhang/${id}/xac-nhan`);
   return response.data;
 };
@@ -44,7 +44,7 @@ export const createOrder = async (data: DonHangFormValues): Promise<DonHang> => 
 };
 
 export const updateOrderStatus = async (
-  id: number,
+  id: string,
   trangthai: string,
   ngaygiao?: string
 ): Promise<DonHang> => {
@@ -52,7 +52,7 @@ export const updateOrderStatus = async (
   return response.data.donHang;
 };
 
-export const cancelOrder = async (id: number, reason?: string): Promise<DonHang> => {
+export const cancelOrder = async (id: string, reason?: string): Promise<DonHang> => {
   const response = await api.post(`/api/donhang/${id}/cancel`, { reason });
   return response.data.donHang;
 };

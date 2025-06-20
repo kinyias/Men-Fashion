@@ -35,7 +35,7 @@ export interface ChiTietDonHang {
   soluong: number;
   dongia: number;
   masp: number;
-  madh: number;
+  madh: string;
   mabienthe: number;
   sanPham: {
     ma: number;
@@ -53,7 +53,7 @@ export interface ThanhToan {
   phuongthuc: string;
   ngaythanhtoan: Date;
   trangthai: boolean;
-  madh: number;
+  madh: string;
 }
 
 export enum TrangThaiDonHang {
