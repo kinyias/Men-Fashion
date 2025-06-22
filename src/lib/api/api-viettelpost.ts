@@ -7,7 +7,9 @@ import {
   ViettelPostLoginRequest,
   ViettelPostLoginResponse,
   ViettelPostPriceRequest,
-  ViettelPostPriceResponse
+  ViettelPostPriceResponse,
+  ViettelPostBillRequest,
+  ViettelPostBillResponse
 } from '@/types/viettelpost';
   const api = axios.create({
       baseURL: process.env.NEXT_PUBLIC_VIETTEL_POST_URL,
@@ -62,6 +64,16 @@ export const calculatePrice = async (
   const response = await axios.post(
     `/api/proxy-calculate-price`,
     priceRequest
+  );
+  return response.data;
+};
+
+export const createBill = async (
+  billRequest: ViettelPostBillRequest
+): Promise<ViettelPostBillResponse> => {
+  const response = await axios.post(
+    `/api/proxy-create-bill`,
+    billRequest
   );
   return response.data;
 };

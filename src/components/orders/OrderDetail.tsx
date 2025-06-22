@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { updateOrderStatus, cancelOrder } from "@/lib/api/api-orders"
 import toast from "react-hot-toast"
+import { ViettelPostBillRequest } from "@/types/viettelpost"
+import { createBill } from "@/lib/api"
 
 const shippingSteps = [
   {
@@ -48,7 +50,48 @@ export function OrderDetails({ order }: {order: DonHang}) {
   
   // Update order status mutation
   const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: string }) => {
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      if(status === "dang_giao_hang"){ 
+        const billRequest: ViettelPostBillRequest = {
+          ORDER_NUMBER: "12",
+          GROUPADDRESS_ID: 5818802,
+          CUS_ID: 722,
+          DELIVERY_DATE: "11/10/2018 15:09:52",
+          SENDER_FULLNAME: "Yanme Shop",
+          SENDER_ADDRESS: "Số 5A ngách 22 ngõ 282",
+          SENDER_EMAIL: "titiyoutu@gmail.com",
+          SENDER_WARD: 827,
+          SENDER_DISTRICT: 47,
+          SENDER_PROVINCE: 2,
+          RECEIVER_FULLNAME: order.ten,
+          RECEIVER_ADDRESS: order.diachi + ", " + order.phuong + ", " + order.quan + ", " + order.thanhpho,
+          RECEIVER_PHONE: order.sdt,
+          RECEIVER_EMAIL: order.email || "",
+          PRODUCT_TYPE: "HH",
+          ORDER_PAYMENT: 3,
+          ORDER_SERVICE:  order.phuongthucgiaohang,
+          ORDER_SERVICE_ADD: "",
+          ORDER_VOUCHER: "",
+          ORDER_NOTE: "Cho phép xem hàng",
+          MONEY_COLLECTION: order.tonggia,
+          MONEY_TOTALFEE: 0,
+          MONEY_FEECOD: 0,
+          MONEY_FEEVAS: 0,
+          MONEY_FEEINSURRANCE: 0,
+          MONEY_FEE: 0,
+          MONEY_FEEOTHER: 0,
+          MONEY_TOTALVAT: 0,
+          MONEY_TOTAL: 0,
+          LIST_ITEM: order.chiTietDonHangs.map((item: ChiTietDonHang) => ({
+            PRODUCT_NAME: item.sanPham.ten,
+            PRODUCT_PRICE: item.dongia,
+            PRODUCT_WEIGHT: 200,
+            PRODUCT_QUANTITY: item.soluong,
+          })),
+        }
+        const billResponse = await createBill(billRequest)
+        return updateOrderStatus(id, status, billResponse.data.data.ORDER_NUMBER)
+      }
       return updateOrderStatus(id, status)
     },
     onSuccess: (data) => {

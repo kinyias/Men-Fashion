@@ -29,7 +29,7 @@ interface CheckoutFormProps {
     price: number,
     time: number,
   }},
-  onSetShippingMethod: (method: "nhanh" | "tietkiem" | "hoatoc") => void,
+  onSetShippingMethod: (method: "SCN" | "SHT" | "STK") => void,
   onSetShippingPrices: (prices: {[key: string]: {
     price: number,
     time: number,
@@ -52,7 +52,7 @@ export function CheckoutForm({ userAddresses, onSubmit, total, isProcessing, shi
         quan: userAddresses?.quanhuyen || "",
         phuong: userAddresses?.phuongxa || "",
         ghichu: "",
-        phuongthucgiaohang: "tietkiem",
+        phuongthucgiaohang: "STK",
       },
       payment: {
         phuongthuc: "cod",
@@ -357,15 +357,15 @@ export function CheckoutForm({ userAddresses, onSubmit, total, isProcessing, shi
                         <RadioGroup 
                           onValueChange={(value) => {
                             field.onChange(value);
-                            onSetShippingMethod(value as "hoatoc" | "nhanh" | "tietkiem");
+                            onSetShippingMethod(value as "SCN" | "SHT" | "STK");
                           }} 
                           defaultValue={field.value} 
                           className="space-y-2"
                         >
                           
                           <div className="flex items-center space-x-2 border rounded-md p-3">
-                            <FormControl><RadioGroupItem value="tietkiem" id="tietkiem" /></FormControl>
-                            <FormLabel htmlFor="tietkiem" className="flex-1 cursor-pointer">
+                            <FormControl><RadioGroupItem value="STK" id="STK" /></FormControl>
+                            <FormLabel htmlFor="STK" className="flex-1 cursor-pointer">
                               <div className="font-medium">Tiết kiệm</div>
                               <div className="text-sm text-muted-foreground"> {shippingPrices["STK"] && (
                       <div className="text-sm text-muted-foreground">
@@ -384,8 +384,8 @@ export function CheckoutForm({ userAddresses, onSubmit, total, isProcessing, shi
                             </div>
                           </div>
                           <div className="flex items-center space-x-2 border rounded-md p-3">
-                            <FormControl><RadioGroupItem value="nhanh" id="nhanh" /></FormControl>
-                            <FormLabel htmlFor="nhanh" className="flex-1 cursor-pointer">
+                            <FormControl><RadioGroupItem value="SCN" id="SCN" /></FormControl>
+                            <FormLabel htmlFor="SCN" className="flex-1 cursor-pointer">
                               <div className="font-medium">Nhanh</div>
                               <div className="text-sm text-muted-foreground">  {shippingPrices["SCN"] && (
                       <div className="text-sm text-muted-foreground">
@@ -404,8 +404,8 @@ export function CheckoutForm({ userAddresses, onSubmit, total, isProcessing, shi
                             </div>
                           </div>
                           <div className="flex items-center space-x-2 border rounded-md p-3">
-                            <FormControl><RadioGroupItem value="hoatoc" id="hoatoc" /></FormControl>
-                            <FormLabel htmlFor="hoatoc" className="flex-1 cursor-pointer">
+                            <FormControl><RadioGroupItem value="SHT" id="SHT" /></FormControl>
+                            <FormLabel htmlFor="SHT" className="flex-1 cursor-pointer">
                               <div className="font-medium">Hỏa tốc</div>
                               <div className="text-sm text-muted-foreground"> {shippingPrices["SHT"] && (
                       <div className="text-sm text-muted-foreground">

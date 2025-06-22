@@ -20,6 +20,7 @@ export interface DonHang {
   sdt: string;
   trangthai: TrangThaiDonHang;
   phigiaohang: number;
+  phuongthucgiaohang: string;
   ghichu?: string;
   manguoidung: number;
   maKhuyenMai?: number;

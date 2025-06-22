@@ -46,9 +46,10 @@ export const createOrder = async (data: DonHangFormValues): Promise<DonHang> => 
 export const updateOrderStatus = async (
   id: string,
   trangthai: string,
+  mavandon?: string,
   ngaygiao?: string
 ): Promise<DonHang> => {
-  const response = await api.patch(`/api/donhang/${id}/status`, { trangthai, ngaygiao });
+  const response = await api.patch(`/api/donhang/${id}/status`, { trangthai, ngaygiao, mavandon });
   return response.data.donHang;
 };
 

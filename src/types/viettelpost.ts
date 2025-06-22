@@ -43,7 +43,6 @@ export interface ViettelPostQueryParams {
   districtId?: number;
 }
 
-
 export interface ViettelPostLoginRequest {
   USERNAME: string;
   PASSWORD: string;
@@ -86,14 +85,76 @@ export interface ViettelPostPriceResponse {
 }
 
 export interface ViettelPostPrice {
-    service: string;
-    MONEY_TOTAL_OLD: number;
-    MONEY_TOTAL: number;
-    MONEY_TOTAL_FEE: number;
-    MONEY_FEE: number;
-    MONEY_COLLECTION_FEE: number;
-    MONEY_OTHER_FEE: number;
-    MONEY_VAS: number;
-    MONEY_VAT: number;
-    KPI_HT: number;
-  }
+  service: string;
+  MONEY_TOTAL_OLD: number;
+  MONEY_TOTAL: number;
+  MONEY_TOTAL_FEE: number;
+  MONEY_FEE: number;
+  MONEY_COLLECTION_FEE: number;
+  MONEY_OTHER_FEE: number;
+  MONEY_VAS: number;
+  MONEY_VAT: number;
+  KPI_HT: number;
+}
+export interface ViettelPostBillItem {
+  PRODUCT_NAME: string;
+  PRODUCT_PRICE: number;
+  PRODUCT_WEIGHT: number;
+  PRODUCT_QUANTITY: number;
+}
+export interface ViettelPostBillRequest {
+  ORDER_NUMBER: string;
+  GROUPADDRESS_ID: number;
+  CUS_ID: number;
+  DELIVERY_DATE: string;
+  SENDER_FULLNAME: string;
+  SENDER_ADDRESS: string;
+  SENDER_EMAIL: string;
+  SENDER_WARD: number;
+  SENDER_DISTRICT: number;
+  SENDER_PROVINCE: number;
+  RECEIVER_FULLNAME: string;
+  RECEIVER_ADDRESS: string;
+  RECEIVER_PHONE: string;
+  RECEIVER_EMAIL: string;
+  PRODUCT_TYPE: string;
+  ORDER_PAYMENT: number;
+  ORDER_SERVICE: string;
+  ORDER_SERVICE_ADD: string;
+  ORDER_VOUCHER: string;
+  ORDER_NOTE: string;
+  MONEY_COLLECTION: number;
+  MONEY_TOTALFEE: number;
+  MONEY_FEECOD: number;
+  MONEY_FEEVAS: number;
+  MONEY_FEEINSURRANCE: number;
+  MONEY_FEE: number;
+  MONEY_FEEOTHER: number;
+  MONEY_TOTALVAT: number;
+  MONEY_TOTAL: number;
+  LIST_ITEM: ViettelPostBillItem[];
+}
+
+export interface ViettelPostBillResponse {
+  status: number;
+  error: boolean;
+  message: string;
+  data: {
+    data:{
+      ORDER_NUMBER: string;
+      MONEY_COLLECTION: number;
+      EXCHANGE_WEIGHT: number;
+      MONEY_TOTAL: number;
+      MONEY_TOTAL_FEE: number;
+      MONEY_FEE: number;
+      MONEY_COLLECTION_FEE: number;
+      MONEY_OTHER_FEE: number;
+      MONEY_VAS: number;
+      MONEY_VAT: number;
+      KPI_HT: number;
+      RECEIVER_PROVINCE: number;
+      RECEIVER_DISTRICT: number;
+      RECEIVER_WARDS: number;
+    }
+  };
+}

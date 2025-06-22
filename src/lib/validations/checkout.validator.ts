@@ -13,7 +13,7 @@ export const shippingSchema = z.object({
   quan: z.string().min(1, "Vui lòng nhập tên quận"),
   phuong: z.string().min(1, "Vui lòng nhập tên phường"),
   ghichu: z.string().optional(),
-  phuongthucgiaohang: z.enum(["tietkiem", "nhanh", "hoatoc"], {
+  phuongthucgiaohang: z.enum(["SCN", "SHT", "STK"], {
     required_error: "Vui lòng chọn phương thức giao hàng",
   }),
 })

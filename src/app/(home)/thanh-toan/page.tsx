@@ -17,7 +17,7 @@ export default function CheckoutPage() {
   const router = useRouter()
   const [isProcessing, setIsProcessing] = useState(false)
   const [appliedCoupon, setAppliedCoupon] = useState<KhuyenMai | null>(null)
-  const [shippingMethod, setShippingMethod] = useState<"nhanh" | "tietkiem" | "hoatoc" >("tietkiem");
+  const [shippingMethod, setShippingMethod] = useState<"SCN" | "SHT" | "STK" >("STK");
   const [shippingPrices, setShippingPrices] = useState<{[key: string]: {
     price: number,
     time: number,
@@ -29,9 +29,9 @@ export default function CheckoutPage() {
   });
   // Calculate order totals
   const subtotal = cartItems.reduce((sum, item) => sum + item.gia * item.soLuong, 0)
-  const shipping = shippingMethod === "tietkiem" 
+  const shipping = shippingMethod === "STK" 
   ? shippingPrices["STK"]?.price 
-  : shippingMethod === "nhanh"
+  : shippingMethod === "SCN"
   ? shippingPrices["SCN"]?.price
   : shippingPrices["SHT"]?.price;
   const getDiscount = (coupon: KhuyenMai) => {
