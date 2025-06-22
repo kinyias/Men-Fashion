@@ -70,11 +70,13 @@ export function OrderDetails({ order }: {order: DonHang}) {
       return cancelOrder(id, reason)
     },
     onSuccess: (data) => {
+      console.log('data', data)
       // Update local state
       setStatus(data.trangthai)
       // Invalidate and refetch order data
       queryClient.invalidateQueries({ queryKey: ['order', order.ma] })
       toast.success("Đơn hàng đã được hủy")
+      
     },
     onError: (error) => {
       toast.error("Không thể hủy đơn hàng")

@@ -111,3 +111,16 @@ export interface DonHangFormValues {
     trangthai?: boolean;
   };
 }
+
+export interface CancelOrderResponse {
+  success: boolean;
+  message: string;
+  trangthai: TrangThaiDonHang;
+  data: {
+    requestId: string;
+    orderId: string;
+    transId: string;
+    amount: number;
+    message: string;
+  };
+}

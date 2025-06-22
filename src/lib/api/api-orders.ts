@@ -1,5 +1,5 @@
 import api from '@/lib/axios-client';
-import { DonHang, DonHangFormValues, DonHangQueryParams, DonHangResponse } from '@/types';
+import { CancelOrderResponse, DonHang, DonHangFormValues, DonHangQueryParams, DonHangResponse } from '@/types';
 
 export const getOrders = async (
   queryParams: DonHangQueryParams
@@ -52,9 +52,9 @@ export const updateOrderStatus = async (
   return response.data.donHang;
 };
 
-export const cancelOrder = async (id: string, reason?: string): Promise<DonHang> => {
+export const cancelOrder = async (id: string, reason?: string): Promise<CancelOrderResponse> => {
   const response = await api.post(`/api/donhang/${id}/cancel`, { reason });
-  return response.data.donHang;
+  return response.data;
 };
 
 export const updatePaymentStatus = async (
