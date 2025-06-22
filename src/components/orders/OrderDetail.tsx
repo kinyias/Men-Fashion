@@ -287,6 +287,15 @@ export function OrderDetails({ order }: {order: DonHang}) {
         {/* Vận Chuyển Section */}
         <div>
           <h2 className="text-lg font-semibold mb-4">Vận Chuyển</h2>
+          <div className="text-sm">
+            <p>Phương thức giao hàng: {order.phuongthucgiaohang == "STK" ? "Tiết kiệm" : order.phuongthucgiaohang == "SCN" ? "Nhanh" : "Hỏa tốc"}</p>
+          </div>
+          {order.mavandon && (
+            <div className="text-sm pb-3">
+              <p>Đơn vị vận chuyển: Viettel Post</p>
+              <p>Mã vận đơn: {order.mavandon}</p>
+            </div>
+          )}
           <div className="space-y-6 p-6 bg-white rounded-lg border">
             <div className="space-y-2">
               <h3 className="text-sm font-medium flex items-center gap-2">
@@ -458,7 +467,7 @@ export function OrderDetails({ order }: {order: DonHang}) {
           <Printer className="mr-2 h-4 w-4" />
           In Đơn Hàng
         </Button>
-        <Button>Gửi Email Cho Khách Hàng</Button>
+        {/* <Button>Gửi Email Cho Khách Hàng</Button> */}
       </CardFooter>
     </Card>
   )

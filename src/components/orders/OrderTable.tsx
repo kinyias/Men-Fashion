@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ChevronLeft, ChevronRight, MoreHorizontal, Eye, FileText, Truck, XCircle, ArrowUpDown, Loader2 } from "lucide-react"
+import { ChevronLeft, ChevronRight, MoreHorizontal, Eye, ArrowUpDown, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { DonHang, TrangThaiDonHang } from "@/types"
 import { useQuery } from "@tanstack/react-query"
@@ -206,18 +206,6 @@ export function OrdersTable({ searchQuery, statusFilter }: OrdersTableProps) {
                     <Eye className="mr-2 h-4 w-4" />
                     Xem chi tiết
                   </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <FileText className="mr-2 h-4 w-4" />
-                  Tạo hóa đơn
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Truck className="mr-2 h-4 w-4" />
-                  Cập nhật vận chuyển
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <XCircle className="mr-2 h-4 w-4" />
-                  Hủy đơn hàng
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

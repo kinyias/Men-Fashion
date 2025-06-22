@@ -26,8 +26,6 @@ import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getOrderWithOrderItemsById, cancelOrder } from '@/lib/api/api-orders';
-import { format } from 'date-fns';
-import { vi } from 'date-fns/locale';
 import {
   Dialog,
   DialogContent,
@@ -41,6 +39,7 @@ import toast from 'react-hot-toast';
 import type { ApiError, DonHang } from '@/types';
 import { formatCurrency } from '@/utils/currency';
 import { WriteReviewModal } from '@/components/reviews/WriteReviewModal';
+import { formatDate } from '@/utils/formatTime';
 
 const statusConfig = {
   da_dat: {
@@ -173,7 +172,7 @@ export default function OrderDetailPage() {
             <h1 className="text-3xl font-bold">Đơn hàng #{order.ma}</h1>
             <p className="text-muted-foreground">
               Đặt ngày{' '}
-              {format(new Date(order.ngaydat), 'dd MMMM, yyyy', { locale: vi })}
+              {formatDate(order.ngaydat)}
             </p>
           </div>
         </div>
@@ -202,15 +201,23 @@ export default function OrderDetailPage() {
                     <Progress value={statusInfo.progress} className="h-2" />
                   </div>
 
+                  {order.mavandon && (
+                    <div className="text-sm">
+                      <span className="font-medium">
+                        Mã vận đơn:{' '}
+                      </span>
+                      <span>
+                       {order.mavandon}
+                      </span>
+                    </div>
+                  )}
                   {order.ngaygiao && (
                     <div className="text-sm">
                       <span className="font-medium">
                         Ngày giao hàng dự kiến:{' '}
                       </span>
                       <span>
-                        {format(new Date(order.ngaygiao), 'dd/MM/yyyy', {
-                          locale: vi,
-                        })}
+                        {formatDate(order.ngaygiao)}
                       </span>
                     </div>
                   )}

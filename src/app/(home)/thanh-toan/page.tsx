@@ -51,7 +51,6 @@ export default function CheckoutPage() {
       clearCart()
       if (data.paymentUrl) {
         window.location.href = data.paymentUrl;
-      
       } else {
         router.push(`/thanh-toan/xac-nhan/${data.ma}`)
       }
