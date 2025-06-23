@@ -21,6 +21,7 @@ export interface DonHang {
   trangthai: TrangThaiDonHang;
   phigiaohang: number;
   phuongthucgiaohang: string;
+  lydo?: string;
   mavandon?: string;
   ghichu?: string;
   manguoidung: number;
@@ -56,6 +57,7 @@ export interface ThanhToan {
   ngaythanhtoan: Date;
   trangthai: boolean;
   madh: string;
+  transId?: string;
 }
 
 export enum TrangThaiDonHang {
@@ -125,4 +127,5 @@ export interface CancelOrderResponse {
     amount: number;
     message: string;
   };
+  donHang: DonHang;
 }

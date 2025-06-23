@@ -53,8 +53,8 @@ export const updateOrderStatus = async (
   return response.data.donHang;
 };
 
-export const cancelOrder = async (id: string, reason?: string): Promise<CancelOrderResponse> => {
-  const response = await api.post(`/api/donhang/${id}/cancel`, { reason });
+export const cancelOrder = async (id: string, lydo?: string): Promise<CancelOrderResponse> => {
+  const response = await api.post(`/api/donhang/${id}/cancel`, { lydo });
   return response.data;
 };
 
