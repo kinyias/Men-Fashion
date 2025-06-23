@@ -91,7 +91,7 @@ export default function CategoryPage() {
   
   // Use React Query to fetch products with advanced search
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['products', categoryId, filters, sortBy, pagination],
+    queryKey: ['productsSearch', categoryId, filters, sortBy, pagination],
     queryFn: async () => {
       // Convert string IDs to numbers for the API
       const numericCategoryId = Number(categoryId);

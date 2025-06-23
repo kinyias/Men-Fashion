@@ -73,7 +73,7 @@ export default function ProductDetail({product}:{product: SanPhamWithRating}) {
     addItem({
         ma: product.ma,
         ten: product.ten,
-        gia: product.giagiam || product.giaban,
+        gia: getSelectedVariant().gia || product.giagiam || product.giaban,
         bienThe: getSelectedVariant(),
         soLuong: quantity,
         hinhAnh: getMainImage() || "/placeholder.svg",
@@ -156,7 +156,7 @@ const getMainImage = () => {
             <div className="flex items-baseline space-x-2">
               {product.giagiam && product.giagiam < product.giaban ? (
                 <>
-                  <span className="text-2xl font-bold">{formatCurrency(product.giagiam)}</span>
+                  <span className="text-2xl font-bold">{formatCurrency(getSelectedVariant().gia || product.giagiam)}</span>
                   <span className="text-lg text-muted-foreground line-through">
                     {formatCurrency(product.giaban)}
                   </span>
@@ -264,7 +264,7 @@ const getMainImage = () => {
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row">
-                <Button className="flex-1" size="lg" onClick={handleAddToCart}>
+                <Button className="flex-1" size="lg" onClick={handleAddToCart} disabled={getSelectedVariant().soluong === 0}>
                   <ShoppingCart className="w-4 h-4 mr-2" />
                   Thêm vào giỏ hàng
                 </Button>

@@ -85,7 +85,7 @@ export function SubCategoryTable() {
       setQueryParams(prev => ({
         ...prev,
         sortBy: sorting[0].id,
-        sortOrder: sorting[0].desc ? 'desc' : 'asc',
+        sortOrder: sorting[0].desc ? 'asc' : 'desc',
         page: 1,
       }));
     }
@@ -185,6 +185,7 @@ export function SubCategoryTable() {
             src={row.getValue("hinhanh") || "/placeholder.svg"}
             alt={row.getValue("ten")}
             fill
+            sizes="50px"
             className="object-cover"
           />
         </div>

@@ -16,7 +16,7 @@ export default function ProductTabSub({
     const [selectedSubCategory, setSelectedSubCategory] = useState<number | null>(subcategories[0]?.ma || null)
      // Fetch products based on selected sub-category
   const { data: productsData, isLoading } = useQuery({
-    queryKey: ['products', selectedSubCategory],
+    queryKey: ['productsTabSub', selectedSubCategory],
     queryFn: () => getProductsWithVariant({ 
       page: 1, 
       limit: 6,
