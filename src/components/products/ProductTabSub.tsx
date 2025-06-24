@@ -1,16 +1,20 @@
 "use client"
 import React, { useMemo, useState } from 'react'
-import { LoaiSanPham } from '@/types'
+import { DanhMuc, LoaiSanPham } from '@/types'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import ProductCard from './ProductCard'
 import { useQuery } from '@tanstack/react-query'
 import { getProductsWithVariant } from '@/lib/api'
 import { Skeleton } from '../ui/skeleton'
+import Link from 'next/link'
+import { Button } from '../ui/button'
 interface ProductTabSubProps {
+  category: DanhMuc
   subcategories: LoaiSanPham[]
 }
 
 export default function ProductTabSub({
+  category,
   subcategories, 
 }: ProductTabSubProps) {
     const [selectedSubCategory, setSelectedSubCategory] = useState<number | null>(subcategories[0]?.ma || null)
@@ -51,7 +55,7 @@ export default function ProductTabSub({
     {subcategories.map((subcategory) => (
     <TabsContent key={subcategory.ma} value={subcategory.ma.toString()} className="mt-0">
     {isLoading ? (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
         {Array.from({ length: 6 }).map((_,index) => (
           <div key={index} className="space-y-4">
             <Skeleton className="aspect-square rounded-xl" />
@@ -75,7 +79,7 @@ export default function ProductTabSub({
         ))}
       </div>
     ) : products.length > 0 ? (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
         {products.map((product) => (
           <ProductCard key={`${subcategory.ma}-${product.ma}`} product={product} />
         ))}
@@ -94,6 +98,13 @@ export default function ProductTabSub({
             <p className="text-lg text-slate-500">Hiện tại chưa có sản phẩm.</p>
           </div>
         )}
+         <div className="w-full flex justify-center">
+      {subcategories.length > 0 && products.length > 7 && (
+         <Link href={`/danh-muc/${category?.ten}-${category?.ma}/${subcategories[0]?.ten}-${selectedSubCategory}`}>
+         <Button variant="outline" className="mt-5 rounded-2xl">Xem thêm</Button>
+         </Link>
+      )}
+       </div>
     </>
   )
 }

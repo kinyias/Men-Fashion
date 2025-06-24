@@ -169,7 +169,7 @@ export default function ProductCard({ product }: { product: SanPhamWithRating })
             <Link
             href={`/san-pham/${toSlug(product.ten)}-${product.ma}`}
             >
-            <h3 className="font-medium line-clamp-1 hover:text-primary transition duration-300">{product.ten}</h3>
+            <h3 className="font-medium line-clamp-2 hover:text-primary transition duration-300">{product.ten}</h3>
             </Link>
             <div className="flex items-center">
               <Star className="h-3.5 w-3.5 fill-yellow-300 text-yellow-300" />

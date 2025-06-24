@@ -25,6 +25,7 @@ import "@/components/tiptap/tiptap-node/list-node/list-node.scss"
 import "@/components/tiptap/tiptap-node/image-node/image-node.scss"
 import "@/components/tiptap/tiptap-node/paragraph-node/paragraph-node.scss"
 import "@/components/tiptap/tiptap-node/table-node/table-node.scss"
+import "@/components/tiptap/tiptap-node/paragraph-node/paragraph-node.scss"
 import { RelatedPosts } from '@/components/blog/BlogRelate';
 export default function BlogPostPage() {
   const params = useParams<{ id: string }>();

@@ -43,7 +43,7 @@ export function FeatureProduct() {
           ))
         ) : (
           featuredProducts?.data.map((product) => (
-            <CarouselItem key={product.ma} className="pl-2 md:pl-4 sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+            <CarouselItem key={product.ma} className="pl-2 md:pl-4 basis-1/2 sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
               <ProductCard product={product} />
             </CarouselItem>
           ))
@@ -51,14 +51,15 @@ export function FeatureProduct() {
       </CarouselContent>
 
       {/* Navigation controls - styled differently for mobile and desktop */}
-      <div className="hidden md:block">
+      {(!isLoading && featuredProducts?.data && featuredProducts.data.length > 4) &&
+        (<div className="hidden md:block">
         <CarouselPrevious className="left-0 -translate-x-1/2" />
         <CarouselNext className="right-0 translate-x-1/2" />
-      </div>
+      </div>)}
 
       <div className="flex justify-center gap-2 mt-4 md:hidden">
-        <CarouselPrevious className="static translate-x-0 transform-none mx-1" />
-        <CarouselNext className="static translate-x-0 transform-none mx-1" />
+        <CarouselPrevious className="static translate-y-1 translate-x-0 transform-none mx-1" />
+        <CarouselNext className="static translate-y-1 translate-x-0 transform-none mx-1" />
       </div>
     </Carousel>
   )

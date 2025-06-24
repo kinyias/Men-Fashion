@@ -38,7 +38,7 @@ export default function SubCategoryFeature() {
           ))
         ) : (
           featuredCategories?.data.map((category) => (
-            <CarouselItem key={category.ma} className="pl-2 md:pl-4 sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+            <CarouselItem key={category.ma} className="pl-2 md:pl-4 basis-1/2 sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
               <Link href={`/danh-muc/${toSlug(category?.danhMuc?.ten || "")}-${category?.danhMuc?.ma}/${toSlug(category.ten)}-${category.ma}`} className="group relative overflow-hidden rounded-xl block">
                 <div className="w-full overflow-hidden rounded-xl">
                   <Image
@@ -72,8 +72,8 @@ export default function SubCategoryFeature() {
       }
 
       <div className="flex justify-center gap-2 mt-4 md:hidden">
-        <CarouselPrevious className="static translate-x-0 transform-none mx-1" />
-        <CarouselNext className="static translate-x-0 transform-none mx-1" />
+        <CarouselPrevious className="static translate-y-1 translate-x-0 transform-none mx-1" />
+        <CarouselNext className="static translate-y-1 translate-x-0 transform-none mx-1" />
       </div>
     </Carousel>
   )

@@ -35,9 +35,10 @@ export function ProductTab({category}:{category:DanhMuc}) {
         )}
         {
           !isLoading && (
-            <ProductTabSub subcategories={subcategories} />
+            <ProductTabSub category={category} subcategories={subcategories} />
           )
         }
+      
       </div>
     </section>
   )

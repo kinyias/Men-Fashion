@@ -17,14 +17,14 @@ export default function HomePage() {
             <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                  Danh mục nổi bật
+                  Loại sản phẩm nổi bật
                 </h2>
                 <p className="text-muted-foreground md:text-lg">
                   Hàng được tuyển chọn trang phục nam cao cấp
                 </p>
               </div>
               <Link
-                href="#"
+                href="/san-pham"
                 className="group flex items-center gap-1 text-sm font-medium"
               >
                 Xem tất cả
@@ -44,7 +44,7 @@ export default function HomePage() {
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Sản phẩm nổi bật</h2>
                 <p className="text-muted-foreground md:text-lg">Những sản phẩm nổi bật nhất</p>
               </div>
-              <Link href="#" className="group flex items-center gap-1 text-sm font-medium">
+              <Link href="/san-pham" className="group flex items-center gap-1 text-sm font-medium">
                 Xem tất cả <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </div>

@@ -70,7 +70,7 @@ export function BlogTable() {
   const [queryParams, setQueryParams] = useState<BlogQueryParams>({
     page: 1,
     limit: 5,
-    sortBy: 'tieude',
+    sortBy: 'ma',
     sortOrder: 'asc',
   });
   const [open, setOpen] = useState(false);
@@ -260,6 +260,7 @@ export function BlogTable() {
           {row.original.tieude}
         </div>
       ),
+      enableSorting: false,
     },
     {
       id: 'category',
@@ -279,7 +280,7 @@ export function BlogTable() {
         const author = row.original.nguoiDung;
         return (
           <div className="max-w-[200px] truncate">
-            {author ? `${author.ho} ${author.ten}` : 'N/A'}
+            {author ? `${author.ten}` : 'N/A'}
           </div>
         );
       },

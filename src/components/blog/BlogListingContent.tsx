@@ -58,7 +58,10 @@ export function BlogListingContent() {
   });
   const blogs = blogsData?.data || [];
   const totalPages = blogsData?.pagination.totalPages || 1;
-
+  const onGenreChange = (value: number) => {
+    setSelectedGenre(value);
+    setCurrentPage(1);
+  };
   return (
     <>
       {/* Hero Section */}
@@ -103,9 +106,7 @@ export function BlogListingContent() {
               ) : (
                 <Select
                   value={selectedGenre?.toString() || '0'}
-                  onValueChange={(value) =>
-                    setSelectedGenre(value ? parseInt(value) : undefined)
-                  }
+                  onValueChange={(value) => onGenreChange(parseInt(value))}
                 >
                   <SelectTrigger className="w-[140px]">
                     <SelectValue placeholder="Chủ đề" />
