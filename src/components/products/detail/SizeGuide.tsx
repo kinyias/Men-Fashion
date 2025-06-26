@@ -44,16 +44,6 @@ export const pantsSizeChart = [
   { size: "35", waist: "85-88", hips: "98-100", height: "177-182", weight: "80-85" },
 ];
 
-export const shoeSizeChart = [
-  { size: "36", footLength: "22.5 cm" },
-  { size: "37", footLength: "23.0 cm" },
-  { size: "38", footLength: "23.5 cm" },
-  { size: "39", footLength: "24.0 cm" },
-  { size: "40", footLength: "24.5 cm" },
-  { size: "41", footLength: "25.0 cm" },
-  { size: "42", footLength: "25.5 cm" },
-  { size: "43", footLength: "26.0 cm" },
-];
 export function SizeGuide({ onClose }: SizeGuideProps) {
 
   return (
@@ -67,10 +57,9 @@ export function SizeGuide({ onClose }: SizeGuideProps) {
         </DialogHeader>
 
         <Tabs defaultValue="tops">
-          <TabsList className="w-full grid grid-cols-3 gap-2">
+          <TabsList className="w-full grid grid-cols-2 gap-2">
             <TabsTrigger value="tops">Áo</TabsTrigger>
             <TabsTrigger value="pants">Quần</TabsTrigger>
-            <TabsTrigger value="shoes">Giày</TabsTrigger>
           </TabsList>
 
           {/* Áo */}
@@ -127,25 +116,6 @@ export function SizeGuide({ onClose }: SizeGuideProps) {
             </Table>
           </TabsContent>
 
-          {/* Giày */}
-          <TabsContent value="shoes" className="mt-4">
-            <Table className="min-w-[300px]">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Cỡ giày</TableHead>
-                  <TableHead>Chiều dài chân</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {shoeSizeChart.map((item) => (
-                  <TableRow key={item.size}>
-                    <TableCell className="font-medium">{item.size}</TableCell>
-                    <TableCell>{item.footLength}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TabsContent>
         </Tabs>
         <div className="mt-4 space-y-2">
           <h3 className="font-medium">Cách đo kích thước</h3>
