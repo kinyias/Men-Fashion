@@ -369,7 +369,6 @@ export function ProductsTable() {
     },
   ];
 
-  console.log(products);
   const table = useReactTable({
     data: products,
     columns,

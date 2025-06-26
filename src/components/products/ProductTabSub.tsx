@@ -23,7 +23,7 @@ export default function ProductTabSub({
     queryKey: ['productsTabSub', selectedSubCategory],
     queryFn: () => getProductsWithVariant({ 
       page: 1, 
-      limit: 6,
+      limit: 8,
       maloaisanpham: selectedSubCategory || undefined 
     }),
     enabled: !!selectedSubCategory,

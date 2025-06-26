@@ -501,6 +501,24 @@ export function CheckoutForm({ userAddresses, onSubmit, total, isProcessing, shi
                             <div className="text-sm text-muted-foreground">Thanh toán bằng MOMO</div>
                           </FormLabel>
                         </div>
+                        <div className="flex items-center space-x-2 border rounded-md p-3">
+                          <FormControl><RadioGroupItem value="vnpay" id="vnpay" /></FormControl>
+                          <FormLabel htmlFor="vnpay" className="flex-1 cursor-pointer">
+                            <div className="font-medium flex items-center gap-2">
+                              <div className="relative w-8 h-8">
+                                <Image 
+                                  className="object-contain"
+                                  alt="Vnpay"
+                                  src="/assets/vnpay.svg" 
+                                  fill
+                                  sizes="(max-width: 40px) 100vw"
+                                />
+                              </div>
+                              VNPAY
+                            </div>
+                            <div className="text-sm text-muted-foreground">Thanh toán bằng VNPAY</div>
+                          </FormLabel>
+                        </div>
                       </RadioGroup>
                     </FormControl>
                     <FormMessage />

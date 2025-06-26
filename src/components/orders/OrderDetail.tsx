@@ -151,7 +151,7 @@ export function OrderDetails({ order }: { order: DonHang }) {
     mutationFn: ({ id, reason }: { id: string; reason?: string }) => {
       return cancelOrder(id, reason);
     },
-    onSuccess: (data) => {;
+    onSuccess: (data) => {
       // Update local state
       setStatus(data.donHang.trangthai);
       setCancelDialogOpen(false);

@@ -381,7 +381,7 @@ export default function OrderDetailPage() {
                           : 'bg-yellow-100 text-yellow-800'
                       }
                     >
-                      {order.thanhToans?.trangthai
+                      {order.trangthai == 'da_huy' && order.thanhToans.phuongthuc != 'cod' ? 'Đã hoàn tiền' : order.thanhToans?.trangthai
                         ? 'Đã thanh toán'
                         : 'Chưa thanh toán'}
                     </Badge>

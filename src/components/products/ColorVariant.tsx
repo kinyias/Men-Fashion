@@ -157,7 +157,7 @@ export function ColorVariant({
                       {isUploading && (
 <div className="flex items-center gap-2">
 <Progress value={uploadProgress} className="h-2 w-24" />
-<span className="text-xs text-muted-foreground">{uploadProgress}%</span>
+<span className="text-xs text-muted-foreground">{Math.round(uploadProgress)}%</span>
 </div>
 )}
                     </Label>

@@ -71,7 +71,7 @@ export function BlogTable() {
     page: 1,
     limit: 5,
     sortBy: 'ma',
-    sortOrder: 'asc',
+    sortOrder: 'desc',
   });
   const [open, setOpen] = useState(false);
   const [blogToDelete, setBlogToDelete] = useState<Blog | null>(null);

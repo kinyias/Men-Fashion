@@ -8,6 +8,7 @@ import { formatCurrency } from '@/utils/currency'
 import { useParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { getOrderById } from '@/lib/api'
+import { formatDate } from '@/utils/formatTime'
 
 export default function Confirmation() {
     const params = useParams();
@@ -16,12 +17,6 @@ export default function Confirmation() {
         queryKey: ['order-confirmation', orderId],
         queryFn: () => getOrderById(orderId),
         retry: false,
-    })
-
-    const orderDate = new Date().toLocaleDateString("vi-VN", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
     })
 
     if (isLoading) {
@@ -81,7 +76,7 @@ export default function Confirmation() {
         </div>
         <div>
           <h3 className="text-sm font-medium text-muted-foreground">Ngày đặt</h3>
-          <p>{orderDate}</p>
+          <p>{formatDate(order.ngaydat)}</p>
         </div>
         <div>
           <h3 className="text-sm font-medium text-muted-foreground">Email</h3>

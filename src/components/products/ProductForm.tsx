@@ -506,7 +506,11 @@ export default function ProductForm({product}:{product: SanPham}) {
       bienThes: variants,
       mauSacs: selectedColors.flatMap(mauSac => mauSac.hinhAnhs),
     }
-
+    console.log(data)
+    if(data.giagiam && Number(data.giagiam) >= Number(data.giaban)){
+      toast.error("Giá giảm phải nhỏ hơn giá bán")
+      return
+    }
     // Submit based on mode
     if (isEditMode && productId) {
       updateMutation.mutate({ id: productId, data: productData })

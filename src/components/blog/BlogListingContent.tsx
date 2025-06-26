@@ -18,8 +18,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const sortOptions = [
-  { value: 'ngaydang-asc', label: 'Ngày: Mới nhất' },
-  { value: 'ngaydang-desc', label: 'Ngày: Cũ nhất' },
+  { value: 'ngaydang-desc', label: 'Ngày: Mới nhất' },
+  { value: 'ngaydang-asc', label: 'Ngày: Cũ nhất' },
   { value: 'tieude-asc', label: 'Tên: A-Z' },
   { value: 'tieude-desc', label: 'Tên: Z-A' },
   { value: 'soluotxem-asc', label: 'Lượt xem: Cao nhất' },
@@ -28,7 +28,7 @@ const sortOptions = [
 export function BlogListingContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGenre, setSelectedGenre] = useState<number | undefined>(0);
-  const [sortBy, setSortBy] = useState('ngaydang-asc');
+  const [sortBy, setSortBy] = useState('ngaydang-desc');
   const [sortField, sortOrder] = sortBy.split('-');
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 9;
