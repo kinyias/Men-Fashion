@@ -6,10 +6,30 @@ import { ProductTabSection } from '@/components/products/ProductTabSection';
 import SubCategoryFeature from '@/components/sub-category/SubCategoryFeature';
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import { dehydrate,HydrationBoundary, QueryClient } from '@tanstack/react-query';
+import { getProductsWithVariant } from '@/lib/api/api-products';
+
 export const revalidate = 86400;
-export default function HomePage() {
+export default async  function HomePage() {
+  const queryClient = new QueryClient();
+
+  // Fetch trước ở server
+  await queryClient.prefetchQuery({
+    queryKey: ['featured-products'],
+    queryFn: () => {
+      const params = {
+        page: 1,
+        limit: 10,
+        noibat: true,
+        trangthai: true,
+      };
+      return getProductsWithVariant(params);
+    },
+  });
+  
+  const dehydratedState = dehydrate(queryClient);
   return (
-    <>
+    <HydrationBoundary state={dehydratedState}>
       <HeroCarousel />
       <div className="container mx-auto">
         <section className="py-10">
@@ -59,6 +79,6 @@ export default function HomePage() {
         <BlogSection />
       </div>
         <NewsletterSection />
-    </>
+    </HydrationBoundary>
   );
 }

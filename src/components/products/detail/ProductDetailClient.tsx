@@ -1,7 +1,6 @@
 'use client';
 // import type { Metadata } from "next"
 import ProductDetail from '@/components/products/detail/ProductDetail';
-import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { getProductById } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -20,10 +19,9 @@ import {
 } from '@/components/ui/breadcrumb';
 import Link from 'next/link';
 import { ProductRelate } from '@/components/products/ProductRelate';
-import { Separator } from '@/components/ui/separator';  
-export default function ChiTietSanPhamPage() {
-  const params = useParams<{ id: string }>();
-  const productId = Number(params?.id?.split('-').pop());
+import { Separator } from '@/components/ui/separator';
+
+export default function ProductDetailClient({productId}: {productId: number}) {
   const {
     data: product,
     isLoading,
