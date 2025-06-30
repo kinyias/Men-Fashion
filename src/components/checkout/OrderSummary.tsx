@@ -311,7 +311,6 @@ export function OrderSummary({ cartItems, subtotal, shipping, total, appliedCoup
       <div className="bg-muted/30 p-6 rounded-b-lg border-t">
         <div className="text-xs text-muted-foreground space-y-2">
           <p>Dự kiến giao hàng: 3–5 ngày làm việc</p>
-          <p>Đổi trả miễn phí trong 30 ngày</p>
           <p>Thanh toán an toàn với mã hoá 256-bit</p>
         </div>
       </div>

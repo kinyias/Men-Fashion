@@ -302,31 +302,11 @@ export function OrdersTable({ searchQuery, statusFilter }: OrdersTableProps) {
                 </select>
               </div>
               <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setQueryParams(prev => ({ ...prev, page: prev.page - 1 }));
-                  }}
-                  disabled={pagination.page <= 1}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
                 <EllipsisPagination 
                   currentPage={queryParams.page}
                   totalPages={pagination.totalPages}
                   onPageChange={(page) => setQueryParams(prev => ({...prev, page }))}
                 />
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => {
-                    setQueryParams(prev => ({ ...prev, page: prev.page + 1 }));
-                  }}
-                  disabled={pagination.page >= pagination.totalPages}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
               </div>
             </div>
           </div>

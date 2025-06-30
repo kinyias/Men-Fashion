@@ -40,6 +40,7 @@ import type { ApiError, DonHang } from '@/types';
 import { formatCurrency } from '@/utils/currency';
 import { WriteReviewModal } from '@/components/reviews/WriteReviewModal';
 import { formatDate } from '@/utils/formatTime';
+import Link from 'next/link';
 
 const statusConfig = {
   da_dat: {
@@ -411,11 +412,12 @@ export default function OrderDetailPage() {
                     Hủy đơn hàng
                   </Button>
                 )}
-
+                <Link href="/lien-he">
                 <Button className="w-full" variant="outline">
                   <MessageCircle className="h-4 w-4 mr-2" />
                   Liên hệ hỗ trợ
                 </Button>
+                </Link>
               </CardContent>
             </Card>
 
