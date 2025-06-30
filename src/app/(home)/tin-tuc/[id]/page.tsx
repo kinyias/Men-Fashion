@@ -10,7 +10,6 @@ import {
   Calendar,
   Clock,
   ArrowLeft,
-  User,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -122,23 +121,6 @@ export default function BlogPostPage() {
             />
           )}
         </div>
-
-        {/* Author Info */}
-        {blog?.nguoiDung && (
-          <div className="flex items-center gap-4 mb-8">
-            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <User className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <p className="font-medium">
-                {blog.nguoiDung.ho} {blog.nguoiDung.ten}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {blog.nguoiDung.email}
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* Content */}
         <div className="prose prose-slate max-w-none mb-12">

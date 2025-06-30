@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ChevronLeft, ChevronRight, MoreHorizontal, Eye, ArrowUpDown, Loader2 } from "lucide-react"
+import { MoreHorizontal, Eye, ArrowUpDown, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { DonHang, TrangThaiDonHang } from "@/types"
 import { useQuery } from "@tanstack/react-query"

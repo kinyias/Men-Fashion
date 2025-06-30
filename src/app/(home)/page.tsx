@@ -6,7 +6,7 @@ import { ProductTabSection } from '@/components/products/ProductTabSection';
 import SubCategoryFeature from '@/components/sub-category/SubCategoryFeature';
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-
+export const revalidate = 86400;
 export default function HomePage() {
   return (
     <>

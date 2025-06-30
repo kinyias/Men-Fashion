@@ -19,6 +19,8 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import Link from 'next/link';
+import { ProductRelate } from '@/components/products/ProductRelate';
+import { Separator } from '@/components/ui/separator';
 
 export default function ChiTietSanPhamPage() {
   const params = useParams<{ id: string }>();
@@ -173,6 +175,9 @@ export default function ChiTietSanPhamPage() {
         </Breadcrumb>
       </div>
       <ProductDetail product={product} />
+      <Separator />
+      <h2 className="text-2xl font-bold">Sản phẩm liên quan</h2>
+      <ProductRelate product={product} />
     </div>
   );
 }
