@@ -34,7 +34,6 @@ export function ProductRelate({product}: {product: SanPhamWithRating}) {
           ))
         )
       }
-      console.log(products);
   const productList = products?.data.filter(p => p.ma !== product.ma) || []
   return (
     <Carousel
