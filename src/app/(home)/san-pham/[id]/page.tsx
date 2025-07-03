@@ -175,8 +175,8 @@ export default function ChiTietSanPhamPage() {
         </Breadcrumb>
       </div>
       <ProductDetail product={product} />
-      <Separator />
-      <h2 className="text-2xl font-bold">Sản phẩm liên quan</h2>
+      <Separator className="my-6" />
+      <h2 className="text-2xl font-bold mb-5">Sản phẩm liên quan</h2>
       <ProductRelate product={product} />
     </div>
   );

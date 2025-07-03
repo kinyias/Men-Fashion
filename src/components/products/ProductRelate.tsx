@@ -13,13 +13,28 @@ export function ProductRelate({product}: {product: SanPhamWithRating}) {
       const params: SanPhamQueryParams = {
         page: 1,
         limit: 6,
-        noibat: true,
         trangthai: true,
-        maloaisanpham: product.loaiSanPham?.ma
+        maloaisanpham: product.maloaisanpham
       }
       return getProductsWithVariant(params)
     }
   })
+  if(isLoading) {
+    return (
+          // Skeleton loading placeholders
+          Array.from({ length: 4 }).map((_, index) => (
+            <div key={`skeleton-${index}`} className="pl-2 md:pl-4 sm:basis-1/2 md:basis-1/3 lg:basis-1/4">
+              <div className="space-y-2">
+                <Skeleton className="aspect-square w-full h-64" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-4 w-1/4" />
+              </div>
+            </div>
+          ))
+        )
+      }
+      console.log(products);
   const productList = products?.data.filter(p => p.ma !== product.ma) || []
   return (
     <Carousel

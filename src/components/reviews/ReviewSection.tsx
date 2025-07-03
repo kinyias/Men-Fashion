@@ -99,9 +99,9 @@ export function ReviewsSection({ productId, averageRating, totalReviews }: Revie
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>Đánh giá sản phẩm</span>
-            {user && (
+            {/* {user && (
               <Button onClick={() => setShowWriteReview(true)}>Viết đánh giá</Button>
-            )}
+            )} */}
           </CardTitle>
         </CardHeader>
         <CardContent>
