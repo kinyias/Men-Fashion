@@ -63,7 +63,11 @@ export default function CheckoutPage() {
     if (cartProductsData?.data && cartItems.length > 0) {
       const updatedItems = cartItems.map((cartItem) => {
         const product = cartProductsData.data.find((p) => p.ma === cartItem.ma);
-        if (!product) return cartItem;
+        if (!product) {
+          toast.error(`Sản phẩm "${cartItem.ten}" đã ngừng kinh doanh`);
+          cartItem.soLuong = 0;
+          return cartItem;
+        }
 
         const variant = product.bienThes.find(
           (v) =>
