@@ -25,7 +25,11 @@ import {
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getOrderWithOrderItemsById, cancelOrder } from '@/lib/api/api-orders';
+import {
+  getOrderWithOrderItemsById,
+  cancelOrder,
+  repaymentOrder,
+} from '@/lib/api/api-orders';
 import {
   Dialog,
   DialogContent,
@@ -78,11 +82,12 @@ const statusConfig = {
 export default function OrderDetailPage() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
+  const [repaymentDialogOpen, setRepaymentDialogOpen] = useState(false);
   const params = useParams<{ id: string }>();
   const orderId = params?.id;
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [showWriteReview, setShowWriteReview] = useState(false)
+  const [showWriteReview, setShowWriteReview] = useState(false);
   const {
     data: order,
     isLoading,
@@ -114,10 +119,38 @@ export default function OrderDetailPage() {
     },
   });
 
+  const repaymentMutation = useMutation({
+    mutationFn: ({
+      id,
+      phuongthuc,
+    }: {
+      id: string;
+      phuongthuc: 'momo' | 'vnpay';
+    }) => repaymentOrder(id, phuongthuc),
+    onSuccess: (data) => {
+      // Redirect to payment URL
+      window.location.href = data.paymentUrl;
+      setRepaymentDialogOpen(false);
+    },
+    onError: (error: ApiError) => {
+      console.error('Error repaying order:', error);
+      toast.error(
+        error.response?.data?.message || 'Không thể thanh toán lại đơn hàng'
+      );
+    },
+  });
+
   const handleCancelOrder = () => {
     cancelOrderMutation.mutate({
       id: orderId,
       reason: cancelReason,
+    });
+  };
+
+  const handleRepayment = (phuongthuc: 'momo' | 'vnpay') => {
+    repaymentMutation.mutate({
+      id: orderId,
+      phuongthuc,
     });
   };
 
@@ -172,8 +205,7 @@ export default function OrderDetailPage() {
           <div>
             <h1 className="text-3xl font-bold">Đơn hàng #{order.ma}</h1>
             <p className="text-muted-foreground">
-              Đặt ngày{' '}
-              {formatDate(order.ngaydat)}
+              Đặt ngày {formatDate(order.ngaydat)}
             </p>
           </div>
         </div>
@@ -204,12 +236,8 @@ export default function OrderDetailPage() {
 
                   {order.mavandon && (
                     <div className="text-sm">
-                      <span className="font-medium">
-                        Mã vận đơn:{' '}
-                      </span>
-                      <span>
-                       {order.mavandon}
-                      </span>
+                      <span className="font-medium">Mã vận đơn: </span>
+                      <span>{order.mavandon}</span>
                     </div>
                   )}
                   {order.ngaygiao && (
@@ -217,9 +245,7 @@ export default function OrderDetailPage() {
                       <span className="font-medium">
                         Ngày giao hàng dự kiến:{' '}
                       </span>
-                      <span>
-                        {formatDate(order.ngaygiao)}
-                      </span>
+                      <span>{formatDate(order.ngaygiao)}</span>
                     </div>
                   )}
                 </div>
@@ -235,50 +261,54 @@ export default function OrderDetailPage() {
                 <div className="space-y-4">
                   {order.chiTietDonHangs.map((item) => (
                     <div key={item.ma} className="flex flex-col">
+                      <div className="flex flex-wrap items-center gap-4 p-4 border rounded-lg">
+                        <Image
+                          src={item.sanPham.hinhanh}
+                          alt={item.sanPham.ten}
+                          width={80}
+                          height={80}
+                          className="rounded-md object-cover"
+                        />
 
-                    <div
-                      className="flex flex-wrap items-center gap-4 p-4 border rounded-lg"
-                    >
-                      <Image
-                        src={item.sanPham.hinhanh}
-                        alt={item.sanPham.ten}
-                        width={80}
-                        height={80}
-                        className="rounded-md object-cover"
-                      />
-
-                      <div className="flex-1">
-                        <h4 className="font-medium">{item.sanPham.ten}</h4>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                          <span>Màu: {item.bienThe.mauSac.ten}</span>
-                          <span>Size: {item.bienThe.kichCo.ten}</span>
+                        <div className="flex-1">
+                          <Link href={`/san-pham/${item.sanPham.ma}`}>
+                            <h4 className="font-medium hover:text-primary transition-colors duration-300">
+                              {item.sanPham.ten}
+                            </h4>
+                          </Link>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                            <span>Màu: {item.bienThe.mauSac.ten}</span>
+                            <span>Size: {item.bienThe.kichCo.ten}</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Số lượng: {item.soluong}
+                          </p>
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Số lượng: {item.soluong}
-                        </p>
-                      </div>
 
-                      <div className="text-right w-full">
-                        <p className="font-medium">
-                          {formatCurrency(item.dongia)}
-                        </p>
+                        <div className="text-right w-full">
+                          <p className="font-medium">
+                            {formatCurrency(item.dongia)}
+                          </p>
+                        </div>
                       </div>
+                      {order.trangthai === 'da_giao_hang' && (
+                        <Button
+                          onClick={() => setShowWriteReview(true)}
+                          className="w-full"
+                          variant="default"
+                        >
+                          <Star className="h-4 w-4 mr-2" />
+                          Đánh giá sản phẩm
+                        </Button>
+                      )}
+                      {/* Write Review Modal */}
+                      {showWriteReview && (
+                        <WriteReviewModal
+                          productId={item.sanPham.ma}
+                          onClose={() => setShowWriteReview(false)}
+                        />
+                      )}
                     </div>
-                    {order.trangthai === 'da_giao_hang' && (
-                  <Button onClick={() => setShowWriteReview(true)} className="w-full" variant="default">
-                    <Star className="h-4 w-4 mr-2" />
-                    Đánh giá sản phẩm
-                  </Button>
-                )}
-                 {/* Write Review Modal */}
-                  {showWriteReview && (
-                    <WriteReviewModal
-                      productId={item.sanPham.ma}
-                      onClose={() => setShowWriteReview(false)}
-                    />
-                  )}
-                    </div>
-                    
                   ))}
                 </div>
               </CardContent>
@@ -306,23 +336,18 @@ export default function OrderDetailPage() {
                   <div className="flex justify-between">
                     <span>Giảm giá</span>
                     <span className="text-red-500">
-                      -
-                      {formatCurrency(order.giamgia)}
+                      -{formatCurrency(order.giamgia)}
                     </span>
                   </div>
                 )}
                 <div className="flex justify-between">
                   <span>Phí vận chuyển</span>
-                  <span>
-                    {formatCurrency(order.phigiaohang)}
-                  </span>
+                  <span>{formatCurrency(order.phigiaohang)}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between font-semibold text-lg">
                   <span>Tổng cộng</span>
-                  <span>
-                    {formatCurrency(order.tonggia)}
-                  </span>
+                  <span>{formatCurrency(order.tonggia)}</span>
                 </div>
               </CardContent>
             </Card>
@@ -382,11 +407,31 @@ export default function OrderDetailPage() {
                           : 'bg-yellow-100 text-yellow-800'
                       }
                     >
-                      {order.trangthai == 'da_huy' && order.thanhToans.phuongthuc != 'cod' ? 'Đã hoàn tiền' : order.thanhToans?.trangthai
+                      {order.trangthai == 'da_huy' &&
+                      order.thanhToans.phuongthuc != 'cod'
+                        ? 'Đã hoàn tiền'
+                        : order.thanhToans?.trangthai
                         ? 'Đã thanh toán'
                         : 'Chưa thanh toán'}
                     </Badge>
                   </div>
+                  {/* Add Repayment Button */}
+                  {order.thanhToans &&
+                    !order.thanhToans.trangthai &&
+                    order.trangthai !== 'da_huy' && (
+                      <Button
+                        className="w-full mt-2"
+                        onClick={() => setRepaymentDialogOpen(true)}
+                        disabled={repaymentMutation.isPending}
+                      >
+                        {repaymentMutation.isPending ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        ) : (
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                        )}
+                        Thanh toán lại
+                      </Button>
+                    )}
                 </div>
               </CardContent>
             </Card>
@@ -413,10 +458,10 @@ export default function OrderDetailPage() {
                   </Button>
                 )}
                 <Link href="/lien-he">
-                <Button className="w-full" variant="outline">
-                  <MessageCircle className="h-4 w-4 mr-2" />
-                  Liên hệ hỗ trợ
-                </Button>
+                  <Button className="w-full" variant="outline">
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Liên hệ hỗ trợ
+                  </Button>
                 </Link>
               </CardContent>
             </Card>
@@ -496,7 +541,57 @@ export default function OrderDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-     
+
+      {/* Add the repayment dialog */}
+      <Dialog open={repaymentDialogOpen} onOpenChange={setRepaymentDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Chọn phương thức thanh toán</DialogTitle>
+            <DialogDescription>
+              Vui lòng chọn phương thức thanh toán bạn muốn sử dụng.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <Button
+              onClick={() => handleRepayment('momo')}
+              className="w-full"
+              disabled={repaymentMutation.isPending}
+            >
+              <Image
+                src="/assets/momo.svg"
+                alt="MoMo"
+                width={24}
+                height={24}
+                className="mr-2"
+              />
+              Thanh toán qua MoMo
+            </Button>
+            <Button
+              onClick={() => handleRepayment('vnpay')}
+              className="w-full"
+              disabled={repaymentMutation.isPending}
+            >
+              <Image
+                src="/assets/vnpay.svg"
+                alt="VNPay"
+                width={24}
+                height={24}
+                className="mr-2"
+              />
+              Thanh toán qua VNPay
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setRepaymentDialogOpen(false)}
+              disabled={repaymentMutation.isPending}
+            >
+              Hủy bỏ
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

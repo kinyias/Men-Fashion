@@ -45,10 +45,17 @@ export const useCartStore = create<CartState>()(
           const existingItemIndex = state.items.findIndex(
             (i) => i.ma === item.ma && i.bienThe.mauSac.ma === item.bienThe.mauSac.ma && i.bienThe.kichCo.ma === item.bienThe.kichCo.ma,
           )
-          
+          if(item.soLuong > 10){
+            toast.error(`Nếu đặt số lượng sản phẩm lớn hơn 10, vui lòng liên hệ với cửa hàng để đặt hàng. Hotline: 0906.060.060`)
+            return state
+          }
           if (existingItemIndex >= 0) {
             // Update quantity if item exists
             const updatedItems = [...state.items]
+            if((item.soLuong + updatedItems[existingItemIndex].soLuong) > 10){
+              toast.error(`Nếu đặt số lượng sản phẩm lớn hơn 10, vui lòng liên hệ với cửa hàng để đặt hàng. Hotline: 0906.060.060`)
+              return state
+            }
             if(item.bienThe.soluong < (item.soLuong + updatedItems[existingItemIndex].soLuong)) {
               toast.error(`Số lượng sản phẩm không đủ. Chỉ còn lại ${item.bienThe.soluong} sản phẩm`)
               return state
@@ -70,6 +77,10 @@ export const useCartStore = create<CartState>()(
         set((state) => ({
           items: state.items.map((item) => {
             if (item.ma === Number(itemId) && item.bienThe.mauSac.ma === mamausac && item.bienThe.kichCo.ma === makichco) {
+              if(quantity > 10){
+                toast.error(`Nếu đặt số lượng sản phẩm lớn hơn 10, vui lòng liên hệ với cửa hàng để đặt hàng. Hotline: 0906.060.060`)
+                return {...item}
+              }
               if(item.bienThe.soluong < quantity) {
                 toast.error(`Số lượng sản phẩm không đủ. Chỉ còn lại ${item.bienThe.soluong} sản phẩm`)
                 return {...item}

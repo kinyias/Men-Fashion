@@ -1,5 +1,11 @@
 import api from '@/lib/axios-client';
-import { CancelOrderResponse, DonHang, DonHangFormValues, DonHangQueryParams, DonHangResponse } from '@/types';
+import {
+  CancelOrderResponse,
+  DonHang,
+  DonHangFormValues,
+  DonHangQueryParams,
+  DonHangResponse,
+} from '@/types';
 
 export const getOrders = async (
   queryParams: DonHangQueryParams
@@ -11,13 +17,16 @@ export const getOrders = async (
   if (queryParams.trangthai) params.append('trangthai', queryParams.trangthai);
   if (queryParams.startDate) params.append('startDate', queryParams.startDate);
   if (queryParams.endDate) params.append('endDate', queryParams.endDate);
-  if (queryParams.manguoidung) params.append('manguoidung', queryParams.manguoidung.toString());
+  if (queryParams.manguoidung)
+    params.append('manguoidung', queryParams.manguoidung.toString());
 
   const response = await api.get(`/api/donhang?${params.toString()}`);
   return response.data;
 };
 
-export const getOrderWithOrderItemsById = async (id: string): Promise<DonHang> => {
+export const getOrderWithOrderItemsById = async (
+  id: string
+): Promise<DonHang> => {
   const response = await api.get(`/api/donhang/${id}`);
   return response.data;
 };
@@ -38,7 +47,9 @@ export const getMyOrders = async (
   return response.data;
 };
 
-export const createOrder = async (data: DonHangFormValues): Promise<DonHang> => {
+export const createOrder = async (
+  data: DonHangFormValues
+): Promise<DonHang> => {
   const response = await api.post('/api/donhang', data);
   return response.data.donHang;
 };
@@ -49,11 +60,18 @@ export const updateOrderStatus = async (
   mavandon?: string,
   ngaygiao?: string
 ): Promise<DonHang> => {
-  const response = await api.patch(`/api/donhang/${id}/status`, { trangthai, ngaygiao, mavandon });
+  const response = await api.patch(`/api/donhang/${id}/status`, {
+    trangthai,
+    ngaygiao,
+    mavandon,
+  });
   return response.data.donHang;
 };
 
-export const cancelOrder = async (id: string, lydo?: string): Promise<CancelOrderResponse> => {
+export const cancelOrder = async (
+  id: string,
+  lydo?: string
+): Promise<CancelOrderResponse> => {
   const response = await api.post(`/api/donhang/${id}/cancel`, { lydo });
   return response.data;
 };
@@ -62,6 +80,22 @@ export const updatePaymentStatus = async (
   id: number,
   trangthai: boolean
 ): Promise<{ message: string }> => {
-  const response = await api.patch(`/api/donhang/thanhtoan/${id}`, { trangthai });
+  const response = await api.patch(`/api/donhang/thanhtoan/${id}`, {
+    trangthai,
+  });
+  return response.data;
+};
+
+export const repaymentOrder = async (
+  id: string,
+  phuongthuc: 'momo' | 'vnpay'
+): Promise<{
+  message: string;
+  paymentUrl: string;
+  paymentMethod: string;
+}> => {
+  const response = await api.post(`/api/donhang/${id}/repayment`, {
+    phuongthuc,
+  });
   return response.data;
 };

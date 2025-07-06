@@ -268,9 +268,9 @@ const getMainImage = () => {
                   <ShoppingCart className="w-4 h-4 mr-2" />
                   Thêm vào giỏ hàng
                 </Button>
-                <Button variant="secondary" size="lg">
+                {/* <Button variant="secondary" size="lg">
                   Mua ngay
-                </Button>
+                </Button> */}
                
               </div>
             </div>
