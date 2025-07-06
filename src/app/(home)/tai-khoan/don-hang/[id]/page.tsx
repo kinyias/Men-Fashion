@@ -417,6 +417,7 @@ export default function OrderDetailPage() {
                   </div>
                   {/* Add Repayment Button */}
                   {order.thanhToans &&
+                    order.thanhToans.phuongthuc !== 'cod' &&
                     !order.thanhToans.trangthai &&
                     order.trangthai !== 'da_huy' && (
                       <Button
