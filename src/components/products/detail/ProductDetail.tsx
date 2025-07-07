@@ -256,6 +256,7 @@ const getMainImage = () => {
                   <Button
                     variant="outline"
                     size="icon"
+                    disabled={quantity >= getSelectedVariant().soluong || quantity >=10}
                     onClick={() => handleQuantityChange(1)}
                   >
                     <Plus className="w-4 h-4" />
