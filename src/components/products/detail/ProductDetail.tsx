@@ -15,9 +15,11 @@ import { BienThe, MauSac, SanPhamWithRating } from "@/types"
 import { ReviewsSection } from "../../reviews/ReviewSection"
 import { MySizeAssistSidebar } from "./MySizeAssistSideBar"
 import { useProductSeenStore } from "@/lib/store/product-seen-store"
+import { useRouter } from "next/navigation"
 interface SizeWithAvailability{ ma: number; ten: string, available: boolean }
 interface MauSacWithAvailability extends MauSac{ available: boolean }
 export default function ProductDetail({product}:{product: SanPhamWithRating}) {
+  const router = useRouter()
   const { addSeenProduct } = useProductSeenStore()
 
     // Get unique colors from variants
@@ -78,6 +80,10 @@ export default function ProductDetail({product}:{product: SanPhamWithRating}) {
         soLuong: quantity,
         hinhAnh: getMainImage() || "/placeholder.svg",
       })
+  }
+  const handleBuyNow = () => {
+    handleAddToCart()
+    router.push("/thanh-toan")
   }
   const handleQuantityChange = (delta: number) => {
     const newQuantity = quantity + delta
@@ -269,9 +275,9 @@ const getMainImage = () => {
                   <ShoppingCart className="w-4 h-4 mr-2" />
                   Thêm vào giỏ hàng
                 </Button>
-                {/* <Button variant="secondary" size="lg">
+                <Button variant="secondary" size="lg" onClick={handleBuyNow}>
                   Mua ngay
-                </Button> */}
+                </Button>
                
               </div>
             </div>
