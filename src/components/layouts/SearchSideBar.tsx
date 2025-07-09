@@ -12,6 +12,7 @@ import { formatCurrency } from '@/utils/currency';
 import { advancedSearchProducts } from '@/lib/api/api-products';
 import { useQuery } from '@tanstack/react-query';
 import { toSlug } from '@/utils/slug';
+import { cn } from '@/lib/utils';
 
 interface SearchSidebarProps {
   isOpen: boolean;
@@ -181,14 +182,14 @@ export function SearchSidebar({ isOpen, onClose }: SearchSidebarProps) {
                           )}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
-                        <p className="font-bold text-sm">
-                          {formatCurrency(product.giaban)}
-                        </p>
                         {product.giagiam && (
-                          <p className="text-sm text-muted-foreground line-through">
+                          <p className="text-sm font-bold">
                             {formatCurrency(product.giagiam)}
                           </p>
                         )}
+                        <p className={cn("font-bold text-sm", product.giagiam ? "text-muted-foreground line-through" : "font-normal")}>
+                          {formatCurrency(product.giaban)}
+                        </p>
                       </div>
                     </div>
                   </Link>
