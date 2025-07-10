@@ -156,3 +156,18 @@ export const getCartProducts = async (
   const response = await api.post('/api/sanpham/cart-products', { items });
   return response.data;
 };
+
+// Toggle product field (trangthai/noibat)
+export const toggleProductField = async (
+  id: number,
+  field: 'trangthai' | 'noibat',
+  value: boolean
+): Promise<SanPham> => {
+
+  // Toggle the value
+  const response = await api.patch(`/api/sanpham/${id}/toggle`, {
+    field,
+    value: !value,
+  });
+  return response.data.sanPham;
+};

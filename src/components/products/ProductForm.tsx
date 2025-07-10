@@ -142,7 +142,6 @@ export default function ProductForm({product}:{product: SanPham}) {
       mathuonghieu: product?.mathuonghieu.toString() || "",
     },
   })
-
   // Load product data into form when in edit mode
   useEffect(() => {
     if (product && isEditMode) {

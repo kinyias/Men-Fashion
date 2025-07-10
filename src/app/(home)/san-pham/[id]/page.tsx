@@ -115,7 +115,7 @@ export default function ChiTietSanPhamPage() {
       </div>
     );
   }
-  if (isError || !product) {
+  if (isError || !product || !product.trangthai) {
     return (
       <div className="container px-4 py-16 mx-auto">
         <div className="mb-6">

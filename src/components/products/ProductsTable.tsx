@@ -62,6 +62,7 @@ import {
   deleteProduct,
   deleteManyProducts,
   getProducts,
+  toggleProductField as apiToggleProductField,
 } from '@/lib/api/api-products';
 import EllipsisPagination from '../ui/EllipsisPagination';
 import axios from 'axios';
@@ -170,6 +171,39 @@ export function ProductsTable() {
       toast.error('Xóa sản phẩm hàng loạt thất bại');
     },
   });
+
+  // Add toggle mutation
+  const toggleMutation = useMutation({
+    mutationFn: async ({
+      id,
+      field,
+      value,
+    }: {
+      id: number;
+      field: 'trangthai' | 'noibat';
+      value: boolean;
+    }) => {
+      const product = products.find((p) => p.ma === id);
+      if (!product) return toast.error('Không tìm thấy sản phẩm');
+      return apiToggleProductField(id, field, value);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      toast.success('Cập nhật trạng thái thành công');
+    },
+    onError: (error) => {
+      console.error('Error toggling product field:', error);
+      toast.error('Cập nhật trạng thái thất bại');
+    },
+  });
+
+  const toggleProductField = (
+    id: number,
+    field: 'trangthai' | 'noibat',
+    value: boolean
+  ) => {
+    toggleMutation.mutate({ id, field, value });
+  };
 
   const getImageKey = (src: string) => src.substring(src.lastIndexOf('/') + 1);
 
@@ -307,6 +341,26 @@ export function ProductsTable() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Hành động</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => {
+                      toggleProductField(product.ma, 'trangthai', product.trangthai);
+                    }}
+                  >
+                    {product.trangthai ? 'Ẩn' : 'Hiện'}
+                  </div>
+                </DropdownMenuItem>
+                {/* <DropdownMenuItem asChild>
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => {
+                      toggleProductField(product.ma, 'noibat');
+                    }}
+                  >
+                    {product.noibat ? 'Bỏ nổi bật' : 'Thêm nổi bật'}
+                  </div>
+                </DropdownMenuItem> */}
                 <DropdownMenuItem asChild>
                   <Link
                     className="cursor-pointer"
