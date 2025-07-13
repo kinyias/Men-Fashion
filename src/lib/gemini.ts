@@ -159,3 +159,27 @@ Chỉ trả về JSON, không thêm text khác.`;
     throw new Error('Failed to analyze size. Please try again.');
   }
 };
+export interface RatingCheckResponse {
+  isAppropriate: boolean;
+  message: string;
+}
+export const checkRatingWithGemini = async (text: string): Promise<RatingCheckResponse> => {
+  try {
+    const model = getGemini2Model();
+    const prompt = `Hãy kiểm tra đoạn văn sau đây có phù hợp với thuần phong mỹ tục của Việt Nam và không chứa nội dung tục tĩu, phản cảm hay vi phạm đạo đức hay văn hóa không. Nếu phù hợp, trả về kết quả:
+    { "isAppropriate": true, "message": lý do phù hợp }
+     Nếu không phù hợp, trả về:
+     { "isAppropriate": false, "message": lý do không phù hợp cụ thể từ ngữ nào }
+      Đây là đoạn văn cần kiểm tra:
+      """${text}"""
+    Chỉ trả về JSON, không thêm text khác.`;
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const textResponse = await response.text();
+    const cleaned = textResponse.replace(/```json|```/g, '').trim();
+    return JSON.parse(cleaned) as RatingCheckResponse;
+  } catch (error) {
+    console.error('Error checking rating with Gemini:', error);
+    throw new Error('Failed to check rating. Please try again.');
+  }
+};
