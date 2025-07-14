@@ -273,9 +273,10 @@ export default function SubcategoryPage() {
             <div className="h-[calc(100vh-10rem)] overflow-y-auto py-4">
               <ProductFilters
                 filters={filters}
-                onFiltersChange={(filters) =>
-                  setFilters((prev) => ({ ...prev, ...filters }))
-                }
+                onFiltersChange={(filters) => {
+                  setFilters((prev) => ({ ...prev, ...filters }));
+                  setPagination((prev) => ({ ...prev, page: 1 }));
+                }}
                 onClearAll={() => {
                   setFilters({
                     searchQuery: '',

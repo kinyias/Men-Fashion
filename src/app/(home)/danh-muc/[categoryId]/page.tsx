@@ -198,7 +198,10 @@ export default function CategoryPage() {
         <aside className="hidden lg:block w-64 flex-shrink-0">
           <ProductFilters
             filters={filters}
-            onFiltersChange={(filters) => setFilters(prev => ({ ...prev, ...filters }))}
+            onFiltersChange={(filters) => {
+              setFilters(prev => ({ ...prev, ...filters }));
+              setPagination(prev => ({ ...prev, page: 1 }));
+            }}
             onClearAll={() => {
               setFilters({
                 searchQuery: "",
