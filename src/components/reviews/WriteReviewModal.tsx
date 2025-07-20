@@ -111,8 +111,8 @@ export function WriteReviewModal({
       const formData = new FormData();
       formData.append('file', file);
 
-      // Upload to Imgur API
-      const response = await fetch('/api/imgur', {
+      // Upload to Imgur APIs
+      const response = await fetch('/api/cloudinary', {
         method: 'POST',
         body: formData,
       });
@@ -125,7 +125,7 @@ export function WriteReviewModal({
       const data = await response.json();
 
       // Set the single image URL
-      setImageUrl(data.url);
+      setImageUrl(data.secure_url);
       toast.dismiss();
       toast.success('Tải ảnh lên thành công');
     } catch (error) {
@@ -169,7 +169,7 @@ export function WriteReviewModal({
   };
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
+    <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Viết đánh giá</DialogTitle>

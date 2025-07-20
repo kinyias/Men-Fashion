@@ -87,7 +87,7 @@ export default function OrderDetailPage() {
   const orderId = params?.id;
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [showWriteReview, setShowWriteReview] = useState(false);
+  const [reviewProductId, setReviewProductId] = useState<number | null>(null);
   const {
     data: order,
     isLoading,
@@ -293,7 +293,7 @@ export default function OrderDetailPage() {
                       </div>
                       {order.trangthai === 'da_giao_hang' && (
                         <Button
-                          onClick={() => setShowWriteReview(true)}
+                          onClick={() => setReviewProductId(item.sanPham.ma)}
                           className="w-full"
                           variant="default"
                         >
@@ -302,10 +302,10 @@ export default function OrderDetailPage() {
                         </Button>
                       )}
                       {/* Write Review Modal */}
-                      {showWriteReview && (
+                      {reviewProductId === item.sanPham.ma && (
                         <WriteReviewModal
                           productId={item.sanPham.ma}
-                          onClose={() => setShowWriteReview(false)}
+                          onClose={() => setReviewProductId(null)}
                         />
                       )}
                     </div>

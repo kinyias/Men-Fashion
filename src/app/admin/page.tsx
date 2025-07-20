@@ -15,7 +15,7 @@ export default function DashboardPage() {
             <h1 className="text-2xl font-bold tracking-tight">Tổng quan</h1>
             <TabsList>
               <TabsTrigger className="cursor-pointer" value="overview">Tổng quan</TabsTrigger>
-              <TabsTrigger className="cursor-pointer" value="analytics">Phân tích</TabsTrigger>
+              {/* <TabsTrigger className="cursor-pointer" value="analytics">Phân tích</TabsTrigger> */}
             </TabsList>
           </div>
           <TabsContent value="overview" className="space-y-4">
