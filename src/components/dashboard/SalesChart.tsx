@@ -4,7 +4,6 @@ import { useState } from 'react';
 import {
   getMonthlyRevenue,
   getDetailedRevenueReport,
-  getRevenueByYear,
 } from '@/lib/api/api-report';
 import { formatCurrency } from '@/utils/currency';
 import { useQuery } from '@tanstack/react-query';
