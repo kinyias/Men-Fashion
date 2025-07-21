@@ -6,7 +6,6 @@ export interface DashboardStats {
 }
 
 export interface MonthlyRevenue {
-  // Array of 12 numbers representing revenue for each month
   data: number[];
 }
 
@@ -32,3 +31,10 @@ export interface FeaturedProduct {
     ten: string;
   };
 }
+
+export interface RevenueReport {
+  date: string;
+  revenue: number;
+}
+
+export type RevenueGroupBy = 'day' | 'week' | 'month';
