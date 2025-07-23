@@ -162,7 +162,6 @@ export default function CheckoutPage() {
         ? updatedCartItems
         : cartItems
       ).map((item) => ({
-        masp: item.ma,
         soluong: item.soLuong,
         dongia: item.gia,
         mabienthe: item.bienThe.ma,

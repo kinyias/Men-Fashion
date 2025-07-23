@@ -37,17 +37,16 @@ export interface ChiTietDonHang {
   ma: number;
   soluong: number;
   dongia: number;
-  masp: number;
   madh: string;
   mabienthe: number;
-  sanPham: {
-    ma: number;
-    ten: string;
-    hinhanh: string;
-  };
   bienThe: {
     mauSac: MauSac;
     kichCo: KichCo;
+    sanPham: {
+      ma: number;
+      ten: string;
+      hinhanh: string;
+    };
   };
 }
 
@@ -105,7 +104,6 @@ export interface DonHangFormValues {
   phigiaohang: number;
   phuongthucgiaohang: string;
   chiTietDonHangs: {
-    masp: number;
     mabienthe: number;
     soluong: number;
     dongia: number;

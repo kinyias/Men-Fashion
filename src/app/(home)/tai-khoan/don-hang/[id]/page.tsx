@@ -263,17 +263,17 @@ export default function OrderDetailPage() {
                     <div key={item.ma} className="flex flex-col">
                       <div className="flex flex-wrap items-center gap-4 p-4 border rounded-lg">
                         <Image
-                          src={item.sanPham.hinhanh}
-                          alt={item.sanPham.ten}
+                          src={item.bienThe.sanPham.hinhanh}
+                          alt={item.bienThe.sanPham.ten}
                           width={80}
                           height={80}
                           className="rounded-md object-cover"
                         />
 
                         <div className="flex-1">
-                          <Link href={`/san-pham/${item.sanPham.ma}`}>
+                          <Link href={`/san-pham/${item.bienThe.sanPham.ma}`}>
                             <h4 className="font-medium hover:text-primary transition-colors duration-300">
-                              {item.sanPham.ten}
+                              {item.bienThe.sanPham.ten}
                             </h4>
                           </Link>
                           <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
@@ -293,7 +293,9 @@ export default function OrderDetailPage() {
                       </div>
                       {order.trangthai === 'da_giao_hang' && (
                         <Button
-                          onClick={() => setReviewProductId(item.sanPham.ma)}
+                          onClick={() =>
+                            setReviewProductId(item.bienThe.sanPham.ma)
+                          }
                           className="w-full"
                           variant="default"
                         >
@@ -302,9 +304,9 @@ export default function OrderDetailPage() {
                         </Button>
                       )}
                       {/* Write Review Modal */}
-                      {reviewProductId === item.sanPham.ma && (
+                      {reviewProductId === item.bienThe.sanPham.ma && (
                         <WriteReviewModal
-                          productId={item.sanPham.ma}
+                          productId={item.bienThe.sanPham.ma}
                           onClose={() => setReviewProductId(null)}
                         />
                       )}

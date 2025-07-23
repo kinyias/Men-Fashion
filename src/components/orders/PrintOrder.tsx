@@ -134,7 +134,7 @@ export const PrintOrder = forwardRef<HTMLDivElement, PrintOrderProps>(({ order }
                         className="object-cover rounded"
                       />
                     </div> */}
-                    <span>{item.sanPham.ten}</span>
+                    <span>{item.bienThe.sanPham.ten}</span>
                   </div>
                 </td>
                 <td className="border border-gray-300 px-4 py-2 text-center">{item.soluong}</td>

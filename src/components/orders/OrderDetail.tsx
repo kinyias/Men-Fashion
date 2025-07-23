@@ -116,7 +116,7 @@ export function OrderDetails({ order }: { order: DonHang }) {
           MONEY_TOTALVAT: 0,
           MONEY_TOTAL: 0,
           LIST_ITEM: order.chiTietDonHangs.map((item: ChiTietDonHang) => ({
-            PRODUCT_NAME: item.sanPham.ten,
+            PRODUCT_NAME: item.bienThe.sanPham.ten,
             PRODUCT_PRICE: item.dongia,
             PRODUCT_WEIGHT: 200,
             PRODUCT_QUANTITY: item.soluong,
@@ -204,15 +204,15 @@ export function OrderDetails({ order }: { order: DonHang }) {
               <div key={item.ma} className="flex items-center gap-4">
                 <div className="h-12 w-12 rounded-md overflow-hidden flex-shrink-0">
                   <Image
-                    src={item.sanPham.hinhanh || '/placeholder.svg'}
-                    alt={item.sanPham.ten}
+                    src={item.bienThe.sanPham.hinhanh || '/placeholder.svg'}
+                    alt={item.bienThe.sanPham.ten}
                     width={48}
                     height={48}
                     className="object-cover"
                   />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{item.sanPham.ten}</p>
+                  <p className="font-medium truncate">{item.bienThe.sanPham.ten}</p>
                   <p className="text-sm text-muted-foreground">
                     {item.bienThe?.mauSac?.ten} / {item.bienThe?.kichCo?.ten}
                   </p>

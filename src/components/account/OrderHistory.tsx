@@ -110,7 +110,7 @@ export function OrderHistory() {
     const matchesSearch =
       order.ma.toString().includes(searchTerm.toLowerCase()) ||
       order.chiTietDonHangs.some((item) =>
-        item.sanPham.ten.toLowerCase().includes(searchTerm.toLowerCase())
+        item.bienThe.sanPham.ten.toLowerCase().includes(searchTerm.toLowerCase())
       );
     return matchesSearch;
   });
@@ -201,10 +201,10 @@ export function OrderHistory() {
                         <div className="relative h-16 w-16 rounded-lg overflow-hidden border">
                           <Image
                             src={
-                              order.chiTietDonHangs[0]?.sanPham.hinhanh ||
+                              order.chiTietDonHangs[0]?.bienThe.sanPham.hinhanh ||
                               '/placeholder.svg'
                             }
-                            alt={order.chiTietDonHangs[0]?.sanPham.ten}
+                            alt={order.chiTietDonHangs[0]?.bienThe.sanPham.ten}
                             className="object-cover w-full h-full"
                             width={64}
                             height={64}
@@ -217,7 +217,7 @@ export function OrderHistory() {
                           </p>
                           <div className="mt-1">
                             <p className="text-sm font-medium line-clamp-1">
-                              {order.chiTietDonHangs[0]?.sanPham.ten}
+                              {order.chiTietDonHangs[0]?.bienThe.sanPham.ten}
                               {order.chiTietDonHangs.length > 1 &&
                                 ` và ${
                                   order.chiTietDonHangs.length - 1

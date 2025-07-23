@@ -68,7 +68,7 @@ export function RecentOrders() {
             <div>
               <p className="text-sm font-medium leading-none">{order.ten}</p>
               <p className="text-sm text-muted-foreground">
-                {order.chiTietDonHangs[0].sanPham.ten}
+                {order.chiTietDonHangs[0].bienThe.sanPham.ten}
               </p>
             </div>
           </div>
