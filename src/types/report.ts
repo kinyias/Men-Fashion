@@ -38,3 +38,8 @@ export interface RevenueReport {
 }
 
 export type RevenueGroupBy = 'day' | 'week' | 'month';
+
+export interface OrdersByStatus {
+  status: string;
+  count: number;
+}

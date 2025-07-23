@@ -5,6 +5,7 @@ import {
   CustomerStats,
   FeaturedProduct,
   RevenueReport,
+  OrdersByStatus,
 } from '@/types/report';
 
 // Get dashboard statistics
@@ -98,5 +99,10 @@ export const getDetailedRevenueReport = async (
   const response = await api.get(
     `/api/report/revenue/report?${params.toString()}`
   );
+  return response.data;
+};
+
+export const getOrdersByStatus = async (): Promise<OrdersByStatus[]> => {
+  const response = await api.get('/api/report/orders-by-status');
   return response.data;
 };
