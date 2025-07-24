@@ -110,9 +110,9 @@ export function SubCategoryTable() {
       toast.success(`Đã xóa loại sản phẩm thành công`)
       setOpen(false)
     },
-    onError: (error) => {
+    onError: (error:ApiError) => {
       console.error("Error deleting sub-category:", error)
-      toast.error('Xóa loại sản phẩm thất bại')
+      toast.error(`Xóa loại sản phẩm thất bại! ${error.response.data.message}` )
     }
   })
   

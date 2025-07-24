@@ -82,7 +82,7 @@ export const handleImageUpload = async (
         reject(new Error('Upload cancelled'));
       };
 
-      xhr.open('POST', '/api/imgur', true);
+      xhr.open('POST', '/api/cloudinary', true);
       xhr.send(formData);
     });
 

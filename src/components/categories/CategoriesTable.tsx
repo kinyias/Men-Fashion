@@ -31,7 +31,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "../ui/input"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog"
 import toast from "react-hot-toast"
-import { DanhMuc, DanhMucQueryParams } from "@/types"
+import { ApiError, DanhMuc, DanhMucQueryParams } from "@/types"
 import { deleteCategory, deleteManyCategories, getCategories } from "@/lib/api/api-categories"
 import EllipsisPagination from "../ui/EllipsisPagination"
 
@@ -95,9 +95,9 @@ export function CategoriesTable() {
       toast.success(`Đã xóa danh mục thành công`)
       setOpen(false)
     },
-    onError: (error) => {
+    onError: (error: ApiError) => {
       console.error("Error deleting category:", error)
-      toast.error('Xóa danh mục thất bại')
+      toast.error(`Xóa danh mục thất bại! ${error.response.data.message}`)
     }
   })
   

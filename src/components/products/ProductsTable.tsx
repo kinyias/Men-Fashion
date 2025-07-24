@@ -67,6 +67,7 @@ import {
 import EllipsisPagination from '../ui/EllipsisPagination';
 import axios from 'axios';
 import { toSlug } from '@/utils/slug';
+import { ApiError } from '@/types';
 
 export function ProductsTable() {
   const queryClient = useQueryClient();
@@ -139,9 +140,9 @@ export function ProductsTable() {
       toast.success(`Đã xóa sản phẩm thành công`);
       setOpen(false);
     },
-    onError: (error) => {
+    onError: (error:ApiError) => {
       console.error('Error deleting product:', error);
-      toast.error('Xóa sản phẩm thất bại');
+      toast.error(`Xóa sản phẩm thất bại! ${error.response.data.message}`);
     },
   });
 
@@ -166,9 +167,9 @@ export function ProductsTable() {
       setBulkDeleteOpen(false);
       setRowSelection({});
     },
-    onError: (error) => {
+    onError: (error:ApiError) => {
       console.error('Error bulk deleting products:', error);
-      toast.error('Xóa sản phẩm hàng loạt thất bại');
+      toast.error(`Xóa sản phẩm hàng loạt thất bại! ${error.response.data.message}`);
     },
   });
 

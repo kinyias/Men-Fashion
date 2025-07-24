@@ -31,7 +31,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "../ui/input"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog"
 import toast from "react-hot-toast"
-import { ThuongHieu, ThuongHieuQueryParams } from "@/types"
+import { ApiError, ThuongHieu, ThuongHieuQueryParams } from "@/types"
 import { deleteBrand, deleteManyBrands, getBrands } from "@/lib/api/api-brands"
 import EllipsisPagination from "../ui/EllipsisPagination"
 
@@ -96,9 +96,9 @@ export function BrandTable() {
       toast.success(`Đã xóa thương hiệu thành công`)
       setOpen(false)
     },
-    onError: (error) => {
+    onError: (error:ApiError) => {
       console.error("Error deleting brand:", error)
-      toast.error('Xóa thương hiệu thất bại')
+      toast.error(`Xóa thương hiệu thất bại! ${error.response.data.message}`) 
     }
   })
   

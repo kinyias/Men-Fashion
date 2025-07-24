@@ -157,6 +157,7 @@ export default function CheckoutPage() {
       tonggia: total,
       tamtinh: subtotal,
       giamgia: getDiscount(appliedCoupon!),
+      maKhuyenMai: appliedCoupon?.ma || undefined,
       phigiaohang: shipping || 0,
       chiTietDonHangs: (updatedCartItems.length > 0
         ? updatedCartItems
