@@ -99,3 +99,31 @@ export const repaymentOrder = async (
   });
   return response.data;
 };
+
+export const getMoMoTransactionStatus = async (
+  orderId: string
+): Promise<{
+  success: boolean;
+  message: string;
+  data?: {
+    orderId: string;
+    requestId: string;
+    amount: number;
+    transId: string;
+    payType: string;
+    refundTrans: {
+      orderId: string;
+      amount: number;
+      resultCode: number;
+      transId: number;
+      createdTime: number;
+    }[];
+    resultCode: number;
+    message: string;
+    orderStatus: string;
+  };
+  error?: any;
+}> => {
+  const response = await api.get(`/api/donhang/payment/momo/status/${orderId}`);
+  return response.data;
+};

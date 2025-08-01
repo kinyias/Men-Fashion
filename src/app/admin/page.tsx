@@ -24,7 +24,7 @@ export default function DashboardPage() {
               <Card className="col-span-4">
                 <CardHeader>
                   <CardTitle>Tổng quan đơn hàng</CardTitle>
-                  <CardDescription>Doanh thu trong 12 tháng qua</CardDescription>
+                  <CardDescription>Doanh thu</CardDescription>
                 </CardHeader>
                 <CardContent className="pl-2">
                   <SalesChart />
@@ -33,7 +33,7 @@ export default function DashboardPage() {
               <Card className="col-span-3">
                 <CardHeader>
                   <CardTitle>Đơn hàng gần đây</CardTitle>
-                  <CardDescription>Có 50 đơn hàng trong tháng này</CardDescription>
+                  <CardDescription>Đơn hàng trong gần đây</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <RecentOrders />

@@ -159,11 +159,58 @@ Chỉ trả về JSON, không thêm text khác.`;
     throw new Error('Failed to analyze size. Please try again.');
   }
 };
+
+export const generateReportWithGemini = async (
+  chartData: any[],
+  viewType: 'year' | 'range',
+  selectedYear: number,
+  dateRange: { from: Date | undefined; to: Date | undefined },
+  groupBy: string
+): Promise<string> => {
+  try {
+    const model = getGemini2Model();
+    let prompt = `Bạn là một nhà phân tích kinh doanh chuyên nghiệp. Dưới đây là dữ liệu doanh thu, hãy viết một **báo cáo phân tích doanh thu chi tiết** với bố cục sau:
+
+1. **Tiêu đề báo cáo**
+2. **Tóm tắt tổng quan**
+3. **Phân tích xu hướng doanh thu**
+4. **Đánh giá hiệu suất kinh doanh**
+5. **Đề xuất các hành động cải thiện hiệu suất**
+
+`;
+
+    if (viewType === 'year') {
+      prompt += `Báo cáo doanh thu năm ${selectedYear}:
+`;
+    } else {
+      prompt += `Báo cáo doanh thu từ ${dateRange.from} đến ${dateRange.to}, nhóm theo ${groupBy}:
+`;
+    }
+
+    prompt += `Dữ liệu doanh thu:
+${JSON.stringify(chartData, null, 2)}
+
+`;
+
+    prompt += `Vui lòng chỉ trả về báo cáo, không thêm bất kỳ văn bản giải thích nào khác.`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+    return text;
+  } catch (error) {
+    console.error('Error generating report with Gemini:', error);
+    throw new Error('Failed to generate report. Please try again.');
+  }
+};
+
 export interface RatingCheckResponse {
   isAppropriate: boolean;
   message: string;
 }
-export const checkRatingWithGemini = async (text: string): Promise<RatingCheckResponse> => {
+export const checkRatingWithGemini = async (
+  text: string
+): Promise<RatingCheckResponse> => {
   try {
     const model = getGemini2Model();
     const prompt = `Hãy kiểm tra đoạn văn sau đây có phù hợp với thuần phong mỹ tục của Việt Nam và không chứa nội dung tục tĩu, phản cảm hay vi phạm đạo đức hay văn hóa không. Nếu phù hợp, trả về kết quả:
