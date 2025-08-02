@@ -264,7 +264,7 @@ export function OrderDetails({ order }: { order: DonHang }) {
               <p className="text-sm">
                 {order.thanhToans.phuongthuc === 'cod'
                   ? 'Thanh toán khi nhận hàng (COD)'
-                  : 'Thanh toán qua MoMo'}
+                  : order.thanhToans.phuongthuc === 'momo' ? 'Thanh toán qua MoMo' : 'Thanh toán qua VNpay'}
               </p>
             </div>
 
