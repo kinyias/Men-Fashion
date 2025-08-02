@@ -20,7 +20,7 @@ export function MySizeAssistSidebar({
 }: MySizeAssistSidebarProps) {
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
-  const [bodyType, setBodyType] = useState('');
+  const [bodyType, setBodyType] = useState('regular');
   const [isLoading, setIsLoading] = useState(false);
   const [analysisResult, setAnalysisResult] =
     useState<SizeAnalysisResult | null>(null);

@@ -26,7 +26,11 @@ export default function CheckoutPage() {
       price: number;
       time: number;
     };
-  }>({});
+  }>({
+    STK: { price: 16500, time: 48 }, // 3 ngày
+    SCN: { price: 17000, time: 36 }, // 1 ngày
+    SHT: { price: 38000, time: 24 }, // 5 ngày
+  });
   const [updatedCartItems, setUpdatedCartItems] = useState<CartItem[]>([]);
   const { items: cartItems, clearCart } = useCartStore();
 
