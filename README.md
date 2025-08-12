@@ -1,16 +1,19 @@
 # 👔 TKhang - Website Thời Trang Nam
+![Project Screenshot](./public/demo.png)
+Website thương mại điện tử chuyên bán thời trang nam được xây dựng bằng Next.js, cung cấp trải nghiệm mua sắm hiện đại và thân thiện với người dùng. Xem backend của dự án [Tại đây](https://github.com/kinyias/tkhang-fashion-api)
 
-Website thương mại điện tử chuyên bán thời trang nam được xây dựng bằng Next.js, cung cấp trải nghiệm mua sắm hiện đại và thân thiện với người dùng.
-
+Xem demo : [🚀 Xem bản demo](https://tkhang-fashion.vercel.app/)
 ## 🌟 Tính năng chính
 
 ### 🛍️ Tính năng người dùng
 
 - **Danh mục sản phẩm đa dạng**: Áo sơ mi, quần tây, áo polo, phụ kiện nam
-- **Tìm kiếm và lọc thông minh**: Theo giá, size, màu sắc, thương hiệu
-- **Giỏ hàng và thanh toán**: Tích hợp nhiều phương thức thanh toán
+- **Tìm kiếm và lọc thông minh**: Tìm kiếm full-text-search, tìm kiếm theo từ đồng nghĩa , theo giá, size, màu sắc, thương hiệu
+- **Giỏ hàng và thanh toán**: Tích hợp nhiều phương thức thanh toán (cod, momo, vnpay)
 - **Tài khoản cá nhân**: Quản lý đơn hàng, địa chỉ, thông tin cá nhân
 - **Đánh giá sản phẩm**: Hệ thống review và rating
+- **Quản trị**: Trang quản trị đầy đủ thông tin dễ sử dụng và quản lý
+- **Ứng dụng AI**: AI tự động tạo mô tả sản phẩm, tạo báo cáo phân tích, duyệt đánh giá tự động, gợi ý chọn size, chatbot.
 - **Responsive design**: Tối ưu cho mọi thiết bị
 
 ### 🎨 Giao diện
@@ -23,8 +26,6 @@ Website thương mại điện tử chuyên bán thời trang nam được xây 
 
 - **SSR/SSG**: Server-side rendering và Static site generation
 - **Image optimization**: Tối ưu hình ảnh với Next.js Image
-- **Code splitting**: Tách code tự động cho tốc độ tải nhanh
-- **PWA ready**: Hỗ trợ Progressive Web App
 
 ## 🛠️ Công nghệ sử dụng
 
@@ -87,21 +88,27 @@ cp .env.example .env.local
 Cập nhật các biến môi trường trong `.env.local`:
 
 ```env
-# Database
-DATABASE_URL="your-database-url"
+#Backend API
+NEXT_PUBLIC_API_BASE_URL=
 
+#Gemini API key
+NEXT_PUBLIC_GEMINI_API_KEY=
 
-# OAuth Providers
-GOOGLE_CLIENT_ID="your-google-client-id"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
+#UPLOADTHING_TOKEN
+UPLOADTHING_TOKEN=
 
-# Payment
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="your-stripe-public-key"
+#Cloudinary
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
 
-# Cloudinary (for image uploads)
-CLOUDINARY_CLOUD_NAME="your-cloud-name"
-CLOUDINARY_API_KEY="your-api-key"
-CLOUDINARY_API_SECRET="your-api-secret"
+#ViettelPost
+NEXT_PUBLIC_VIETTEL_POST_URL=
+NEXT_PUBLIC_VIETTEL_POST_USERNAME=
+NEXT_PUBLIC_VIETTEL_POST_PASSWORD=
+NEXT_PUBLIC_VIETTEL_POST_SENDER_DISTRICT=
+NEXT_PUBLIC_VIETTEL_POST_SENDER_PROVINCE=
+NEXT_PUBLIC_VIETTEL_POST_SENDER_WARD=
 ```
 
 4. **Chạy development server**
@@ -124,26 +131,6 @@ npm run build        # Build production
 npm run start        # Chạy production server
 ```
 
-## 🔧 Customization
-
-### Thay đổi theme colors
-
-Chỉnh sửa file `tailwind.config.js`:
-
-```javascript
-module.exports = {
-  theme: {
-    extend: {
-      colors: {
-        primary: {
-          50: '#f0f9ff',
-          500: '#3b82f6',
-          900: '#1e3a8a',
-        },
-      },
-    },
-  },
-};
 ```
 
 ## 🚀 Deployment
@@ -161,18 +148,6 @@ module.exports = {
 - **Railway**: Deploy với database tích hợp
 - **DigitalOcean App Platform**: Container-based deployment
 
-## 🧪 Testing
-
-```bash
-# Unit tests
-npm run test
-
-# E2E tests với Playwright
-npm run test:e2e
-
-# Coverage report
-npm run test:coverage
-```
 
 ## 🔒 Security
 
@@ -180,25 +155,10 @@ npm run test:coverage
 - **CSP Headers** để ngăn XSS attacks
 - **Rate limiting** cho API endpoints
 - **Input validation** với Zod
-- **Secure authentication** với NextAuth.js
-
-## 🤝 Đóng góp
-
-1. Fork repository
-2. Tạo feature branch: `git checkout -b feature/amazing-feature`
-3. Commit changes: `git commit -m 'Add amazing feature'`
-4. Push to branch: `git push origin feature/amazing-feature`
-5. Mở Pull Request
 
 ## 📄 License
 
 Dự án này được cấp phép dưới [MIT License](LICENSE).
-
-## 👥 Team
-
-- **Frontend Developer**: [Tên của bạn]
-- **UI/UX Designer**: [Tên designer]
-- **Backend Developer**: [Tên backend dev]
 
 ## 📞 Liên hệ
 
