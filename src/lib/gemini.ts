@@ -72,7 +72,7 @@ export const processTextWithGeminiStream = async (
   }
 
   try {
-    const model = getGeminiModel();
+    const model = getGemini2Model();
     const prompt = `${PROMPTS[command]}\n\n"""${text}"""\n\nOnly return the processed text without any additional explanations or comments.`;
 
     const result = await model.generateContentStream(prompt);
