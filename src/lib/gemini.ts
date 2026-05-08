@@ -14,7 +14,7 @@ export const getGeminiModel = () => {
     throw new Error('Gemini API not initialized. Call initializeGemini first.');
   }
   return genAI.getGenerativeModel({
-    model: 'gemini-1.5-flash',
+    model: 'gemini-2.5-flash',
     generationConfig: {
       maxOutputTokens: 2048,
     },
@@ -26,7 +26,7 @@ export const getGemini2Model = () => {
     throw new Error('Gemini API not initialized. Call initializeGemini first.');
   }
   return genAI.getGenerativeModel({
-    model: 'gemini-2.0-flash',
+    model: 'gemini-2.5-flash',
     generationConfig: {
       maxOutputTokens: 2048,
     },
